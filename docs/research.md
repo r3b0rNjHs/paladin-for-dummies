@@ -26,7 +26,7 @@
 
 ## Rotación de Retribución (investigación del 11 nov 2026)
 
-Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 2 nov, hotfixes del 9 y 10 nov), Maxroll (4 nov), Conquest Capped (8 nov), classicwowforever.com (8 nov), wowforeverleveling.com (5 nov), Warcraft Tavern (sin fecha, todavía con Twist of Light), LFCarry (11 nov), el simulador de foreverdb.net (build 70888) y el hilo del foro oficial "Unsealed Wrath - Implications and seal effect" (2 nov). Bloqueadas (403): Icy Veins (rotación y subida de nivel) y Mobalytics.
+Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 2 nov, hotfixes del 9 y 10 nov), Maxroll (4 nov), Conquest Capped (8 nov), classicwowforever.com (8 nov), wowforeverleveling.com (5 nov), Warcraft Tavern (sin fecha, todavía con Twist of Light), LFCarry (11 nov), el simulador de foreverdb.net (build 70888) y el hilo del foro oficial "Unsealed Wrath - Implications and seal effect" (2 nov). Icy Veins (rotación) la pegó Jorge a mano porque daba 403; sin fecha en el texto pegado. Siguen sin leer: Icy Veins (subida de nivel) y Mobalytics.
 
 **Ninguna fuente aporta pruebas medidas en el juego.** Las guías son opinión o extrapolación (wowforeverleveling lo dice: la beta acababa en el nivel 30). El simulador de foreverdb marca como especulación lo que el cliente no trae.
 
@@ -44,20 +44,30 @@ Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 
 - **La tasa de activación de Seal of Command no está en el cliente: la decide el servidor** (foreverdb). Las "7 por minuto" de todas las guías son el valor de Classic, sin medir en Forever.
 - Seal of Righteousness tiene 8 rangos (niveles 1, 10, 18, 26, 34, 42, 50 y 58) y escala con el poder con hechizos y con la velocidad del arma (foreverdiff, datos del cliente de octubre).
 
+### Icy Veins: rotación (la guía más completa; sin fecha, sin números ni pruebas)
+- **Unsealed Wrath:** cada golpe con un sello deja un Echo; al golpear con *otro* sello, cada Echo vuelve a aplicar el sello antiguo una vez. IDs: `Echo of Command` **1311703** (coincide con el sondeo 1), `Echo of Righteousness` **1311704**, Unsealed Wrath 1310735.
+- **Cambio de sellos:** arma lenta → cambia a Righteousness con 3 Echo of Command y vuelve a Command con 1+ Echo of Righteousness. Arma rápida → al revés. No da un corte en segundos. Recomienda un addon de temporizador de golpes.
+- **Prioridad (un objetivo):** Judgement con Crusader si falta el debuff y cambiar a Command al momento; cambio de sellos; Hammer of Wrath por debajo del 20%; **Consecration en cuanto esté lista**; Judgement en cuanto esté listo; Holy Strike en cuanto esté listo; Exorcism contra no muertos y demonios.
+- Si otro aturde al objetivo, retrasar Judgement para hacerlo con Command (doble daño): coincide con el texto del cliente.
+- **Varios objetivos:** igual, pero Crusader solo en el principal (los demás solo reciben daño Sagrado de Consecration); Holy Wrath contra grupos de no muertos o demonios.
+- **Maná:** Reverence mantiene hasta el 30% de la regeneración dentro de la regla de los 5 segundos (**confirma que esa regla existe en Forever**). Sanctified Judgement devuelve maná. Si falta: Seal of Wisdom un rato y aguantar Consecration, lo más caro.
+- **Shockadin:** arma rápida con Righteousness (su coeficiente de poder con hechizos es fijo por golpe); con un arma muy lenta, Command da más o menos lo mismo. Mantener Righteousness y renovarlo con menos de 10 s si todo lo demás está en enfriamiento.
+- IDs que usa (rangos altos, sacados de su base de datos y sin verificar en nuestro cliente): Command 20920, Righteousness 20293, Crusader 20308, Wisdom 20357, Reverence 1310899, Sanctified Judgement 1311074, Consecrated Ground 1310905, Champion of the Light 1311084.
+
 ### Consenso de guías (sin medir)
 - **Antes del pull:** Crusader → Judgement → sello de daño. Maxroll, Warcraft Tavern y wowforever.be.
 - **Prioridad en la pelea:** sello de daño siempre puesto, Judgement en cuanto esté listo, Holy Strike en cuanto esté listo. Todas.
-- **Consecration solo en grupos de enemigos** (2-3 o más): gasta mucho maná. Todas.
+- **Consecration solo en grupos de enemigos** (2-3 o más): gasta mucho maná. Todas las de subir de nivel. **Icy Veins dice lo contrario**, "en cuanto esté lista" también contra un solo objetivo, seguramente porque piensa en banda a nivel 60. Depende del perfil.
 - **Exorcism** contra no muertos y demonios.
 - **Arma lenta → Command, rápida → Righteousness.** El corte varía: 3,0 s (Maxroll), 3,2 s (Conquest Capped), y Expcarry dice que no se decida solo por la velocidad. Ninguna explica el número.
-- **Maná:** lanzar Judgement y Holy Strike seguidos para pasar más tiempo fuera de la "regla de los 5 segundos" (Maxroll, Conquest Capped). La regla no está confirmada en Forever.
-- **Unsealed Wrath:** Command por defecto y cambiar de sello cuando hay 3 copias (classicwowforever). Maxroll propone cambiar en cada golpe (Command ↔ Righteousness), pero lo explica con el "eco" de Twist of Light, así que probablemente está desfasado.
+- **Maná:** lanzar Judgement y Holy Strike seguidos para pasar más tiempo fuera de la "regla de los 5 segundos" (Maxroll, Conquest Capped). Icy Veins confirma que la regla existe (Reverence).
+- **Unsealed Wrath:** Command por defecto y cambiar de sello cuando hay 3 copias (classicwowforever, Icy Veins para arma lenta). Maxroll propone cambiar en cada golpe (Command ↔ Righteousness), pero lo explica con el "eco" de Twist of Light, así que probablemente está desfasado.
 
 ### Contradicciones y dudas abiertas
 - **Cómo se gastan las copias de Unsealed Wrath.** Según fansites, al golpear con otro sello cada copia tiene su probabilidad normal: Righteousness siempre se activa y Command tira su probabilidad. No es texto de Blizzard ni está medido. En el foro hay modelos teóricos en los que guardar copias y cambiar en cada golpe dan lo mismo por golpe; lo que cambia es el maná (cada cambio cuesta un sello).
 - **Crusader con Unsealed Wrath** parece no aportar nada al liberarse (foro): se juzga una vez y ya.
 - **Enfriamiento de Judgement:** 8 s según classicwowforever; nadie más lo da.
-- **¿Judgement de Command quita la Sentencia de Crusader del objetivo** ("solo una Sentencia por paladín")? Si la quita, "Judgement en cuanto esté listo" pierde el +daño Sagrado de Crusader. Se puede comprobar mirando los debuffs del objetivo en el juego.
+- **¿Judgement de Command quita la Sentencia de Crusader del objetivo** ("solo una Sentencia por paladín")? Si la quita, "Judgement en cuanto esté listo" pierde el +daño Sagrado de Crusader. Icy Veins pide a la vez "Crusader si falta" y "Judgement en cuanto esté listo", lo que sugiere que no la quita, pero no lo dice. Se comprueba mirando los debuffs del objetivo en el juego.
 - **Tasa real de Command.** Sondeo 1: 13 activaciones en 143 s de combate con Command puesto al empezar = **5,5 por minuto de combate**. No es concluyente: cuenta tiempo sin golpear, cambios de sello y una muestra pequeña. Lo resolverá el repaso tras el combate con muchas peleas.
 
 ### Lo que implica para tu personaje (sondeo 1)
@@ -68,5 +78,6 @@ Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 
 ### Qué cambia en el addon
 - Las reglas Command/Righteousness deben depender de la velocidad del arma (comprobar que `UnitAttackSpeed` es legible) y de que tengas un rango decente de Righteousness.
 - Avisar de sellos y rangos sin entrenar para tu nivel: coaching útil y legible fuera de combate.
-- Unsealed Wrath es una decisión golpe a golpe: va a la capa didáctica, no al asesor (regla 1).
+- Unsealed Wrath es una decisión golpe a golpe: va a la capa didáctica, no al asesor (regla 1). Lo que sí puede decidir el asesor antes del pull es el *patrón* (arma lenta o rápida) que enseñará la capa didáctica.
+- Consecration y Wisdom dependen del perfil (subir de nivel solo frente a banda).
 - El repaso tras el combate puede medir lo que nadie ha medido: activaciones de Command por minuto según la velocidad del arma y el efecto de Unsealed Wrath. Cada activación llega como lanzamiento (20424).
