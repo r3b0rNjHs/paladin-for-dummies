@@ -9,10 +9,18 @@
 Cada vez que haya cambios: `git pull` y `/reload`.
 
 ## Comandos
+- `/pfd stats`: estadísticas de tus peleas por sello inicial y activaciones de Command por minuto. `/pfd last`: la última pelea. `/pfd quiet`: activa o desactiva el resumen tras cada pelea. `/pfd resetstats`: borra las peleas guardadas.
 - `/pfd ui`: estado de la ventana (si está visible, dónde y qué iconos tiene).
 - `/pfd debug`: lo que ve el addon (spec y de dónde la saca, nivel, contenido, sellos conocidos, objetivo) y la recomendación.
 - `/pfd spec ret | prot | holy | auto`: fija la spec a mano si la detección automática no funciona.
 - `/pfd show | hide | reset`: mostrar, ocultar o recolocar la ventana. Se mueve arrastrando los iconos.
+
+## Pruebas de la v0.2.0 (repaso tras el combate)
+1. `/pfd debug`: nueva línea "Arma: velocidad …, daño …-… | poder con hechizos …". ¿Salen números o `<secret>`?
+2. Pelea normal con Seal of Command puesto. Al acabar debe salir en el chat: "Pelea de N s con Seal of Command | Sentencias: … | Holy Strike: … | activaciones de Command: …". ¿Cuadran los números con lo que hiciste?
+3. Haz 5-10 peleas, alguna empezando con otro sello, y `/pfd stats`.
+4. `/reload` y `/pfd stats` otra vez: las peleas siguen guardadas.
+5. Si molesta el mensaje tras cada pelea: `/pfd quiet`.
 
 ## Pruebas de la v0.1.3
 1. El icono de "Sentencia" debe ser el de Judgement, con el de Seal of the Crusader en pequeño en la esquina inferior derecha.

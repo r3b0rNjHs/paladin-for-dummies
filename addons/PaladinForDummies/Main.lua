@@ -1,6 +1,7 @@
 -- Arranque: eventos, SavedVariables y comandos.
 -- Regla 1 de CLAUDE.md: en combate no se calcula nada. Al entrar en combate la
--- recomendación se congela y solo se vuelve a calcular al salir.
+-- recomendación se congela y solo se vuelve a calcular al salir. Durante la pelea
+-- solo se anotan tus lanzamientos para el repaso (Recorder.lua).
 local ADDON_NAME, ns = ...
 
 local SituationReader = ns.Adapters.SituationReader
@@ -67,6 +68,14 @@ local function debug()
   else
     p("Objetivo: ninguno atacable")
   end
+  local w = s.player.weapon or {}
+  local function stat(field, value)
+    if d.secret[field] then return "<secret>" end
+    return tostring(value)
+  end
+  p(("Arma: velocidad %s, daño %s-%s | poder con hechizos (Sagrado): %s"):format(
+    stat("weaponSpeed", w.speed), stat("weaponDamage", w.minDamage), stat("weaponDamage", w.maxDamage),
+    stat("spellPower", s.player.spellPower)))
   p(describeSlot("Sello", r.seal))
   p(describeSlot("Sentencia", r.judgement))
   if frozen then p("(congelado: estás en combate)") end
@@ -90,7 +99,12 @@ local REFRESH_EVENTS = {
 
 local events = CreateFrame("Frame")
 
-events:SetScript("OnEvent", function(_, event, arg1)
+local function safely(label, fn, ...)
+  local ok, err = pcall(fn, ...)
+  if not ok then p("Error en " .. label .. ":", err) end
+end
+
+events:SetScript("OnEvent", function(_, event, arg1, _, arg3)
   if event == "ADDON_LOADED" then
     if arg1 ~= ADDON_NAME then return end
     PaladinForDummiesDB = PaladinForDummiesDB or {}
@@ -99,8 +113,18 @@ events:SetScript("OnEvent", function(_, event, arg1)
     if db.hidden then ui:Hide() end
     setFrozen(InCombatLockdown() and true or false)
   elseif event == "PLAYER_REGEN_DISABLED" then
+    if not db then return end
+    refresh() -- última lectura antes del pull: aún no estamos en combate
+    safely("el inicio de la pelea", ns.Recorder.start, last.situation)
     setFrozen(true)
+  elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+    safely("un lanzamiento", ns.Recorder.cast, arg3) -- arg3 = spellID
   elseif event == "PLAYER_REGEN_ENABLED" then
+    if not db then return end
+    safely("el final de la pelea", function()
+      local record = ns.Recorder.finish(db)
+      if record and not db.quiet then p(ns.Recorder.describe(record)) end
+    end)
     setFrozen(false)
   else
     refresh()
@@ -110,6 +134,7 @@ end)
 events:RegisterEvent("ADDON_LOADED")
 events:RegisterEvent("PLAYER_REGEN_DISABLED")
 events:RegisterEvent("PLAYER_REGEN_ENABLED")
+events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 for _, event in ipairs(REFRESH_EVENTS) do
   -- Algunos eventos pueden no existir en Forever: registrar uno inexistente da error.
   local ok = pcall(events.RegisterEvent, events, event)
@@ -152,10 +177,22 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
   elseif cmd == "ui" then
     if not ui then p("La ventana no se ha creado.") return end
     for _, line in ipairs(ui:Describe()) do p(line) end
+  elseif cmd == "stats" then
+    for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
+  elseif cmd == "last" then
+    local fights = db.fights or {}
+    if #fights == 0 then p("Todavía no hay peleas guardadas.") return end
+    p(ns.Recorder.describe(fights[#fights]))
+  elseif cmd == "quiet" then
+    db.quiet = not db.quiet or nil
+    p(db.quiet and "Resumen tras cada pelea: desactivado." or "Resumen tras cada pelea: activado.")
+  elseif cmd == "resetstats" then
+    db.fights = {}
+    p("Peleas guardadas borradas.")
   elseif cmd == "reset" then
     ui:ResetPosition()
     p("Posición restablecida.")
   else
-    p("Comandos: /pfd debug | ui | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd debug | ui | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
   end
 end

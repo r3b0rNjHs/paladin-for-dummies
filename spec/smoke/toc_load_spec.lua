@@ -30,6 +30,8 @@ describe("PaladinForDummies.toc", function()
     })
   end
 
+  local env_now = 1000
+
   local function wowEnv()
     local frames, printed = {}, {}
     local env = setmetatable({
@@ -52,6 +54,19 @@ describe("PaladinForDummies.toc", function()
       IsInInstance = function() return false, "none" end,
       IsInGroup = function() return false end,
       C_Spell = { GetSpellTexture = function() return 135000 end },
+      GetTime = function() return env_now end,
+      time = function() return 1794416000 end,
+      UnitAttackSpeed = function() return 2.4 end,
+      UnitDamage = function() return 110, 160 end,
+      GetSpellBonusDamage = function() return 35 end,
+      C_UnitAuras = {
+        GetAuraDataByIndex = function(_, i)
+          return ({
+            { spellId = 20918, expirationTime = 1025, applications = 0 },  -- Seal of Command
+            { spellId = 1311703, expirationTime = 1010, applications = 3 }, -- Echo of Command
+          })[i]
+        end,
+      },
       C_SpellBook = {
         GetNumSpellBookSkillLines = function() return 1 end,
         GetSpellBookSkillLineInfo = function() return { itemIndexOffset = 0, numSpellBookItems = 2 } end,
@@ -90,9 +105,18 @@ describe("PaladinForDummies.toc", function()
       if f.scripts.OnEnter then f.scripts.OnEnter(f); hovered = hovered + 1 end
     end
     assert.are.equal(2, hovered)
+    -- Una pelea de 20 s con Command: Sentencia, Holy Strike y dos activaciones.
+    env_now = 1000
     fire(frames, "PLAYER_REGEN_DISABLED")
     fire(frames, "PLAYER_TARGET_CHANGED")
+    env_now = 1002; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-1", 20271)
+    env_now = 1004; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-2", 2495)
+    env_now = 1006; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-3", 20424)
+    env_now = 1012; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-4", 20424)
+    env_now = 1020
     fire(frames, "PLAYER_REGEN_ENABLED")
+    env.SlashCmdList.PALADINFORDUMMIES("stats")
+    env.SlashCmdList.PALADINFORDUMMIES("last")
 
     local output = table.concat(printed, "\n")
     assert.is_nil(output:find("Error"), output)
@@ -101,5 +125,21 @@ describe("PaladinForDummies.toc", function()
     assert.truthy(output:find("mostrada"), output)
     assert.is_table(env.PaladinForDummiesDB)
     assert.are.equal("retribution", env.PaladinForDummiesDB.specOverride)
+
+    -- El repaso tras el combate
+    local fights = env.PaladinForDummiesDB.fights
+    assert.are.equal(1, #fights)
+    local f = fights[1]
+    assert.are.equal(20, f.duration)
+    assert.are.equal("command", f.openingSeal)
+    assert.are.same({ command = 3 }, f.openingEchoes)
+    assert.are.same({ judgement = 1, holyStrike = 1, commandProc = 2, sealCast = 0 }, f.counts)
+    assert.are.same({ command = 20 }, f.sealSeconds)
+    assert.are.equal(2.4, f.context.weaponSpeed)
+    assert.are.equal(6, f.context.target.creatureType)
+    assert.truthy(output:find("Pelea de 20 s con command | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
+    assert.truthy(output:find("Peleas guardadas: 1", 1, true), output)
+    assert.truthy(output:find("= 6 por minuto"), output)
+    assert.truthy(output:find("Arma: velocidad 2.4, daño 110%-160"), output)
   end)
 end)

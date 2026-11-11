@@ -1,6 +1,8 @@
 -- Adaptador: la única capa que toca la API de WoW.
 -- Lee el estado del juego y lo convierte en una Situation plana para el core:
---   player  = { level, spec, knownSpells = { [spellID] = true } }
+--   player  = { level, spec, knownSpells = { [spellID] = true },
+--               weapon = { speed, minDamage, maxDamage }, spellPower }
+--             (el arma y el poder con hechizos pueden ser secret: SecretWhenUnitStatsRestricted)
 --   content = "solo" | "group" | "dungeon" | "raid" | "pvp"
 --   target  = { exists = false } o { exists = true, creatureType, classification, level }
 --             (solo objetivos atacables: las reglas de enemigo nunca se aplican a aliados)
@@ -163,6 +165,14 @@ local function readTarget(call, tagged, api)
   }
 end
 
+local HOLY_SCHOOL = 2 -- GetSpellBonusDamage(2) = Sagrado
+
+local function readWeapon(tagged, api)
+  local speed = tagged("weaponSpeed", api.UnitAttackSpeed, "player")
+  local minDamage, maxDamage = tagged("weaponDamage", api.UnitDamage, "player")
+  return { speed = speed, minDamage = minDamage, maxDamage = maxDamage }
+end
+
 -- Devuelve la Situation y unos diagnósticos: de dónde salió la spec, IDs
 -- desconocidos y qué valores del objetivo eran secret.
 function SituationReader.read(api, seals, options)
@@ -175,6 +185,8 @@ function SituationReader.read(api, seals, options)
       level = call(api.UnitLevel, "player"),
       spec = readSpec(api, call, options, diagnostics),
       knownSpells = readKnownSeals(api, call, seals),
+      weapon = readWeapon(tagged, api),
+      spellPower = tagged("spellPower", api.GetSpellBonusDamage, HOLY_SCHOOL),
     },
     content = readContent(call, api),
     target = readTarget(call, tagged, api),

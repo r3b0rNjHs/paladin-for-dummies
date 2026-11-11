@@ -44,6 +44,31 @@ describe("SituationReader.read", function()
     assert.are.same({ [20375] = true, [20918] = true, [21082] = true }, situation.player.knownSpells)
   end)
 
+  it("reads the weapon and the Holy spell power", function()
+    local situation = SituationReader.read(fakeApi({
+      UnitAttackSpeed = function() return 2.4, nil end,
+      UnitDamage = function() return 110.5, 160.2 end,
+      GetSpellBonusDamage = function(school) return school == 2 and 35 or 0 end,
+    }), seals)
+
+    assert.are.same({ speed = 2.4, minDamage = 110.5, maxDamage = 160.2 }, situation.player.weapon)
+    assert.are.equal(35, situation.player.spellPower)
+  end)
+
+  it("reports secret weapon stats instead of passing them on", function()
+    local situation, diagnostics = SituationReader.read(fakeApi({
+      UnitAttackSpeed = function() return SECRET end,
+      UnitDamage = function() return SECRET, SECRET end,
+      GetSpellBonusDamage = function() return SECRET end,
+    }), seals)
+
+    assert.are.same({}, situation.player.weapon)
+    assert.is_nil(situation.player.spellPower)
+    assert.is_true(diagnostics.secret.weaponSpeed)
+    assert.is_true(diagnostics.secret.weaponDamage)
+    assert.is_true(diagnostics.secret.spellPower)
+  end)
+
   it("reads an attackable target by creature type id, not by its localized name", function()
     local situation = SituationReader.read(fakeApi({ UnitLevel = function(unit) return unit == "target" and 38 or 40 end }), seals)
 

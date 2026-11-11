@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.1.3). Motor de reglas, adaptador e icono con "Sello + Sentencia". Cómo probarlo: `docs/addon-testing.md`. Probada en el juego y funcionando.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.2.0). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -54,6 +54,8 @@ Todo vive en `addons/PaladinForDummies/` (WoW solo carga lo que está dentro de 
 Tests: `busted` desde la raíz del repo (Lua 5.1; en Ubuntu, `apt install lua5.1 lua-busted`). `spec/support/addon.lua` carga los archivos como WoW, pasando `(addonName, ns)`; `spec/smoke/` carga el `.toc` entero con un WoW simulado.
 
 - La Sentencia (Judgement, 20271) es **un solo hechizo** que libera el sello puesto. La recomendación de "Sentencia" es el sello que hay que llevar al juzgar; `core/Plan.lua` la convierte en pasos (ponte X, lanza Judgement, cambia a Y) y la interfaz muestra el icono de Judgement con el sello en la esquina.
+
+- **Repaso tras el combate:** en `PLAYER_REGEN_DISABLED` se lee el sello y las copias de Unsealed Wrath (último momento con auras legibles); durante la pelea solo se anotan tus lanzamientos; `core/Fight.lua` reconstruye cuánto tiempo llevaste cada sello (cada sello dura 30 s) y cuenta Sentencias, Holy Strike y activaciones de Command (20424). Se guarda en `PaladinForDummiesDB.fights` (máximo 1000).
 
 - `core/`: Lua puro, **sin dependencias de WoW**: motor de reglas, dominio (Situación → Recomendación) y estadísticas de peleas. Se prueba con **busted** fuera del juego (TDD).
 - `adapters/`: la única capa que toca la API de WoW. Lee el contexto (jugador, objetivo, grupo, instancia) y lo convierte en un objeto `Situation` plano, que es lo que recibe el core. Recibe la API como parámetro (`_G` en el juego, una falsa en los tests). `Situation.target` solo se rellena con objetivos atacables.
@@ -108,7 +110,7 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - ¿Hay alguna forma legible del % de maná o solo se puede mostrar (barras, `C_CurveUtil`)?
 - Grimorio de Fury, Justice y Wisdom, y rangos 2-6 de Righteousness (no estaban entrenados).
 - Tasa real de Command en Forever y efecto real de Unsealed Wrath (los medirá el repaso tras el combate).
-- ¿`UnitAttackSpeed` es legible? ¿Judgement de Command quita la Sentencia de Crusader? Enfriamiento de Judgement.
+- ¿`UnitAttackSpeed`, `UnitDamage` y `GetSpellBonusDamage` son legibles? La wiki los marca `SecretWhenUnitStatsRestricted`; `/pfd debug` lo dice. ¿Judgement de Command quita la Sentencia de Crusader? Enfriamiento de Judgement.
 
 ## Herramientas
 - VS Code con la extensión `ketho.wow-api` (anotaciones de la API para el Lua Language Server).

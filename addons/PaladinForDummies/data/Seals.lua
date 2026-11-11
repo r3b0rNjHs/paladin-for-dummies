@@ -19,3 +19,27 @@ ns.Data.Seals = {
 ns.Data.Spells = {
   judgement = 20271, -- libera el sello activo sin consumirlo (sondeo 1)
 }
+
+-- Catálogo para registrar peleas (core/Fight.lua): qué es cada spellID.
+-- Holy Strike y Command (activación) salen del sondeo 1. Echo of Righteousness
+-- (1311704) sale de Icy Veins, sin confirmar en nuestro cliente.
+local HOLY_STRIKE_RANKS = { 679, 678, 1866, 680, 2495 }
+
+local function set(ids)
+  local out = {}
+  for _, id in ipairs(ids) do out[id] = true end
+  return out
+end
+
+local sealBySpellId = {}
+for key, seal in pairs(ns.Data.Seals) do
+  for _, id in ipairs(seal.spellIds) do sealBySpellId[id] = key end
+end
+
+ns.Data.Catalog = {
+  sealBySpellId = sealBySpellId,
+  echoBySpellId = { [1311703] = "command", [1311704] = "righteousness" },
+  judgement = set({ ns.Data.Spells.judgement }),
+  holyStrike = set(HOLY_STRIKE_RANKS),
+  commandProc = set({ 20424 }),
+}
