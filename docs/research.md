@@ -26,7 +26,7 @@
 
 ## Rotación de Retribución (investigación del 11 nov 2026)
 
-Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 2 nov, hotfixes del 9 y 10 nov), Maxroll (4 nov), Conquest Capped (8 nov), classicwowforever.com (8 nov), wowforeverleveling.com (5 nov), Warcraft Tavern (sin fecha, todavía con Twist of Light), LFCarry (11 nov), el simulador de foreverdb.net (build 70888) y el hilo del foro oficial "Unsealed Wrath - Implications and seal effect" (2 nov). Icy Veins (rotación) la pegó Jorge a mano porque daba 403; sin fecha en el texto pegado. Siguen sin leer: Icy Veins (subida de nivel) y Mobalytics.
+Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 2 nov, hotfixes del 9 y 10 nov), Maxroll (4 nov), Conquest Capped (8 nov), classicwowforever.com (8 nov), wowforeverleveling.com (5 nov), Warcraft Tavern (sin fecha, todavía con Twist of Light), LFCarry (11 nov), el simulador de foreverdb.net (build 70888) y el hilo del foro oficial "Unsealed Wrath - Implications and seal effect" (2 nov). Icy Veins (rotación) la pegó Jorge a mano porque daba 403; sin fecha en el texto pegado. Icy Veins (subida de nivel) llegó en capturas, también sin fecha. Sigue sin leer: Mobalytics.
 
 **Ninguna fuente aporta pruebas medidas en el juego.** Las guías son opinión o extrapolación (wowforeverleveling lo dice: la beta acababa en el nivel 30). El simulador de foreverdb marca como especulación lo que el cliente no trae.
 
@@ -54,12 +54,23 @@ Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 
 - **Shockadin:** arma rápida con Righteousness (su coeficiente de poder con hechizos es fijo por golpe); con un arma muy lenta, Command da más o menos lo mismo. Mantener Righteousness y renovarlo con menos de 10 s si todo lo demás está en enfriamiento.
 - IDs que usa (rangos altos, sacados de su base de datos y sin verificar en nuestro cliente): Command 20920, Righteousness 20293, Crusader 20308, Wisdom 20357, Reverence 1310899, Sanctified Judgement 1311074, Consecrated Ground 1310905, Champion of the Light 1311084.
 
+### Icy Veins: subida de nivel (capturas; sin fecha)
+- **Elegir sello depende de la velocidad del arma *y* del poder con hechizos; no hay un corte universal.** Por eso las guías dan números distintos.
+  - Command "está diseñado" para unas 7 activaciones por minuto: con arma lenta, mismas activaciones y más daño por golpe. Sigue sin medirse en Forever.
+  - Righteousness recibe el 12% del poder con hechizos por golpe (arma de dos manos) y Command el 20,3%, pero solo en algunos golpes. Righteousness gana con mucho poder con hechizos y con armas rápidas. foreverdiff da a Righteousness entre el 8% y el 12,6%: encaja.
+- **Maná al subir de nivel:** el maná también es tu curación (Holy Light), lo que evita parar a comer y beber. No renovar el sello hasta que esté a punto de acabarse, y no gastar Judgement ni Holy Strike si el próximo golpe normal remata.
+- **Consecration:** tarda 8 s en hacer todo su daño (el cliente dice "over 8 sec" ✔). Evitarla si los enemigos mueren antes o si hay que moverse. Escala mejor que nada con el poder con hechizos. "Cuesta casi el doble que Judgement + Holy Strike": en el sondeo 1, Consecration rango 3 cuesta 288 frente a 53 + 14, más de 4 veces; con Holy Conduit (-40%) unas 2,6.
+- **Prioridad (un objetivo):** bendición siempre puesta (Kings o Might); Crusader → Judgement → Righteousness o Command según arma y poder con hechizos; Judgement y Holy Strike en cuanto estén listos; con Command, Hammer of Justice o Repentance antes de Judgement (el cliente dice "stunned or incapacitated" ✔); Consecration si sobra maná; Exorcism contra no muertos y demonios, también para atraerlos a 30 m (cliente: 30 m ✔); Hammer of Wrath (nivel 44) por debajo del 20%.
+- **Varios objetivos:** igual, con Consecration mucho más rentable. Holy Wrath en el nivel 50, solo contra no muertos y demonios.
+- Judgement no ocupa el tiempo global de reutilización (coincide con Conquest Capped). Crusader compensa contra enemigos que duran.
+- Auras y bendiciones: Devotion por defecto, Retribution contra grupos o para ayudar al tanque; Kings desde el nivel 20 y Might antes.
+
 ### Consenso de guías (sin medir)
 - **Antes del pull:** Crusader → Judgement → sello de daño. Maxroll, Warcraft Tavern y wowforever.be.
 - **Prioridad en la pelea:** sello de daño siempre puesto, Judgement en cuanto esté listo, Holy Strike en cuanto esté listo. Todas.
 - **Consecration solo en grupos de enemigos** (2-3 o más): gasta mucho maná. Todas las de subir de nivel. **Icy Veins dice lo contrario**, "en cuanto esté lista" también contra un solo objetivo, seguramente porque piensa en banda a nivel 60. Depende del perfil.
 - **Exorcism** contra no muertos y demonios.
-- **Arma lenta → Command, rápida → Righteousness.** El corte varía: 3,0 s (Maxroll), 3,2 s (Conquest Capped), y Expcarry dice que no se decida solo por la velocidad. Ninguna explica el número.
+- **Arma lenta → Command, rápida → Righteousness.** El corte varía: 3,0 s (Maxroll), 3,2 s (Conquest Capped), y Expcarry dice que no se decida solo por la velocidad. Icy Veins explica por qué no hay corte: depende también del poder con hechizos.
 - **Maná:** lanzar Judgement y Holy Strike seguidos para pasar más tiempo fuera de la "regla de los 5 segundos" (Maxroll, Conquest Capped). Icy Veins confirma que la regla existe (Reverence).
 - **Unsealed Wrath:** Command por defecto y cambiar de sello cuando hay 3 copias (classicwowforever, Icy Veins para arma lenta). Maxroll propone cambiar en cada golpe (Command ↔ Righteousness), pero lo explica con el "eco" de Twist of Light, así que probablemente está desfasado.
 
@@ -76,7 +87,8 @@ Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 
 - Tu arma va a 2,4 s (lo mostraba otro addon en el tooltip): por debajo de los dos cortes de las guías, que te dirían Righteousness. Por eso la regla `ret-command` es demasiado simple.
 
 ### Qué cambia en el addon
-- Las reglas Command/Righteousness deben depender de la velocidad del arma (comprobar que `UnitAttackSpeed` es legible) y de que tengas un rango decente de Righteousness.
+- Command frente a Righteousness no es un umbral: es una **comparación que se puede calcular** fuera de combate con la velocidad y el daño del arma y el poder con hechizos (comprobar que `UnitAttackSpeed`, `UnitDamage` y `GetSpellBonusDamage` son legibles) y la tasa real de Command (que medirá el repaso tras el combate). Hasta entonces, regla `consensus`. Solo comparar con un rango decente de Righteousness.
+- Consejos de maná al subir de nivel (no renovar el sello antes de tiempo, no gastar si el golpe remata) son decisiones en combate: capa didáctica.
 - Avisar de sellos y rangos sin entrenar para tu nivel: coaching útil y legible fuera de combate.
 - Unsealed Wrath es una decisión golpe a golpe: va a la capa didáctica, no al asesor (regla 1). Lo que sí puede decidir el asesor antes del pull es el *patrón* (arma lenta o rápida) que enseñará la capa didáctica.
 - Consecration y Wisdom dependen del perfil (subir de nivel solo frente a banda).
