@@ -26,7 +26,7 @@
 
 ## Rotación de Retribución (investigación del 11 nov 2026)
 
-Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 2 nov, hotfixes del 9 y 10 nov), Maxroll (4 nov), Conquest Capped (8 nov), classicwowforever.com (8 nov), wowforeverleveling.com (5 nov), Warcraft Tavern (sin fecha, todavía con Twist of Light), LFCarry (11 nov), el simulador de foreverdb.net (build 70888) y el hilo del foro oficial "Unsealed Wrath - Implications and seal effect" (2 nov). Icy Veins (rotación) la pegó Jorge a mano porque daba 403; sin fecha en el texto pegado. Icy Veins (subida de nivel) llegó en capturas, también sin fecha. Sigue sin leer: Mobalytics.
+Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 2 nov, hotfixes del 9 y 10 nov), Maxroll (4 nov), Conquest Capped (8 nov), classicwowforever.com (8 nov), wowforeverleveling.com (5 nov), Warcraft Tavern (sin fecha, todavía con Twist of Light), LFCarry (11 nov), el simulador de foreverdb.net (build 70888) y el hilo del foro oficial "Unsealed Wrath - Implications and seal effect" (2 nov). Icy Veins (rotación) la pegó Jorge a mano porque daba 403; sin fecha en el texto pegado. Icy Veins (subida de nivel) y Mobalytics (endgame) llegaron en capturas, sin fecha. Ya no queda ninguna fuente bloqueada.
 
 **Ninguna fuente aporta pruebas medidas en el juego.** Las guías son opinión o extrapolación (wowforeverleveling lo dice: la beta acababa en el nivel 30). El simulador de foreverdb marca como especulación lo que el cliente no trae.
 
@@ -65,14 +65,22 @@ Fuentes revisadas: notas oficiales de Blizzard (deep dive de octubre, notas del 
 - Judgement no ocupa el tiempo global de reutilización (coincide con Conquest Capped). Crusader compensa contra enemigos que duran.
 - Auras y bendiciones: Devotion por defecto, Retribution contra grupos o para ayudar al tanque; Kings desde el nivel 20 y Might antes.
 
+### Mobalytics: endgame (capturas; sin fecha)
+La pestaña se llama "Endgame Twist of Light" pero el contenido ya usa Unsealed Wrath: actualizada a medias.
+- **Antes del pull:** empezar con *el sello asignado* (Crusader, Wisdom o Light) y juzgarlo al empezar. En grupo, cada paladín tiene una Sentencia asignada en el jefe (encaja con Sacred Arbiter y con la fase 2 de CLAUDE.md).
+- **Unsealed Wrath:** Command puesto hasta 3 copias, cambiar a Righteousness para que se activen y volver a Command.
+- **Prioridad:** Judgement → Consecration (3+ enemigos) → Exorcism (no muertos y demonios) → Holy Strike → Consecration (1-2 enemigos).
+- **Shockadin:** Righteousness siempre; Consecration siempre puesta (para Consecrated Ground); Judgement → Exorcism → Holy Shock → Holy Strike.
+
 ### Consenso de guías (sin medir)
 - **Antes del pull:** Crusader → Judgement → sello de daño. Maxroll, Warcraft Tavern y wowforever.be.
 - **Prioridad en la pelea:** sello de daño siempre puesto, Judgement en cuanto esté listo, Holy Strike en cuanto esté listo. Todas.
-- **Consecration solo en grupos de enemigos** (2-3 o más): gasta mucho maná. Todas las de subir de nivel. **Icy Veins dice lo contrario**, "en cuanto esté lista" también contra un solo objetivo, seguramente porque piensa en banda a nivel 60. Depende del perfil.
+- **Consecration solo en grupos de enemigos** (2-3 o más): gasta mucho maná. Todas las de subir de nivel. **Icy Veins (endgame) dice lo contrario**, "en cuanto esté lista" también contra un solo objetivo; Mobalytics la deja al final de la prioridad con 1-2 enemigos. Depende del perfil (subir de nivel frente a banda).
+- **En grupo, Sentencia asignada por paladín** (Crusader, Wisdom o Light): Mobalytics, Warcraft Tavern y Blizzard (Sacred Arbiter).
 - **Exorcism** contra no muertos y demonios.
 - **Arma lenta → Command, rápida → Righteousness.** El corte varía: 3,0 s (Maxroll), 3,2 s (Conquest Capped), y Expcarry dice que no se decida solo por la velocidad. Icy Veins explica por qué no hay corte: depende también del poder con hechizos.
 - **Maná:** lanzar Judgement y Holy Strike seguidos para pasar más tiempo fuera de la "regla de los 5 segundos" (Maxroll, Conquest Capped). Icy Veins confirma que la regla existe (Reverence).
-- **Unsealed Wrath:** Command por defecto y cambiar de sello cuando hay 3 copias (classicwowforever, Icy Veins para arma lenta). Maxroll propone cambiar en cada golpe (Command ↔ Righteousness), pero lo explica con el "eco" de Twist of Light, así que probablemente está desfasado.
+- **Unsealed Wrath (consenso de tres fuentes: classicwowforever, Icy Veins y Mobalytics):** Command por defecto; con 3 copias, cambiar a Righteousness un golpe y volver a Command. Con arma rápida, Icy Veins invierte el patrón. Maxroll propone cambiar en cada golpe (Command ↔ Righteousness), pero lo explica con el "eco" de Twist of Light, así que probablemente está desfasado.
 
 ### Contradicciones y dudas abiertas
 - **Cómo se gastan las copias de Unsealed Wrath.** Según fansites, al golpear con otro sello cada copia tiene su probabilidad normal: Righteousness siempre se activa y Command tira su probabilidad. No es texto de Blizzard ni está medido. En el foro hay modelos teóricos en los que guardar copias y cambiar en cada golpe dan lo mismo por golpe; lo que cambia es el maná (cada cambio cuesta un sello).
