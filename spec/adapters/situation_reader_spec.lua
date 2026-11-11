@@ -66,6 +66,21 @@ describe("SituationReader.read", function()
     assert.is_nil(situation.target.classification)
   end)
 
+  it("reports which target values came back secret, to tell them apart from missing ones", function()
+    local _, diagnostics = SituationReader.read(fakeApi({
+      UnitCreatureType = function() return SECRET, SECRET end,
+      UnitLevel = function(unit) return unit == "target" and SECRET or 40 end,
+    }), seals)
+
+    assert.are.same({ creatureType = true, level = true }, diagnostics.secret)
+  end)
+
+  it("reports no secrets when everything is readable", function()
+    local _, diagnostics = SituationReader.read(fakeApi(), seals)
+
+    assert.are.same({}, diagnostics.secret)
+  end)
+
   it("survives API functions that throw", function()
     local situation = SituationReader.read(fakeApi({
       UnitCreatureType = function() error("boom") end,
@@ -147,6 +162,35 @@ describe("SituationReader.read", function()
 
       assert.is_nil(situation.player.spec)
       assert.are.equal("none", diagnostics.specSource)
+    end)
+
+    it("maps Forever's own Retribution spec id (1486, seen in game)", function()
+      local situation, diagnostics = SituationReader.read(fakeApi({
+        C_SpecializationInfo = {
+          GetSpecialization = function() return 3 end,
+          GetSpecializationInfo = function() return 1486, "Retribution", "desc", 135873, "DAMAGER" end,
+        },
+      }), seals)
+
+      assert.are.equal("retribution", situation.player.spec)
+      assert.are.equal("specialization", diagnostics.specSource)
+      assert.is_nil(diagnostics.unknownSpecId)
+    end)
+
+    it("falls back to the role token when the spec id is unknown", function()
+      local roles = { HEALER = "holy", TANK = "protection", DAMAGER = "retribution" }
+      for role, expected in pairs(roles) do
+        local situation, diagnostics = SituationReader.read(fakeApi({
+          C_SpecializationInfo = {
+            GetSpecialization = function() return 1 end,
+            GetSpecializationInfo = function() return 9999, "Localized name", "desc", 1, role end,
+          },
+        }), seals)
+
+        assert.are.equal(expected, situation.player.spec)
+        assert.are.equal("role", diagnostics.specSource)
+        assert.are.equal(9999, diagnostics.unknownSpecId)
+      end
     end)
 
     it("reports an unknown specialization id so we can map it", function()

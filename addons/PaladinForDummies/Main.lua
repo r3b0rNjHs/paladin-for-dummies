@@ -54,12 +54,16 @@ local function debug()
   if not s then p("Todavía no hay ninguna situación calculada.") return end
   p(("Spec: %s (fuente: %s)%s | nivel %s | contenido: %s"):format(
     tostring(s.player.spec), tostring(d.specSource),
-    d.unknownSpecId and (" | ID de spec desconocido: " .. d.unknownSpecId) or "",
+    d.unknownSpecId and (" | ID de spec desconocido: %s, rol %s"):format(d.unknownSpecId, tostring(d.specRole)) or "",
     tostring(s.player.level), tostring(s.content)))
   p("Sellos conocidos (spellIDs):", sortedKeys(s.player.knownSpells))
   if s.target.exists then
+    local function show(field)
+      if d.secret[field] then return "<secret>" end
+      return tostring(s.target[field])
+    end
     p(("Objetivo: tipo %s, clasificación %s, nivel %s"):format(
-      tostring(s.target.creatureType), tostring(s.target.classification), tostring(s.target.level)))
+      show("creatureType"), show("classification"), show("level")))
   else
     p("Objetivo: ninguno atacable")
   end

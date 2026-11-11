@@ -13,13 +13,20 @@ ns.Adapters = ns.Adapters or {}
 local SituationReader = {}
 ns.Adapters.SituationReader = SituationReader
 
--- IDs de especialización del paladín en Mainline. Sin confirmar en Forever:
--- si sale otro, diagnostics.unknownSpecId lo dice.
-local SPEC_BY_ID = { [65] = "holy", [66] = "protection", [70] = "retribution" }
+-- IDs de especialización del paladín. Forever tiene los suyos:
+--   1486 = Retribución (visto en el juego, v0.1.0).
+-- 65, 66 y 70 son los de retail, por si acaso. Si sale otro, se usa el rol y
+-- diagnostics.unknownSpecId lo dice para añadirlo aquí.
+local SPEC_BY_ID = {
+  [1486] = "retribution",
+  [65] = "holy", [66] = "protection", [70] = "retribution",
+}
+-- El rol es un token sin traducir: sirve aunque el ID sea desconocido.
+local SPEC_BY_ROLE = { HEALER = "holy", TANK = "protection", DAMAGER = "retribution" }
 -- Orden de los árboles de talentos clásicos del paladín.
 local SPEC_BY_TAB = { "holy", "protection", "retribution" }
 
-local function reader(api)
+local function reader(api, diagnostics)
   local isSecret = function(v)
     if type(api.issecretvalue) ~= "function" then return false end
     local ok, res = pcall(api.issecretvalue, v)
@@ -32,12 +39,26 @@ local function reader(api)
   end
 
   -- Llama a fn con pcall y devuelve hasta 5 valores, sustituyendo los secret por nil.
-  return function(fn, ...)
+  -- Con tag, anota en diagnostics.secret si algún valor era secret (para distinguir
+  -- "secret" de "no existe" en /pfd debug).
+  local function call(fn, ...)
     if type(fn) ~= "function" then return nil end
     local ok, a, b, c, d, e = pcall(fn, ...)
     if not ok then return nil end
     return clean(a), clean(b), clean(c), clean(d), clean(e)
   end
+
+  local function tagged(tag, fn, ...)
+    if type(fn) ~= "function" then return nil end
+    local ok, a, b, c, d, e = pcall(fn, ...)
+    if not ok then return nil end
+    if isSecret(a) or isSecret(b) or isSecret(c) or isSecret(d) or isSecret(e) then
+      diagnostics.secret[tag] = true
+    end
+    return clean(a), clean(b), clean(c), clean(d), clean(e)
+  end
+
+  return call, tagged
 end
 
 local function field(tbl, key)
@@ -75,10 +96,13 @@ local function readSpecFromSpecialization(api, call, diagnostics)
   local getInfo = field(lib, "GetSpecializationInfo") or api.GetSpecializationInfo
   local index = call(getIndex)
   if type(index) ~= "number" then return nil end
-  local id = call(getInfo, index)
+  local id, _, _, _, role = call(getInfo, index)
   if type(id) ~= "number" then return nil end
-  if not SPEC_BY_ID[id] then diagnostics.unknownSpecId = id end
-  return SPEC_BY_ID[id]
+  if SPEC_BY_ID[id] then return SPEC_BY_ID[id], "specialization" end
+  diagnostics.unknownSpecId = id
+  diagnostics.specRole = role
+  if SPEC_BY_ROLE[role] then return SPEC_BY_ROLE[role], "role" end
+  return nil
 end
 
 local function readSpecFromTalents(api, call)
@@ -101,9 +125,9 @@ local function readSpec(api, call, options, diagnostics)
     diagnostics.specSource = "override"
     return options.specOverride
   end
-  local spec = readSpecFromSpecialization(api, call, diagnostics)
+  local spec, source = readSpecFromSpecialization(api, call, diagnostics)
   if spec then
-    diagnostics.specSource = "specialization"
+    diagnostics.specSource = source
     return spec
   end
   spec = readSpecFromTalents(api, call)
@@ -126,24 +150,25 @@ local function readContent(call, api)
   return "solo"
 end
 
-local function readTarget(call, api)
+local function readTarget(call, tagged, api)
   if not (call(api.UnitExists, "target") and call(api.UnitCanAttack, "player", "target")) then
     return { exists = false }
   end
-  local _, creatureType = call(api.UnitCreatureType, "target")
+  local _, creatureType = tagged("creatureType", api.UnitCreatureType, "target")
   return {
     exists = true,
     creatureType = creatureType,
-    classification = call(api.UnitClassification, "target"),
-    level = call(api.UnitLevel, "target"),
+    classification = tagged("classification", api.UnitClassification, "target"),
+    level = tagged("level", api.UnitLevel, "target"),
   }
 end
 
--- Devuelve la Situation y unos diagnósticos (de dónde salió la spec, IDs desconocidos).
+-- Devuelve la Situation y unos diagnósticos: de dónde salió la spec, IDs
+-- desconocidos y qué valores del objetivo eran secret.
 function SituationReader.read(api, seals, options)
   options = options or {}
-  local call = reader(api)
-  local diagnostics = {}
+  local diagnostics = { secret = {} }
+  local call, tagged = reader(api, diagnostics)
 
   local situation = {
     player = {
@@ -152,7 +177,7 @@ function SituationReader.read(api, seals, options)
       knownSpells = readKnownSeals(api, call, seals),
     },
     content = readContent(call, api),
-    target = readTarget(call, api),
+    target = readTarget(call, tagged, api),
   }
   return situation, diagnostics
 end

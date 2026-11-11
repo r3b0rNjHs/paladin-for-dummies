@@ -13,7 +13,12 @@ Cada vez que haya cambios: `git pull` y `/reload`.
 - `/pfd spec ret | prot | holy | auto`: fija la spec a mano si la detección automática no funciona.
 - `/pfd show | hide | reset`: mostrar, ocultar o recolocar la ventana. Se mueve arrastrando los iconos.
 
-## Pruebas de la v0.1.0
+## Pruebas de la v0.1.1
+1. `/pfd spec auto` (quita la spec fijada a mano) y `/pfd debug`: la spec debe salir `retribution (fuente: specialization)`.
+2. En mundo abierto, marca un enemigo y `/pfd debug`: apunta el "tipo".
+3. Dentro de una mazmorra, marca un enemigo **fuera de combate** y `/pfd debug`: ¿el tipo sale como número, `nil` o `<secret>`? Repite con dos o tres bichos distintos.
+
+## Pruebas de la v0.1.0 (hechas)
 1. Al entrar: ¿aparece una ventana con dos iconos, "Sello" y "Sentencia"?
 2. `/pfd debug` sin objetivo. Apunta la línea de "Spec" (sobre todo la **fuente**).
 3. Marca un enemigo no muerto o bestia y pasa el ratón por los iconos. Esperado con tu Ret 40: **Seal of Command** y **Seal of the Crusader**, con su porqué en el tooltip.

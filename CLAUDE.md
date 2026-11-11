@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.1.0). Motor de reglas, adaptador e icono con "Sello + Sentencia". Cómo probarlo: `docs/addon-testing.md`. Por confirmar en el juego: qué API da la spec en Forever (`/pfd debug` muestra la fuente).
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.1.1). Motor de reglas, adaptador e icono con "Sello + Sentencia". Cómo probarlo: `docs/addon-testing.md`. Por confirmar en el juego: si el tipo de criatura es secret dentro de instancias.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -32,6 +32,11 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 - **`UNIT_SPELLCAST_SUCCEEDED` (player) no es secret en combate.** También llegan los procs (activación de Seal of Command = 20424).
 - `C_SuperTrack.SetSuperTrackedUserWaypoint` **no está protegido**: el marcador se ve en el mundo.
 - Mensajes de addon por PARTY fuera de instancia: funcionan.
+
+### Confirmado con la v0.1.0 (11 nov 2026)
+- **La spec se lee con `C_SpecializationInfo`**, pero Forever tiene sus propios IDs: **1486 = Retribución**. Faltan los de Holy y Protección; mientras tanto se deduce del rol (5.º retorno de `GetSpecializationInfo`: `HEALER`, `TANK`, `DAMAGER`).
+- `GetNumTalentTabs` / `GetTalentTabInfo` no dan la spec en Forever.
+- **Dentro de una mazmorra, `UnitCreatureType(target)` dio `nil`** con un élite de nivel 37 (en mundo abierto siempre se leía). Por confirmar si es secret dentro de instancias o si ese bicho no tiene tipo: la v0.1.1 lo distingue en `/pfd debug`.
 
 Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar como hipótesis hasta que el sondeo lo confirme.
 
@@ -83,7 +88,8 @@ Talentos relacionados: Twist of Light (confirmado: aura `Echo of Command`, 13117
 
 ## Preguntas abiertas (las responde el sondeo)
 Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Siguen abiertas:
-- ¿Qué API da la spec en Forever: especializaciones modernas (`C_SpecializationInfo`), árboles clásicos (`GetTalentTabInfo`) o ninguna? Si es ninguna, queda `/pfd spec`.
+- IDs de spec de Holy y Protección en Forever.
+- ¿El tipo de criatura es secret dentro de instancias?
 - ¿`ENCOUNTER_START` da el `encounterID`? (Necesita un jefe de mazmorra.)
 - ¿Los mensajes de addon funcionan dentro de instancias?
 - ¿`C_UnitAuras.GetPlayerAuraBySpellID` también falla en combate?
