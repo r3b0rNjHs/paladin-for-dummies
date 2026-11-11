@@ -149,10 +149,13 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
   elseif cmd == "hide" then
     db.hidden = true
     ui:Hide()
+  elseif cmd == "ui" then
+    if not ui then p("La ventana no se ha creado.") return end
+    for _, line in ipairs(ui:Describe()) do p(line) end
   elseif cmd == "reset" then
     ui:ResetPosition()
     p("Posición restablecida.")
   else
-    p("Comandos: /pfd debug | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd debug | ui | spec ret|prot|holy|auto | show | hide | reset")
   end
 end

@@ -65,10 +65,30 @@ end
 
 -- db: tabla de SavedVariables donde se guarda la posición.
 function RecommendationFrame.create(db)
-  local frame = CreateFrame("Frame", "PaladinForDummiesFrame", UIParent)
-  frame:SetSize(ICON_SIZE * 2 + 24, ICON_SIZE + 30)
+  local frame = CreateFrame("Frame", "PaladinForDummiesFrame", UIParent, "BackdropTemplate")
+  frame:SetSize(ICON_SIZE * 2 + 60, ICON_SIZE + 52)
+  frame:SetFrameStrata("MEDIUM")
   frame:SetMovable(true)
   frame:SetClampedToScreen(true)
+  frame:EnableMouse(true)
+  frame:RegisterForDrag("LeftButton")
+  frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+  frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing(); self:SavePosition() end)
+
+  -- Fondo oscuro con borde para que la ventana se vea siempre.
+  if frame.SetBackdrop then
+    frame:SetBackdrop({
+      bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+      tile = true, tileSize = 16, edgeSize = 12,
+      insets = { left = 3, right = 3, top = 3, bottom = 3 },
+    })
+    frame:SetBackdropColor(0, 0, 0, 0.75)
+  end
+
+  frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  frame.title:SetPoint("TOP", frame, "TOP", 0, -6)
+  frame.title:SetText("Paladin for Dummies")
 
   local pos = db.position
   if pos then
@@ -85,12 +105,12 @@ function RecommendationFrame.create(db)
   end
 
   frame.seal = createSlot(frame, "Sello")
-  frame.seal:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -4)
+  frame.seal:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -20)
   frame.judgement = createSlot(frame, "Sentencia")
-  frame.judgement:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
+  frame.judgement:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -20, -20)
 
   frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  frame.status:SetPoint("BOTTOM", frame, "BOTTOM", 0, 0)
+  frame.status:SetPoint("BOTTOM", frame, "BOTTOM", 0, 4)
 
   function frame:ShowRecommendation(recommendation)
     fill(self.seal, recommendation.seal)
@@ -99,6 +119,32 @@ function RecommendationFrame.create(db)
 
   function frame:SetFrozen(frozen)
     self.status:SetText(frozen and "en combate" or "")
+  end
+
+  -- Para /pfd ui: estado de la ventana en texto. Todo con pcall y sin tocar secrets.
+  function frame:Describe()
+    local function get(method, ...)
+      local ok, a, b, c, d, e = pcall(self[method], self, ...)
+      if not ok then return "error" end
+      local out = {}
+      for _, v in ipairs({ a, b, c, d, e }) do
+        if issecretvalue and issecretvalue(v) then
+          out[#out + 1] = "<secret>"
+        elseif type(v) == "number" then
+          out[#out + 1] = ("%g"):format(math.floor(v * 100 + 0.5) / 100)
+        elseif type(v) ~= "table" then
+          out[#out + 1] = tostring(v)
+        end
+      end
+      return table.concat(out, " ")
+    end
+    return {
+      ("mostrada %s, visible %s, opacidad %s, escala %s"):format(
+        get("IsShown"), get("IsVisible"), get("GetAlpha"), get("GetEffectiveScale")),
+      ("tamaño %s, posición %s (centro %s)"):format(get("GetSize"), get("GetPoint"), get("GetCenter")),
+      ("icono sello: %s | icono Sentencia: %s"):format(
+        tostring(self.seal.icon:GetTexture()), tostring(self.judgement.icon:GetTexture())),
+    }
   end
 
   function frame:ResetPosition()
