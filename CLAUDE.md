@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.1.2). Motor de reglas, adaptador e icono con "Sello + Sentencia". Cómo probarlo: `docs/addon-testing.md`. Por confirmar en el juego: que la ventana se ve (`/pfd ui`).
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.1.2). Motor de reglas, adaptador e icono con "Sello + Sentencia". Cómo probarlo: `docs/addon-testing.md`. Probada en el juego y funcionando.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -38,7 +38,7 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 - `GetNumTalentTabs` / `GetTalentTabInfo` no dan la spec en Forever.
 - La detección automática funciona: `retribution (fuente: specialization)` (v0.1.1).
 - **Dentro de las mazmorras el tipo de criatura del objetivo es secret** (3 élites de nivel 37 a 39, v0.1.1). La clasificación y el nivel sí se leen. Las reglas por tipo de criatura solo funcionan en mundo abierto.
-- La ventana de la v0.1.0/0.1.1 no se veía en el juego, aunque el cálculo funcionaba. La v0.1.2 le pone fondo y añade `/pfd ui` para diagnosticarlo.
+- **La ventana funciona (v0.1.2):** se ve con fondo, los tooltips muestran el hechizo, el porqué y la confianza, y la posición se guarda entre `/reload`. Sin fondo (v0.1.0/0.1.1) no se distinguía.
 
 Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar como hipótesis hasta que el sondeo lo confirme.
 
@@ -91,7 +91,6 @@ Talentos relacionados: Twist of Light (confirmado: aura `Echo of Command`, 13117
 ## Preguntas abiertas (las responde el sondeo)
 Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Siguen abiertas:
 - IDs de spec de Holy y Protección en Forever.
-- ¿Por qué no se veía la ventana? (`/pfd ui`)
 - En mazmorras, ¿se puede saber el tipo de criatura de otra forma (p. ej. el ID del NPC en `UnitGUID`)?
 - ¿`ENCOUNTER_START` da el `encounterID`? (Necesita un jefe de mazmorra.)
 - ¿Los mensajes de addon funcionan dentro de instancias?
