@@ -1,0 +1,10 @@
+return {
+  _all = {
+    lua = "lua5.1",
+  },
+  default = {
+    ROOT = { "spec" },
+    pattern = "_spec",
+    helper = "spec/support/addon.lua",
+  },
+}
