@@ -1,4 +1,7 @@
--- Ventana de recomendación: dos iconos (sello y Sentencia) con su porqué en el tooltip.
+-- Ventana de recomendación: dos iconos con su porqué en el tooltip.
+--   Sello:     el sello para la pelea.
+--   Sentencia: el icono de Judgement con el sello que se juzga en la esquina; el
+--              tooltip da los pasos antes del pull (core/Plan.lua).
 -- Solo muestra lo que le pasan: no decide nada.
 local _, ns = ...
 ns.UI = ns.UI or {}
@@ -23,18 +26,51 @@ local function spellTexture(spellId)
   return QUESTION_MARK
 end
 
-local function showTooltip(slot)
+-- Nombre traducido del hechizo, solo para mostrarlo (las decisiones van por spellID).
+local function spellName(spellId)
+  if C_Spell and C_Spell.GetSpellName then
+    local ok, name = pcall(C_Spell.GetSpellName, spellId)
+    if ok and type(name) == "string" then return name end
+  end
+  return "spellID " .. tostring(spellId)
+end
+
+local STEP_TEXT = {
+  apply = function(step) return "Ponte " .. spellName(step.spellId) end,
+  judge = function() return "Lanza " .. spellName(ns.Data.Spells.judgement) .. " sobre el objetivo" end,
+  switch = function(step) return "Cambia a " .. spellName(step.spellId) .. " para la pelea" end,
+}
+
+local function addReason(entry)
+  GameTooltip:AddLine(" ")
+  GameTooltip:AddLine(entry.why, 1, 1, 1, true)
+  GameTooltip:AddLine(CONFIDENCE_TEXT[entry.confidence] or entry.confidence, 0.6, 0.8, 1, true)
+end
+
+-- Sello: el tooltip del propio hechizo y debajo el porqué.
+local function showSealTooltip(slot)
   local entry = slot.entry
   if not entry then return end
   GameTooltip:SetOwner(slot, "ANCHOR_RIGHT")
   GameTooltip:SetSpellByID(entry.spellId)
-  GameTooltip:AddLine(" ")
-  GameTooltip:AddLine(entry.why, 1, 1, 1, true)
-  GameTooltip:AddLine(CONFIDENCE_TEXT[entry.confidence] or entry.confidence, 0.6, 0.8, 1, true)
+  addReason(entry)
   GameTooltip:Show()
 end
 
-local function createSlot(parent, label)
+-- Sentencia: los pasos antes del pull y debajo el porqué.
+local function showJudgementTooltip(slot)
+  local entry = slot.entry
+  if not entry then return end
+  GameTooltip:SetOwner(slot, "ANCHOR_RIGHT")
+  GameTooltip:AddLine("Antes del pull")
+  for i, step in ipairs(slot.steps or {}) do
+    GameTooltip:AddLine(("%d. %s"):format(i, STEP_TEXT[step.action](step)), 1, 0.82, 0, true)
+  end
+  addReason(entry)
+  GameTooltip:Show()
+end
+
+local function createSlot(parent, label, onEnter)
   local slot = CreateFrame("Frame", nil, parent)
   slot:SetSize(ICON_SIZE, ICON_SIZE)
   slot.icon = slot:CreateTexture(nil, "ARTWORK")
@@ -47,19 +83,24 @@ local function createSlot(parent, label)
   slot:RegisterForDrag("LeftButton")
   slot:SetScript("OnDragStart", function() parent:StartMoving() end)
   slot:SetScript("OnDragStop", function() parent:StopMovingOrSizing(); parent:SavePosition() end)
-  slot:SetScript("OnEnter", showTooltip)
+  slot:SetScript("OnEnter", onEnter)
   slot:SetScript("OnLeave", function() GameTooltip:Hide() end)
   return slot
 end
 
-local function fill(slot, entry)
+-- iconSpellId: el hechizo cuyo icono se muestra (para la Sentencia, Judgement).
+local function fill(slot, entry, iconSpellId)
   slot.entry = entry
   if entry then
-    slot.icon:SetTexture(spellTexture(entry.spellId))
+    slot.icon:SetTexture(spellTexture(iconSpellId or entry.spellId))
     slot.icon:SetDesaturated(false)
   else
     slot.icon:SetTexture(QUESTION_MARK)
     slot.icon:SetDesaturated(true)
+  end
+  if slot.badge then
+    slot.badge:SetShown(entry ~= nil)
+    if entry then slot.badge:SetTexture(spellTexture(entry.spellId)) end
   end
 end
 
@@ -104,9 +145,13 @@ function RecommendationFrame.create(db)
     end
   end
 
-  frame.seal = createSlot(frame, "Sello")
+  frame.seal = createSlot(frame, "Sello", showSealTooltip)
   frame.seal:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -20)
-  frame.judgement = createSlot(frame, "Sentencia")
+  frame.judgement = createSlot(frame, "Sentencia", showJudgementTooltip)
+  -- Icono pequeño del sello que se juzga, en la esquina del icono de Judgement.
+  frame.judgement.badge = frame.judgement:CreateTexture(nil, "OVERLAY")
+  frame.judgement.badge:SetSize(ICON_SIZE / 2, ICON_SIZE / 2)
+  frame.judgement.badge:SetPoint("BOTTOMRIGHT", frame.judgement, "BOTTOMRIGHT", 4, -4)
   frame.judgement:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -20, -20)
 
   frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
@@ -114,7 +159,8 @@ function RecommendationFrame.create(db)
 
   function frame:ShowRecommendation(recommendation)
     fill(self.seal, recommendation.seal)
-    fill(self.judgement, recommendation.judgement)
+    fill(self.judgement, recommendation.judgement, ns.Data.Spells.judgement)
+    self.judgement.steps = ns.Core.Plan.prepull(recommendation)
   end
 
   function frame:SetFrozen(frozen)

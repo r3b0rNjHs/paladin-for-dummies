@@ -14,7 +14,12 @@ Cada vez que haya cambios: `git pull` y `/reload`.
 - `/pfd spec ret | prot | holy | auto`: fija la spec a mano si la detección automática no funciona.
 - `/pfd show | hide | reset`: mostrar, ocultar o recolocar la ventana. Se mueve arrastrando los iconos.
 
-## Pruebas de la v0.1.2
+## Pruebas de la v0.1.3
+1. El icono de "Sentencia" debe ser el de Judgement, con el de Seal of the Crusader en pequeño en la esquina inferior derecha.
+2. Su tooltip: "Antes del pull" y tres pasos (Ponte Seal of the Crusader, Lanza Judgement sobre el objetivo, Cambia a Seal of Command para la pelea), y debajo el porqué.
+3. El tooltip de "Sello" no cambia: el de Seal of Command con su porqué.
+
+## Pruebas de la v0.1.2 (hechas)
 1. Al entrar: ¿ves una ventana oscura con el título "Paladin for Dummies" y dos iconos, un poco por debajo del centro de la pantalla?
 2. Escribe `/pfd ui` y haz captura (tanto si la ves como si no).
 3. Si no la ves: `/pfd reset`, `/pfd show` y otra vez `/pfd ui`.

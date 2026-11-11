@@ -14,3 +14,8 @@ ns.Data.Seals = {
   justice       = { spellIds = {} },                             -- pendiente de volcar
   wisdom        = { spellIds = {} },                             -- pendiente de volcar
 }
+
+-- Otros hechizos que usa el addon.
+ns.Data.Spells = {
+  judgement = 20271, -- libera el sello activo sin consumirlo (sondeo 1)
+}

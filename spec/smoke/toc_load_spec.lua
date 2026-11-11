@@ -13,12 +13,15 @@ describe("PaladinForDummies.toc", function()
     return files
   end
 
-  -- Objeto que acepta cualquier método; guarda los scripts para poder disparar eventos.
+  -- Objeto que acepta cualquier método (en WoW empiezan por mayúscula) y guarda los
+  -- scripts para poder disparar eventos. Los campos en minúscula que no existen son
+  -- nil, como en un frame de verdad.
   local function mock()
     local scripts = {}
     local obj = { scripts = scripts }
     return setmetatable(obj, {
       __index = function(_, key)
+        if type(key) ~= "string" or not key:match("^%u") then return nil end
         if key == "SetScript" then
           return function(_, name, fn) scripts[name] = fn end
         end
@@ -81,6 +84,12 @@ describe("PaladinForDummies.toc", function()
     env.SlashCmdList.PALADINFORDUMMIES("debug")
     env.SlashCmdList.PALADINFORDUMMIES("ui")
     env.SlashCmdList.PALADINFORDUMMIES("reset")
+    -- Pasar el ratón por los iconos: ejecuta los tooltips.
+    local hovered = 0
+    for _, f in ipairs(frames) do
+      if f.scripts.OnEnter then f.scripts.OnEnter(f); hovered = hovered + 1 end
+    end
+    assert.are.equal(2, hovered)
     fire(frames, "PLAYER_REGEN_DISABLED")
     fire(frames, "PLAYER_TARGET_CHANGED")
     fire(frames, "PLAYER_REGEN_ENABLED")
