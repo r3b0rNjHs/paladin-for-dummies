@@ -84,7 +84,7 @@ Confirmado con el grimorio (sondeo 1): la Sentencia **no consume el sello** y ca
 | Wisdom | 38 | Probabilidad de recuperar maná | Quien golpee al objetivo recupera maná |
 
 Talentos relacionados (notas del 2 nov y deep dive; detalle en `docs/research.md`):
-- **Unsealed Wrath** (Ret 31, requiere Repentance; **sustituye a Twist of Light, que ya no existe**): tus golpes guardan una copia del sello activo durante 15 s, hasta 3; al golpear con otro sello se gastan. Confirmado en el sondeo 1: aura `Echo of Command` (1311703), 15 s, 2-3 acumulaciones.
+- **Unsealed Wrath** (Ret 31, requiere Repentance; **sustituye a Twist of Light, que ya no existe**): tus golpes guardan una copia del sello activo durante 15 s, hasta 3; al golpear con otro sello se gastan. Confirmado en el sondeo 1: aura `Echo of Command` (1311703), 15 s, 2-3 acumulaciones. **Tooltip del aura en el juego (11 nov):** "Empowers your next melee attack without Seal of Command active with N instances of Seal of Command": se gastan todas en un golpe y **vale cualquier otro sello**, no solo Righteousness (hipótesis: cambiar a Wisdom para recuperar maná). Sin confirmar si cada "instance" es una activación segura o una tirada de su probabilidad.
 - Vengeance: hasta 5 acumulaciones, requiere Seal of Command.
 - Sacred Arbiter: Holy Strike refresca todas las Sentencias del objetivo, incluidas las de otros paladines.
 - Sanctified Judgement: devuelve hasta el 60% del coste del sello juzgado.

@@ -83,6 +83,7 @@ La pestaña se llama "Endgame Twist of Light" pero el contenido ya usa Unsealed 
 - **Unsealed Wrath (consenso de tres fuentes: classicwowforever, Icy Veins y Mobalytics):** Command por defecto; con 3 copias, cambiar a Righteousness un golpe y volver a Command. Con arma rápida, Icy Veins invierte el patrón. Maxroll propone cambiar en cada golpe (Command ↔ Righteousness), pero lo explica con el "eco" de Twist of Light, así que probablemente está desfasado.
 
 ### Contradicciones y dudas abiertas
+- **Tooltip real de `Echo of Command` (cliente, 11 nov):** "Empowers your next melee attack without Seal of Command active with N instances of Seal of Command". Confirma que se gastan todas en el siguiente golpe con **cualquier** otro sello (las guías solo hablan de Righteousness). Abre la opción de cambiar a Wisdom para compensar el maná de los cambios (sin medir).
 - **Cómo se gastan las copias de Unsealed Wrath.** Según fansites, al golpear con otro sello cada copia tiene su probabilidad normal: Righteousness siempre se activa y Command tira su probabilidad. No es texto de Blizzard ni está medido. En el foro hay modelos teóricos en los que guardar copias y cambiar en cada golpe dan lo mismo por golpe; lo que cambia es el maná (cada cambio cuesta un sello).
 - **Crusader con Unsealed Wrath** parece no aportar nada al liberarse (foro): se juzga una vez y ya.
 - **Enfriamiento de Judgement:** 8 s según classicwowforever; nadie más lo da.
