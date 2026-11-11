@@ -165,14 +165,21 @@ describe("PaladinForDummies.toc", function()
     assert.are.same({ command = 20 }, f.sealSeconds)
     assert.is_true(math.abs(f.context.weaponSpeed - 2.4) < 0.001)
     assert.are.equal(6, f.context.target.creatureType)
-    assert.truthy(output:find("[prueba A] Pelea de 20 s con command | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
+    assert.truthy(output:find("[prueba A] Solo command | 20 s | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
+    assert.are.same({
+      { t = 2, kind = "judgement" },
+      { t = 4, kind = "holyStrike" },
+      { t = 6, kind = "commandProc" },
+      { t = 12, kind = "commandProc" },
+    }, f.timeline)
+    assert.truthy(output:find("Solo command | peleas: 1 | duración media: 20 s", 1, true), output)
     assert.are.equal("A", f.context.test)
     assert.truthy(output:find("Prueba A | peleas: 1 | duración media: 20 s", 1, true), output)
     assert.truthy(output:find("Command: 2 activaciones en 20 s con el sello puesto = 6 por minuto", 1, true), output)
     assert.truthy(output:find("No hay ninguna prueba activa", 1, true), output)
     assert.is_nil(env.PaladinForDummiesDB.test)
-    assert.truthy(output:find("Peleas guardadas: 1", 1, true), output)
-    assert.truthy(output:find("= 6 por minuto"), output)
+    assert.truthy(output:find("Peleas guardadas: 1.", 1, true), output)
+    assert.truthy(output:find("Total con command: 2 activaciones en 20 s = 6 por minuto", 1, true), output)
     assert.truthy(output:find("Arma: velocidad 2.4, daño 110.35-160", 1, true), output)
 
     -- Todo lo de /pfd debug queda también en el archivo de SavedVariables

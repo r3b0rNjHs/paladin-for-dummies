@@ -24,24 +24,24 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
-## Plan de pruebas de rotación (v0.2.2)
+## Plan de pruebas de rotación (v0.2.3)
 Qué queremos saber: (1) cuántas veces por minuto se activa Command en Forever, (2) Command o Righteousness con tu arma de 3,0 s, (3) si el cambio de sellos con Unsealed Wrath compensa.
 
-Bloques de **15-20 peleas** contra el mismo tipo de enemigo (misma zona, nivel parecido). Antes de cada bloque, activa su etiqueta; la ventana muestra "prueba X" mientras está activa.
+**No hace falta etiquetar nada: juega normal.** Cada pelea guarda la secuencia de lo que lanzaste y el addon deduce el estilo (solo Command, solo Righteousness, Crusader y luego un sello, cambio de sellos, mezcla). `/pfd stats` agrupa por estilo y Claude analiza el archivo con la secuencia completa. Para que salgan comparaciones útiles, conviene que haya rachas de peleas con cada estilo de abajo, a ser posible contra el mismo tipo de enemigo. `/pfd test X` sigue existiendo si algún día quieres etiquetar a mano.
 
-**Prueba A: solo Command** → `/pfd test A`
+**Estilo A: solo Command**
 - Seal of Command puesto **antes** de atacar, sin cambiarlo en toda la pelea. Sin Crusader.
 - Judgement y Holy Strike en cuanto estén listos.
 - Entrar a pegar enseguida: sin abrir con Exorcism a distancia y sin correr detrás.
 
-**Prueba B: solo Righteousness** → `/pfd test B`
+**Estilo B: solo Righteousness**
 - Igual que la A con Seal of Righteousness. **Antes entrena su rango más alto** (el 5; el 6 en el nivel 42): con el rango 1 la comparación no vale.
 
-**Prueba C: Unsealed Wrath** → `/pfd test C`
+**Estilo C: Unsealed Wrath**
 - Empieza con Command. Con 3 "Echo of Command" en tus buffs, cambia a Righteousness, da **un** golpe y vuelve a Command. Repite.
 - Judgement y Holy Strike en cuanto estén listos. Si te quedas sin maná, apúntalo.
 
-**Al terminar:** `/pfd test off`, `/reload` y manda `PaladinForDummies.lua`. `/pfd stats` enseña cada prueba por separado.
+**Cuando quieras:** `/reload` y manda `PaladinForDummies.lua`.
 
 **Comprobaciones a ojo (una vez):**
 - Juzga Crusader y luego juzga con Command: ¿desaparece el icono de Crusader de los debuffs del enemigo?

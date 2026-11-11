@@ -2,6 +2,8 @@
 --   byOpeningSeal: por sello inicial, número de peleas, duración media y Sentencias medias.
 --   byTest: por prueba (/pfd test A, B, C...), lo mismo más Holy Strike, cambios de
 --           sello y la tasa de Command de esa prueba. Las peleas sin prueba no entran.
+--   byStyle: lo mismo que byTest, agrupando por el estilo que devuelva classify(fight)
+--            (en el juego, core/FightStyle.lua). Sin classify, vacío.
 --   command: activaciones de Seal of Command por minuto con Command puesto (todas las peleas).
 --
 -- La tasa de Command es una estimación: el tiempo con Command puesto incluye ratos
@@ -46,8 +48,23 @@ local function average(group, field)
   return round1(group[field] / group.fights)
 end
 
-function FightStats.summarize(fights)
-  local seals, tests, all = {}, {}, newGroup()
+local function detailed(groups)
+  local out = {}
+  for key, g in pairs(groups) do
+    out[key] = {
+      fights = g.fights,
+      avgDuration = average(g, "duration"),
+      avgJudgements = average(g, "judgement"),
+      avgHolyStrikes = average(g, "holyStrike"),
+      avgSealCasts = average(g, "sealCast"),
+      command = commandRate(g),
+    }
+  end
+  return out
+end
+
+function FightStats.summarize(fights, classify)
+  local seals, tests, styles, all = {}, {}, {}, newGroup()
 
   for _, fight in ipairs(fights) do
     local sealKey = fight.openingSeal or "none"
@@ -58,6 +75,12 @@ function FightStats.summarize(fights)
     if test then
       tests[test] = tests[test] or newGroup()
       add(tests[test], fight)
+    end
+
+    if classify then
+      local style = classify(fight)
+      styles[style] = styles[style] or newGroup()
+      add(styles[style], fight)
     end
 
     add(all, fight)
@@ -72,17 +95,11 @@ function FightStats.summarize(fights)
     }
   end
 
-  local byTest = {}
-  for key, g in pairs(tests) do
-    byTest[key] = {
-      fights = g.fights,
-      avgDuration = average(g, "duration"),
-      avgJudgements = average(g, "judgement"),
-      avgHolyStrikes = average(g, "holyStrike"),
-      avgSealCasts = average(g, "sealCast"),
-      command = commandRate(g),
-    }
-  end
-
-  return { fights = #fights, byOpeningSeal = byOpeningSeal, byTest = byTest, command = commandRate(all) }
+  return {
+    fights = #fights,
+    byOpeningSeal = byOpeningSeal,
+    byTest = detailed(tests),
+    byStyle = detailed(styles),
+    command = commandRate(all),
+  }
 end

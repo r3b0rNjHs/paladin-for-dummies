@@ -19,6 +19,27 @@ describe("FightStats.summarize", function()
     return { judgement = judgement, holyStrike = holyStrike, commandProc = commandProc, sealCast = sealCast }
   end
 
+  describe("by style", function()
+    it("groups fights by the style the given classifier returns", function()
+      local classify = function(fight) return fight.openingSeal == "command" and "solo:command" or "other" end
+      local s = FightStats.summarize({
+        record("command", 20, { command = 20 }, counts(2, 3, 2, 0)),
+        record("command", 40, { command = 40 }, counts(4, 5, 4, 0)),
+        record("righteousness", 30, { righteousness = 30 }, counts(3, 3, 0, 0)),
+      }, classify)
+
+      assert.are.same({
+        fights = 2, avgDuration = 30, avgJudgements = 3, avgHolyStrikes = 4, avgSealCasts = 0,
+        command = { procs = 6, seconds = 60, perMinute = 6 },
+      }, s.byStyle["solo:command"])
+      assert.are.equal(1, s.byStyle.other.fights)
+    end)
+
+    it("has no style groups without a classifier", function()
+      assert.are.same({}, FightStats.summarize({ record("command", 20) }).byStyle)
+    end)
+  end)
+
   describe("by test", function()
     it("groups tagged fights by test, each with its own Command rate", function()
       local s = FightStats.summarize({

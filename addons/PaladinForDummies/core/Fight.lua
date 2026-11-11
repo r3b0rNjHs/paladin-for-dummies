@@ -9,6 +9,8 @@
 --
 -- catalog: qué es cada spellID (ver data/Seals.lua: ns.Data.Catalog).
 -- opening: { t, seal, sealExpires, echoes } leído justo al empezar.
+-- El registro guarda también timeline: cada sello, Sentencia, Holy Strike y
+-- activación de Command, con su segundo desde el inicio, para analizar la pelea.
 -- Lua puro: sin dependencias de WoW. Los tiempos son los de GetTime().
 local _, ns = ...
 ns.Core = ns.Core or {}
@@ -17,6 +19,7 @@ local Fight = {}
 ns.Core.Fight = Fight
 
 local SEAL_DURATION = 30
+local MAX_TIMELINE = 300 -- entradas por pelea; los contadores siguen aunque se llene
 local COUNTERS = { "judgement", "holyStrike", "commandProc" }
 
 local function round1(x)
@@ -42,6 +45,7 @@ function Fight.start(catalog, opening, context)
     context = context or {},
     sealSeconds = {},
     counts = { judgement = 0, holyStrike = 0, commandProc = 0, sealCast = 0 },
+    timeline = {},
   }
   if opening.seal then
     f.segment = {
@@ -53,6 +57,11 @@ function Fight.start(catalog, opening, context)
   return f
 end
 
+local function remember(f, t, kind, seal)
+  if #f.timeline >= MAX_TIMELINE then return end
+  f.timeline[#f.timeline + 1] = { t = round1(t - f.startedAt), kind = kind, seal = seal }
+end
+
 function Fight.cast(f, t, spellId)
   if type(spellId) ~= "number" or type(t) ~= "number" then return end
   local catalog = f.catalog
@@ -62,12 +71,14 @@ function Fight.cast(f, t, spellId)
     closeSegment(f, t)
     f.segment = { seal = seal, from = t, expires = t + SEAL_DURATION }
     f.counts.sealCast = f.counts.sealCast + 1
+    remember(f, t, "seal", seal)
     return
   end
 
   for _, counter in ipairs(COUNTERS) do
     if catalog[counter][spellId] then
       f.counts[counter] = f.counts[counter] + 1
+      remember(f, t, counter)
       return
     end
   end
@@ -85,5 +96,6 @@ function Fight.finish(f, ending)
     context = f.context,
     sealSeconds = sealSeconds,
     counts = f.counts,
+    timeline = f.timeline,
   }
 end

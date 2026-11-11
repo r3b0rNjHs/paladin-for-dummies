@@ -85,6 +85,34 @@ describe("Fight", function()
     end)
   end)
 
+  describe("timeline", function()
+    it("keeps every tracked cast with its second from the start of the fight", function()
+      local f = fight({ t = 100, seal = "command", sealExpires = 130 })
+      Fight.cast(f, 101.04, 100)  -- Judgement
+      Fight.cast(f, 102.5, 200)   -- Holy Strike
+      Fight.cast(f, 103, 300)     -- activación de Command
+      Fight.cast(f, 104, 20)      -- Righteousness
+      Fight.cast(f, 105, 999)     -- otro hechizo: no se guarda
+      local record = Fight.finish(f, { t = 110, time = 5000 })
+
+      assert.are.same({
+        { t = 1, kind = "judgement" },
+        { t = 2.5, kind = "holyStrike" },
+        { t = 3, kind = "commandProc" },
+        { t = 4, kind = "seal", seal = "righteousness" },
+      }, record.timeline)
+    end)
+
+    it("stops growing after 300 entries", function()
+      local f = fight({ t = 0 })
+      for i = 1, 400 do Fight.cast(f, i * 0.1, 100) end
+      local record = Fight.finish(f, { t = 60, time = 5000 })
+
+      assert.are.equal(300, #record.timeline)
+      assert.are.equal(400, record.counts.judgement)
+    end)
+  end)
+
   it("keeps the opening seal and the context in the record", function()
     local f = Fight.start(catalog, { t = 0, seal = "command", sealExpires = 30, echoes = { command = 3 } },
       { content = "dungeon", playerLevel = 41, weaponSpeed = 2.4,

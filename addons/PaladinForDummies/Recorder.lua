@@ -4,7 +4,7 @@
 -- (regla 4): el adaptador y Fight.cast descartan lo que no es un número legible.
 local _, ns = ...
 
-local Fight, FightStats = ns.Core.Fight, ns.Core.FightStats
+local Fight, FightStats, FightStyle = ns.Core.Fight, ns.Core.FightStats, ns.Core.FightStyle
 local FightReader = ns.Adapters.FightReader
 local Catalog, Seals = ns.Data.Catalog, ns.Data.Seals
 
@@ -71,44 +71,56 @@ function Recorder.finish(db)
   return record
 end
 
+-- Nombre legible de un estilo de core/FightStyle.lua.
+local function styleName(style)
+  local kind, seal = style:match("^([^:]+):?(.*)$")
+  if kind == "solo" then return "Solo " .. sealName(seal) end
+  if kind == "crusader-then" then return sealName("crusader") .. " y luego " .. sealName(seal) end
+  if kind == "twist" then return "Cambio de sellos (Unsealed Wrath)" end
+  if kind == "none" then return "Sin sello" end
+  return "Mezcla de sellos"
+end
+
 function Recorder.describe(record)
   local c = record.counts
   local test = record.context and record.context.test
-  return ("%sPelea de %s s con %s | Sentencias: %d | Holy Strike: %d | activaciones de Command: %d"):format(
+  return ("%s%s | %s s | Sentencias: %d | Holy Strike: %d | activaciones de Command: %d"):format(
     test and ("[prueba " .. test .. "] ") or "",
-    tostring(record.duration), sealName(record.openingSeal), c.judgement, c.holyStrike, c.commandProc)
+    styleName(FightStyle.classify(record)), tostring(record.duration),
+    c.judgement, c.holyStrike, c.commandProc)
+end
+
+-- Una línea por grupo, y otra con la tasa de Command si la hay.
+local function groupLines(lines, title, g)
+  lines[#lines + 1] = ("%s | peleas: %d | duración media: %s s | por pelea: Sentencias %s, Holy Strike %s, cambios de sello %s"):format(
+    title, g.fights, tostring(g.avgDuration), tostring(g.avgJudgements), tostring(g.avgHolyStrikes), tostring(g.avgSealCasts))
+  if g.command then
+    lines[#lines + 1] = ("   Command: %d activaciones en %s s con el sello puesto = %s por minuto"):format(
+      g.command.procs, tostring(g.command.seconds), tostring(g.command.perMinute))
+  end
+end
+
+local function sortedKeys(t)
+  local keys = {}
+  for key in pairs(t) do keys[#keys + 1] = key end
+  table.sort(keys)
+  return keys
 end
 
 function Recorder.statsLines(db)
   local fights = db.fights or {}
-  local s = FightStats.summarize(fights)
+  local s = FightStats.summarize(fights, FightStyle.classify)
   if s.fights == 0 then return { "Todavía no hay peleas guardadas." } end
 
-  local lines = { ("Peleas guardadas: %d"):format(s.fights) }
-
-  local tests = {}
-  for key in pairs(s.byTest) do tests[#tests + 1] = key end
-  table.sort(tests)
-  for _, key in ipairs(tests) do
-    local t = s.byTest[key]
-    lines[#lines + 1] = ("Prueba %s | peleas: %d | duración media: %s s | por pelea: Sentencias %s, Holy Strike %s, cambios de sello %s"):format(
-      key, t.fights, tostring(t.avgDuration), tostring(t.avgJudgements), tostring(t.avgHolyStrikes), tostring(t.avgSealCasts))
-    if t.command then
-      lines[#lines + 1] = ("   Command: %d activaciones en %s s con el sello puesto = %s por minuto"):format(
-        t.command.procs, tostring(t.command.seconds), tostring(t.command.perMinute))
-    end
+  local lines = { ("Peleas guardadas: %d. Por lo que hiciste en cada una:"):format(s.fights) }
+  for _, style in ipairs(sortedKeys(s.byStyle)) do
+    groupLines(lines, styleName(style), s.byStyle[style])
   end
-  if #tests > 0 then lines[#lines + 1] = "Todas las peleas:" end
-  local keys = {}
-  for key in pairs(s.byOpeningSeal) do keys[#keys + 1] = key end
-  table.sort(keys)
-  for _, key in ipairs(keys) do
-    local g = s.byOpeningSeal[key]
-    lines[#lines + 1] = ("Empezando con %s | peleas: %d | duración media: %s s | Sentencias por pelea: %s"):format(
-      sealName(key), g.fights, tostring(g.avgDuration), tostring(g.avgJudgements))
+  for _, test in ipairs(sortedKeys(s.byTest)) do
+    groupLines(lines, "Prueba " .. test, s.byTest[test])
   end
   if s.command then
-    lines[#lines + 1] = ("%s | activaciones: %d en %s s con el sello puesto = %s por minuto (estimación)"):format(
+    lines[#lines + 1] = ("Total con %s: %d activaciones en %s s = %s por minuto (estimación)"):format(
       sealName("command"), s.command.procs, tostring(s.command.seconds), tostring(s.command.perMinute))
   end
   return lines
