@@ -56,8 +56,10 @@ describe("PaladinForDummies.toc", function()
       C_Spell = { GetSpellTexture = function() return 135000 end },
       GetTime = function() return env_now end,
       time = function() return 1794416000 end,
-      UnitAttackSpeed = function() return 2.4 end,
-      UnitDamage = function() return 110, 160 end,
+      GetBuildInfo = function() return "1.60.1", "70888", "Nov  9 2026", 16001 end,
+      C_AddOns = { GetAddOnMetadata = function(_, field) return field == "Version" and "0.2.1" or nil end },
+      UnitAttackSpeed = function() return 2.4000000953674 end,
+      UnitDamage = function() return 110.35113525391, 160 end,
       GetSpellBonusDamage = function() return 35 end,
       C_UnitAuras = {
         GetAuraDataByIndex = function(_, i)
@@ -83,6 +85,29 @@ describe("PaladinForDummies.toc", function()
       if handler then handler(f, event, ...) end
     end
   end
+
+  it("saves errors in SavedVariables, not only in the chat", function()
+    local env, frames = wowEnv()
+    env.UnitLevel = function() error("boom") end
+    env.C_SpellBook.GetNumSpellBookSkillLines = function() error("boom") end
+    local ns = {}
+    for _, file in ipairs(tocFiles()) do
+      local chunk = assert(loadfile(ROOT .. file))
+      setfenv(chunk, env)
+      chunk("PaladinForDummies", ns)
+    end
+    -- Un fallo dentro del motor: una regla que apunta a un sello inexistente.
+    table.insert(ns.Data.Rules, { id = "broken", priority = 99, when = {}, recommend = { seal = "nope" },
+      why = "x", confidence = "mechanic" })
+
+    fire(frames, "ADDON_LOADED", "PaladinForDummies")
+    fire(frames, "PLAYER_ENTERING_WORLD")
+
+    local errors = env.PaladinForDummiesDB.errors
+    assert.is_true(#errors >= 1)
+    assert.are.equal("la recomendación", errors[1].context)
+    assert.truthy(errors[1].message:find("unknown seal: nope", 1, true))
+  end)
 
   it("loads every file, reacts to events and runs /pfd debug without errors", function()
     local env, frames, printed = wowEnv()
@@ -135,11 +160,19 @@ describe("PaladinForDummies.toc", function()
     assert.are.same({ command = 3 }, f.openingEchoes)
     assert.are.same({ judgement = 1, holyStrike = 1, commandProc = 2, sealCast = 0 }, f.counts)
     assert.are.same({ command = 20 }, f.sealSeconds)
-    assert.are.equal(2.4, f.context.weaponSpeed)
+    assert.is_true(math.abs(f.context.weaponSpeed - 2.4) < 0.001)
     assert.are.equal(6, f.context.target.creatureType)
     assert.truthy(output:find("Pelea de 20 s con command | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
     assert.truthy(output:find("Peleas guardadas: 1", 1, true), output)
     assert.truthy(output:find("= 6 por minuto"), output)
-    assert.truthy(output:find("Arma: velocidad 2.4, daño 110%-160"), output)
+    assert.truthy(output:find("Arma: velocidad 2.4, daño 110.35-160", 1, true), output)
+
+    -- Todo lo de /pfd debug queda también en el archivo de SavedVariables
+    local snap = env.PaladinForDummiesDB.snapshot
+    assert.are.equal("0.2.1", snap.addonVersion)
+    assert.are.equal("70888", snap.client.build)
+    assert.are.equal("retribution", snap.situation.player.spec)
+    assert.are.equal("override", snap.diagnostics.specSource)
+    assert.are.equal("command", snap.recommendation.seal.seal)
   end)
 end)

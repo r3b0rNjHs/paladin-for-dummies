@@ -17,6 +17,44 @@ local function p(...)
   print("|cfff5b041Paladin for Dummies|r:", ...)
 end
 
+local MAX_ERRORS = 50
+
+-- Los errores se muestran en el chat y se guardan en SavedVariables (db.errors),
+-- para que lleguen en el archivo aunque se pierdan del chat.
+local function reportError(context, err)
+  p("Error en " .. context .. ":", err)
+  if not db then return end
+  db.errors = db.errors or {}
+  table.insert(db.errors, { time = time(), context = context, message = tostring(err) })
+  while #db.errors > MAX_ERRORS do table.remove(db.errors, 1) end
+end
+
+local function addonVersion()
+  local get = C_AddOns and C_AddOns.GetAddOnMetadata
+  if not get then return nil end
+  local ok, v = pcall(get, ADDON_NAME, "Version")
+  return ok and v or nil
+end
+
+local function clientInfo()
+  local ok, version, build, date, toc = pcall(GetBuildInfo)
+  if not ok then return nil end
+  return { version = version, build = build, date = date, toc = toc }
+end
+
+-- Lo mismo que muestra /pfd debug, guardado en SavedVariables (db.snapshot).
+-- La Situation ya viene sin valores secret (regla 4).
+local function saveSnapshot()
+  db.snapshot = {
+    savedAt = time(),
+    addonVersion = addonVersion(),
+    client = clientInfo(),
+    situation = last.situation,
+    diagnostics = last.diagnostics,
+    recommendation = last.recommendation,
+  }
+end
+
 local function refresh()
   if frozen or not ui then return end
   local ok, err = pcall(function()
@@ -24,8 +62,9 @@ local function refresh()
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
     ui:ShowRecommendation(recommendation)
+    saveSnapshot()
   end)
-  if not ok then p("Error al calcular la recomendación:", err) end
+  if not ok then reportError("la recomendación", err) end
 end
 
 local function setFrozen(value)
@@ -71,6 +110,7 @@ local function debug()
   local w = s.player.weapon or {}
   local function stat(field, value)
     if d.secret[field] then return "<secret>" end
+    if type(value) == "number" then return ("%g"):format(math.floor(value * 100 + 0.5) / 100) end
     return tostring(value)
   end
   p(("Arma: velocidad %s, daño %s-%s | poder con hechizos (Sagrado): %s"):format(
@@ -101,7 +141,7 @@ local events = CreateFrame("Frame")
 
 local function safely(label, fn, ...)
   local ok, err = pcall(fn, ...)
-  if not ok then p("Error en " .. label .. ":", err) end
+  if not ok then reportError(label, err) end
 end
 
 events:SetScript("OnEvent", function(_, event, arg1, _, arg3)

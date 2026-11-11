@@ -92,7 +92,7 @@ La pestaña se llama "Endgame Twist of Light" pero el contenido ya usa Unsealed 
 ### Lo que implica para tu personaje (sondeo 1)
 - Seal of Righteousness **solo en rango 1** con nivel 40: faltan los rangos 2-5 (niveles 10-34) y el 6 sale en el 42. Comparar Command con Righteousness así no es justo. También faltan Justice, Wisdom y Fury.
 - Tienes Unsealed Wrath (`Echo of Command`, 3 copias) y Vengeance.
-- Tu arma va a 2,4 s (lo mostraba otro addon en el tooltip): por debajo de los dos cortes de las guías, que te dirían Righteousness. Por eso la regla `ret-command` es demasiado simple.
+- Tu arma va a **3,0 s** (`UnitAttackSpeed`, v0.2.0, nivel 41; el 2,4 que mostraba otro addon era otra cosa): justo en el corte de Maxroll (3,0 → Command) y por debajo del de Conquest Capped (3,2). Zona dudosa: la regla `ret-command` es demasiado simple. Daño del arma 207-252 y poder con hechizos Sagrado 68.
 
 ### Qué cambia en el addon
 - Command frente a Righteousness no es un umbral: es una **comparación que se puede calcular** fuera de combate con la velocidad y el daño del arma y el poder con hechizos (comprobar que `UnitAttackSpeed`, `UnitDamage` y `GetSpellBonusDamage` son legibles) y la tasa real de Command (que medirá el repaso tras el combate). Hasta entonces, regla `consensus`. Solo comparar con un rango decente de Righteousness.

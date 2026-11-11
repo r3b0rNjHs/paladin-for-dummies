@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.2.0). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.2.1). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -38,6 +38,7 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 - `GetNumTalentTabs` / `GetTalentTabInfo` no dan la spec en Forever.
 - La detección automática funciona: `retribution (fuente: specialization)` (v0.1.1).
 - **Dentro de las mazmorras el tipo de criatura del objetivo es secret** (3 élites de nivel 37 a 39, v0.1.1). La clasificación y el nivel sí se leen. Las reglas por tipo de criatura solo funcionan en mundo abierto.
+- **El arma y el poder con hechizos se leen fuera de combate** (v0.2.0, nivel 41): `UnitAttackSpeed` 3.0, `UnitDamage` 207-252, `GetSpellBonusDamage(2)` 68. Ninguno secret. Vienen como floats (3.0000001907349): redondear al mostrar.
 - **La ventana funciona (v0.1.2):** se ve con fondo, los tooltips muestran el hechizo, el porqué y la confianza, y la posición se guarda entre `/reload`. Sin fondo (v0.1.0/0.1.1) no se distinguía.
 
 Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar como hipótesis hasta que el sondeo lo confirme.
@@ -110,7 +111,8 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - ¿Hay alguna forma legible del % de maná o solo se puede mostrar (barras, `C_CurveUtil`)?
 - Grimorio de Fury, Justice y Wisdom, y rangos 2-6 de Righteousness (no estaban entrenados).
 - Tasa real de Command en Forever y efecto real de Unsealed Wrath (los medirá el repaso tras el combate).
-- ¿`UnitAttackSpeed`, `UnitDamage` y `GetSpellBonusDamage` son legibles? La wiki los marca `SecretWhenUnitStatsRestricted`; `/pfd debug` lo dice. ¿Judgement de Command quita la Sentencia de Crusader? Enfriamiento de Judgement.
+- ¿El arma y el poder con hechizos siguen legibles dentro de mazmorras? (La wiki los marca `SecretWhenUnitStatsRestricted`.)
+- ¿Judgement de Command quita la Sentencia de Crusader? Enfriamiento de Judgement.
 
 ## Herramientas
 - VS Code con la extensión `ketho.wow-api` (anotaciones de la API para el Lua Language Server).
@@ -119,6 +121,6 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - Tests: busted (Lua 5.1) para `core/`.
 
 ## Forma de trabajar
-- Iteraciones cortas: Claude escribe → Jorge prueba en el juego → pega la salida del chat o el SavedVariables → se ajusta.
+- Iteraciones cortas: Claude escribe → Jorge prueba en el juego → **manda el archivo de SavedVariables** (`PaladinForDummies.lua`) → se ajusta. El archivo lleva todo: `snapshot` (lo mismo que `/pfd debug`, con versiones del addon y del cliente), `errors` (los errores capturados) y `fights`. Un addon solo puede escribir ese archivo, y el juego lo escribe al hacer `/reload` o al salir.
 - Antes de usar una API, comprobar en la Warcraft Wiki que existe en Mainline 12.1.5 y anotar si devuelve secrets.
 - Responder a Jorge en español; el código y los identificadores en inglés.

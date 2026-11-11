@@ -15,6 +15,18 @@ Cada vez que haya cambios: `git pull` y `/reload`.
 - `/pfd spec ret | prot | holy | auto`: fija la spec a mano si la detección automática no funciona.
 - `/pfd show | hide | reset`: mostrar, ocultar o recolocar la ventana. Se mueve arrastrando los iconos.
 
+## Qué mandar a Claude: el archivo
+Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVariables\PaladinForDummies.lua`:
+- `snapshot`: lo mismo que `/pfd debug` (spec, arma, objetivo, qué era secret, recomendación) y las versiones del addon y del cliente;
+- `errors`: los errores que haya capturado el addon, con fecha;
+- `fights`: todas las peleas.
+
+El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
+
+## Pruebas de la v0.2.1
+1. Juega con normalidad (varias peleas, alguna con otro sello) y haz `/reload`.
+2. Manda `PaladinForDummies.lua`.
+
 ## Pruebas de la v0.2.0 (repaso tras el combate)
 1. `/pfd debug`: nueva línea "Arma: velocidad …, daño …-… | poder con hechizos …". ¿Salen números o `<secret>`?
 2. Pelea normal con Seal of Command puesto. Al acabar debe salir en el chat: "Pelea de N s con Seal of Command | Sentencias: … | Holy Strike: … | activaciones de Command: …". ¿Cuadran los números con lo que hiciste?
