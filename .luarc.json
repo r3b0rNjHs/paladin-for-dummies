@@ -1,4 +1,8 @@
 {
   "runtime.version": "Lua 5.1",
-  "diagnostics.globals": ["PalaProbeDB", "SLASH_PALAPROBE1"]
+  "diagnostics.globals": [
+    "PalaProbeDB", "SLASH_PALAPROBE1",
+    "PaladinForDummiesDB", "SLASH_PALADINFORDUMMIES1",
+    "describe", "it", "before_each", "assert", "Addon"
+  ]
 }

@@ -6,6 +6,8 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.1.0). Motor de reglas, adaptador e icono con "Sello + Sentencia". Cómo probarlo: `docs/addon-testing.md`. Por confirmar en el juego: qué API da la spec en Forever (`/pfd debug` muestra la fuente).
+
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
 ## Hechos técnicos de Forever (verificados en fuentes oficiales o en la Warcraft Wiki)
@@ -40,9 +42,12 @@ Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar
 4. Nunca guardar valores secret en SavedVariables.
 5. Política de addons: gratis, código legible, sin publicidad ni donaciones dentro del juego.
 
-## Arquitectura prevista
+## Arquitectura
+Todo vive en `addons/PaladinForDummies/` (WoW solo carga lo que está dentro de la carpeta del addon). Orden de carga en el `.toc`.
+Tests: `busted` desde la raíz del repo (Lua 5.1; en Ubuntu, `apt install lua5.1 lua-busted`). `spec/support/addon.lua` carga los archivos como WoW, pasando `(addonName, ns)`; `spec/smoke/` carga el `.toc` entero con un WoW simulado.
+
 - `core/`: Lua puro, **sin dependencias de WoW**: motor de reglas, dominio (Situación → Recomendación) y estadísticas de peleas. Se prueba con **busted** fuera del juego (TDD).
-- `adapters/`: la única capa que toca la API de WoW. Lee el contexto (jugador, objetivo, grupo, instancia) y lo convierte en un objeto `Situation` plano, que es lo que recibe el core.
+- `adapters/`: la única capa que toca la API de WoW. Lee el contexto (jugador, objetivo, grupo, instancia) y lo convierte en un objeto `Situation` plano, que es lo que recibe el core. Recibe la API como parámetro (`_G` en el juego, una falsa en los tests). `Situation.target` solo se rellena con objetivos atacables.
 - `ui/`: icono de recomendación, tooltips ampliados y panel de opciones (Settings API).
 - `data/`: reglas declarativas en tablas Lua, versionadas por build del juego. Cada regla lleva el porqué y su confianza (`mechanic` = sale de la mecánica, `consensus` = consenso de guías, `measured` = confirmada con datos propios).
 
@@ -78,6 +83,7 @@ Talentos relacionados: Twist of Light (confirmado: aura `Echo of Command`, 13117
 
 ## Preguntas abiertas (las responde el sondeo)
 Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Siguen abiertas:
+- ¿Qué API da la spec en Forever: especializaciones modernas (`C_SpecializationInfo`), árboles clásicos (`GetTalentTabInfo`) o ninguna? Si es ninguna, queda `/pfd spec`.
 - ¿`ENCOUNTER_START` da el `encounterID`? (Necesita un jefe de mazmorra.)
 - ¿Los mensajes de addon funcionan dentro de instancias?
 - ¿`C_UnitAuras.GetPlayerAuraBySpellID` también falla en combate?

@@ -1,0 +1,164 @@
+describe("SituationReader.read", function()
+  local SituationReader
+
+  before_each(function()
+    SituationReader = Addon.load({ "adapters/SituationReader.lua" }).Adapters.SituationReader
+  end)
+
+  local seals = {
+    command = { spellIds = { 20375, 20918 } },
+    crusader = { spellIds = { 21082 } },
+  }
+
+  -- Valor "secret" simulado: el adaptador nunca debe dejarlo pasar a la Situation.
+  local SECRET = setmetatable({}, { __tostring = function() return "<secret>" end })
+
+  -- API de WoW falsa con valores por defecto razonables; cada test cambia lo que necesita.
+  local function fakeApi(overrides)
+    local spellbook = { 20375, 20918, 21082, 635 }
+    local api = {
+      issecretvalue = function(v) return v == SECRET end,
+      UnitLevel = function() return 40 end,
+      UnitExists = function() return true end,
+      UnitCanAttack = function() return true end,
+      UnitCreatureType = function() return "Undead", 6 end,
+      UnitClassification = function() return "normal" end,
+      IsInInstance = function() return false, "none" end,
+      IsInGroup = function() return false end,
+      IsInRaid = function() return false end,
+      Enum = { SpellBookSpellBank = { Player = 0 } },
+      C_SpellBook = {
+        GetNumSpellBookSkillLines = function() return 1 end,
+        GetSpellBookSkillLineInfo = function() return { itemIndexOffset = 0, numSpellBookItems = #spellbook } end,
+        GetSpellBookItemInfo = function(i) return { spellID = spellbook[i] } end,
+      },
+    }
+    for k, v in pairs(overrides or {}) do api[k] = v end
+    return api
+  end
+
+  it("reads the player level and the seal ranks they know", function()
+    local situation = SituationReader.read(fakeApi(), seals)
+
+    assert.are.equal(40, situation.player.level)
+    assert.are.same({ [20375] = true, [20918] = true, [21082] = true }, situation.player.knownSpells)
+  end)
+
+  it("reads an attackable target by creature type id, not by its localized name", function()
+    local situation = SituationReader.read(fakeApi({ UnitLevel = function(unit) return unit == "target" and 38 or 40 end }), seals)
+
+    assert.are.same({ exists = true, creatureType = 6, classification = "normal", level = 38 }, situation.target)
+  end)
+
+  it("treats a friendly target as no target, so enemy rules never fire on allies", function()
+    local situation = SituationReader.read(fakeApi({ UnitCanAttack = function() return false end }), seals)
+
+    assert.are.same({ exists = false }, situation.target)
+  end)
+
+  it("drops secret values instead of passing them to the core", function()
+    local situation = SituationReader.read(fakeApi({
+      UnitCreatureType = function() return SECRET, SECRET end,
+      UnitClassification = function() return SECRET end,
+    }), seals)
+
+    assert.is_nil(situation.target.creatureType)
+    assert.is_nil(situation.target.classification)
+  end)
+
+  it("survives API functions that throw", function()
+    local situation = SituationReader.read(fakeApi({
+      UnitCreatureType = function() error("boom") end,
+    }), seals)
+
+    assert.is_true(situation.target.exists)
+    assert.is_nil(situation.target.creatureType)
+  end)
+
+  describe("content", function()
+    local cases = {
+      { "solo", false, "none", false, false },
+      { "group", false, "none", true, false },
+      { "group", false, "none", true, true },
+      { "dungeon", true, "party", true, false },
+      { "raid", true, "raid", true, true },
+      { "pvp", true, "pvp", true, false },
+      { "pvp", true, "arena", true, false },
+    }
+    for _, c in ipairs(cases) do
+      local expected, inInstance, instanceType, inGroup, inRaid = c[1], c[2], c[3], c[4], c[5]
+      it(("is %s for instance %s, group %s"):format(expected, instanceType, tostring(inGroup)), function()
+        local situation = SituationReader.read(fakeApi({
+          IsInInstance = function() return inInstance, instanceType end,
+          IsInGroup = function() return inGroup end,
+          IsInRaid = function() return inRaid end,
+        }), seals)
+        assert.are.equal(expected, situation.content)
+      end)
+    end
+  end)
+
+  describe("spec", function()
+    it("uses the manual override above anything else", function()
+      local situation, diagnostics = SituationReader.read(fakeApi(), seals, { specOverride = "protection" })
+
+      assert.are.equal("protection", situation.player.spec)
+      assert.are.equal("override", diagnostics.specSource)
+    end)
+
+    it("reads a modern specialization id (Retribution = 70)", function()
+      local situation, diagnostics = SituationReader.read(fakeApi({
+        C_SpecializationInfo = {
+          GetSpecialization = function() return 3 end,
+          GetSpecializationInfo = function() return 70, "Retribution" end,
+        },
+      }), seals)
+
+      assert.are.equal("retribution", situation.player.spec)
+      assert.are.equal("specialization", diagnostics.specSource)
+    end)
+
+    it("falls back to the classic talent tree with the most points", function()
+      local points = { 5, 0, 31 } -- Holy, Protection, Retribution
+      local situation, diagnostics = SituationReader.read(fakeApi({
+        GetNumTalentTabs = function() return 3 end,
+        GetTalentTabInfo = function(i) return 800 + i, "Tab", "desc", 1234, points[i] end,
+      }), seals)
+
+      assert.are.equal("retribution", situation.player.spec)
+      assert.are.equal("talents", diagnostics.specSource)
+    end)
+
+    it("understands the old classic signature of GetTalentTabInfo (name first)", function()
+      local points = { 0, 21, 0 }
+      local situation = SituationReader.read(fakeApi({
+        GetNumTalentTabs = function() return 3 end,
+        GetTalentTabInfo = function(i) return "Tab", 1234, points[i] end,
+      }), seals)
+
+      assert.are.equal("protection", situation.player.spec)
+    end)
+
+    it("leaves the spec empty when no talent points are spent", function()
+      local situation, diagnostics = SituationReader.read(fakeApi({
+        GetNumTalentTabs = function() return 3 end,
+        GetTalentTabInfo = function() return 800, "Tab", "desc", 1234, 0 end,
+      }), seals)
+
+      assert.is_nil(situation.player.spec)
+      assert.are.equal("none", diagnostics.specSource)
+    end)
+
+    it("reports an unknown specialization id so we can map it", function()
+      local situation, diagnostics = SituationReader.read(fakeApi({
+        C_SpecializationInfo = {
+          GetSpecialization = function() return 1 end,
+          GetSpecializationInfo = function() return 1501, "Something" end,
+        },
+      }), seals)
+
+      assert.is_nil(situation.player.spec)
+      assert.are.equal(1501, diagnostics.unknownSpecId)
+    end)
+  end)
+end)
