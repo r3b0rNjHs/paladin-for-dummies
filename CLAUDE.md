@@ -74,21 +74,29 @@ Confirmado con el grimorio (sondeo 1): la Sentencia **no consume el sello** y ca
 |---|---|---|---|
 | Righteousness ✔ | 1 | Daño Sagrado extra por golpe; **las armas lentas hacen más daño por golpe** | Golpe de daño Sagrado |
 | Crusader ✔ | 6 | Más poder de ataque **y** ataques un 40% más rápidos con menos daño por golpe | 40 s: el objetivo recibe más daño Sagrado; tus golpes la refrescan |
-| Fury (nuevo, tanque) | 10 | Daño Sagrado fijo por golpe y un escudo del 50% de ese daño | Daño extra y provoca a 10 m (3 o 4 s según la fuente) |
-| Command ✔ (talento Ret) | 20 | Golpe Sagrado extra del **74%** del daño del arma (lo de 7 PPM no sale en la descripción) | Daño Sagrado, el doble contra aturdidos o incapacitados |
+| Fury (nuevo, tanque) | 10 | Daño Sagrado fijo por golpe y un escudo del 50% de ese daño | Daño extra y provoca a 10 m durante **3 s** (notas del 2 nov) |
+| Command ✔ (talento Ret) | 20 | Golpe Sagrado extra del **74%** del daño del arma. La tasa la decide el servidor: las "7 por minuto" son de Classic, sin medir | Daño Sagrado, el doble contra aturdidos o incapacitados |
 | Justice | 22 | Probabilidad de aturdir 2 s | El objetivo no puede huir a toda velocidad |
 | Light ✔ | 30 | Probabilidad de curarte | 40 s: quien golpee al objetivo puede curarse |
 | Wisdom | 38 | Probabilidad de recuperar maná | Quien golpee al objetivo recupera maná |
 
-Talentos relacionados: Twist of Light (confirmado: aura `Echo of Command`, 1311703) (Ret 31: el sello anterior deja un Eco y el siguiente golpe aplica los dos; −20% de coste), Sacred Arbiter (Holy Strike refresca todas las Sentencias del objetivo, incluidas las de otros paladines), Sanctified Judgement, Swift Judgement (Prot), Improved Seal of Fury, Improved Seals, Benediction.
+Talentos relacionados (notas del 2 nov y deep dive; detalle en `docs/research.md`):
+- **Unsealed Wrath** (Ret 31, requiere Repentance; **sustituye a Twist of Light, que ya no existe**): tus golpes guardan una copia del sello activo durante 15 s, hasta 3; al golpear con otro sello se gastan. Confirmado en el sondeo 1: aura `Echo of Command` (1311703), 15 s, 2-3 acumulaciones.
+- Vengeance: hasta 5 acumulaciones, requiere Seal of Command.
+- Sacred Arbiter: Holy Strike refresca todas las Sentencias del objetivo, incluidas las de otros paladines.
+- Sanctified Judgement: devuelve hasta el 60% del coste del sello juzgado.
+- Swift Judgement (Prot): libera el sello al instante, sin compartir enfriamiento con Judgement.
+- Improved Seals, Benediction, Reverence. Improved Seal of Fury **eliminado**.
 
 ### Primeras reglas (hipótesis)
-- Arma lenta → Command. ~~Arma rápida → Righteousness~~: en duda, Righteousness también premia el arma lenta. `mechanic`
+- Arma lenta → Command, rápida → Righteousness. `consensus`: corte de 3,0 s (Maxroll) o 3,2 s (Conquest Capped), sin justificar; Righteousness también premia el arma lenta. Comparar solo con rangos de Righteousness entrenados.
 - Antes del pull: Sentencia de Crusader y luego cambiar al sello de daño (el debuff se queda). `consensus`
 - Humanoides que huyen → Justice. `mechanic`
 - En solitario con poco maná o en peleas largas → Wisdom. Con poca vida → Light. `consensus` (ojo: maná y vida son secret, no se pueden leer para decidir)
 - En grupo: un paladín mantiene la Sentencia de Wisdom (mucho maná en el grupo) o de Light (mucho daño en área) en el jefe. `consensus`
 - Tanque → Fury, y Swift Judgement si falla una provocación. `mechanic`
+- La Sentencia de Crusader la refrescan tus golpes (cliente): basta con juzgarla una vez por pelea. Duda: ¿Judgement de Command la quita? `mechanic`
+- Hammer of Justice + Judgement de Command: el doble de daño (cliente). `mechanic`
 
 ## Preguntas abiertas (las responde el sondeo)
 Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Siguen abiertas:
@@ -98,7 +106,9 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - ¿Los mensajes de addon funcionan dentro de instancias?
 - ¿`C_UnitAuras.GetPlayerAuraBySpellID` también falla en combate?
 - ¿Hay alguna forma legible del % de maná o solo se puede mostrar (barras, `C_CurveUtil`)?
-- Grimorio de Fury, Justice y Wisdom (no estaban entrenados).
+- Grimorio de Fury, Justice y Wisdom, y rangos 2-6 de Righteousness (no estaban entrenados).
+- Tasa real de Command en Forever y efecto real de Unsealed Wrath (los medirá el repaso tras el combate).
+- ¿`UnitAttackSpeed` es legible? ¿Judgement de Command quita la Sentencia de Crusader? Enfriamiento de Judgement.
 
 ## Herramientas
 - VS Code con la extensión `ketho.wow-api` (anotaciones de la API para el Lua Language Server).
