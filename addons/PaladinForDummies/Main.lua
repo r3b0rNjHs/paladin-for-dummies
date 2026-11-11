@@ -151,11 +151,12 @@ events:SetScript("OnEvent", function(_, event, arg1, _, arg3)
     db = PaladinForDummiesDB
     ui = ns.UI.RecommendationFrame.create(db)
     if db.hidden then ui:Hide() end
+    ui:SetTest(db.test)
     setFrozen(InCombatLockdown() and true or false)
   elseif event == "PLAYER_REGEN_DISABLED" then
     if not db then return end
     refresh() -- última lectura antes del pull: aún no estamos en combate
-    safely("el inicio de la pelea", ns.Recorder.start, last.situation)
+    safely("el inicio de la pelea", ns.Recorder.start, last.situation, db.test)
     setFrozen(true)
   elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
     safely("un lanzamiento", ns.Recorder.cast, arg3) -- arg3 = spellID
@@ -217,6 +218,22 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
   elseif cmd == "ui" then
     if not ui then p("La ventana no se ha creado.") return end
     for _, line in ipairs(ui:Describe()) do p(line) end
+  elseif cmd == "test" then
+    if arg == "" then
+      p(db.test and ("Prueba activa: " .. db.test) or "No hay ninguna prueba activa. Uso: /pfd test A | B | C | off")
+      return
+    end
+    if arg == "off" then
+      db.test = nil
+      p("Prueba desactivada: las peleas siguientes no se etiquetan.")
+    elseif arg:match("^%w+$") and #arg <= 12 then
+      db.test = arg:upper()
+      p(("Prueba %s activada: las peleas siguientes se etiquetan como %s. /pfd test off para quitarla."):format(db.test, db.test))
+    else
+      p("Uso: /pfd test A | B | C | off (letras o números, máximo 12)")
+      return
+    end
+    ui:SetTest(db.test)
   elseif cmd == "stats" then
     for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
   elseif cmd == "last" then
@@ -233,6 +250,6 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     ui:ResetPosition()
     p("Posición restablecida.")
   else
-    p("Comandos: /pfd debug | ui | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd debug | ui | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
   end
 end

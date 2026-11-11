@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.2.1). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.2.2). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -56,7 +56,7 @@ Tests: `busted` desde la raíz del repo (Lua 5.1; en Ubuntu, `apt install lua5.1
 
 - La Sentencia (Judgement, 20271) es **un solo hechizo** que libera el sello puesto. La recomendación de "Sentencia" es el sello que hay que llevar al juzgar; `core/Plan.lua` la convierte en pasos (ponte X, lanza Judgement, cambia a Y) y la interfaz muestra el icono de Judgement con el sello en la esquina.
 
-- **Repaso tras el combate:** en `PLAYER_REGEN_DISABLED` se lee el sello y las copias de Unsealed Wrath (último momento con auras legibles); durante la pelea solo se anotan tus lanzamientos; `core/Fight.lua` reconstruye cuánto tiempo llevaste cada sello (cada sello dura 30 s) y cuenta Sentencias, Holy Strike y activaciones de Command (20424). Se guarda en `PaladinForDummiesDB.fights` (máximo 1000).
+- **Repaso tras el combate:** en `PLAYER_REGEN_DISABLED` se lee el sello y las copias de Unsealed Wrath (último momento con auras legibles); durante la pelea solo se anotan tus lanzamientos; `core/Fight.lua` reconstruye cuánto tiempo llevaste cada sello (cada sello dura 30 s) y cuenta Sentencias, Holy Strike y activaciones de Command (20424). Se guarda en `PaladinForDummiesDB.fights` (máximo 1000). `/pfd test X` etiqueta las peleas (`context.test`) para comparar rotaciones; plan de pruebas A/B/C en `docs/addon-testing.md`.
 
 - `core/`: Lua puro, **sin dependencias de WoW**: motor de reglas, dominio (Situación → Recomendación) y estadísticas de peleas. Se prueba con **busted** fuera del juego (TDD).
 - `adapters/`: la única capa que toca la API de WoW. Lee el contexto (jugador, objetivo, grupo, instancia) y lo convierte en un objeto `Situation` plano, que es lo que recibe el core. Recibe la API como parámetro (`_G` en el juego, una falsa en los tests). `Situation.target` solo se rellena con objetivos atacables.

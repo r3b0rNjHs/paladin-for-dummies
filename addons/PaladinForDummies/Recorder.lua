@@ -30,7 +30,8 @@ local function sealName(key)
 end
 
 -- situation: la última calculada antes del pull (ya sin secrets).
-function Recorder.start(situation)
+-- test: la prueba activa (/pfd test), o nil.
+function Recorder.start(situation, test)
   local opening = FightReader.readOpening(_G, Catalog)
   if not opening.t then return end
   local context = {}
@@ -49,6 +50,7 @@ function Recorder.start(situation)
       } or nil,
     }
   end
+  context.test = test
   current = Fight.start(Catalog, opening, context)
 end
 
@@ -71,7 +73,9 @@ end
 
 function Recorder.describe(record)
   local c = record.counts
-  return ("Pelea de %s s con %s | Sentencias: %d | Holy Strike: %d | activaciones de Command: %d"):format(
+  local test = record.context and record.context.test
+  return ("%sPelea de %s s con %s | Sentencias: %d | Holy Strike: %d | activaciones de Command: %d"):format(
+    test and ("[prueba " .. test .. "] ") or "",
     tostring(record.duration), sealName(record.openingSeal), c.judgement, c.holyStrike, c.commandProc)
 end
 
@@ -81,6 +85,20 @@ function Recorder.statsLines(db)
   if s.fights == 0 then return { "Todavía no hay peleas guardadas." } end
 
   local lines = { ("Peleas guardadas: %d"):format(s.fights) }
+
+  local tests = {}
+  for key in pairs(s.byTest) do tests[#tests + 1] = key end
+  table.sort(tests)
+  for _, key in ipairs(tests) do
+    local t = s.byTest[key]
+    lines[#lines + 1] = ("Prueba %s | peleas: %d | duración media: %s s | por pelea: Sentencias %s, Holy Strike %s, cambios de sello %s"):format(
+      key, t.fights, tostring(t.avgDuration), tostring(t.avgJudgements), tostring(t.avgHolyStrikes), tostring(t.avgSealCasts))
+    if t.command then
+      lines[#lines + 1] = ("   Command: %d activaciones en %s s con el sello puesto = %s por minuto"):format(
+        t.command.procs, tostring(t.command.seconds), tostring(t.command.perMinute))
+    end
+  end
+  if #tests > 0 then lines[#lines + 1] = "Todas las peleas:" end
   local keys = {}
   for key in pairs(s.byOpeningSeal) do keys[#keys + 1] = key end
   table.sort(keys)

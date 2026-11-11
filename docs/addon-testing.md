@@ -9,7 +9,8 @@
 Cada vez que haya cambios: `git pull` y `/reload`.
 
 ## Comandos
-- `/pfd stats`: estadísticas de tus peleas por sello inicial y activaciones de Command por minuto. `/pfd last`: la última pelea. `/pfd quiet`: activa o desactiva el resumen tras cada pelea. `/pfd resetstats`: borra las peleas guardadas.
+- `/pfd test A | B | C | off`: etiqueta las peleas siguientes con una prueba (ver el plan más abajo); `/pfd test` dice cuál está activa.
+- `/pfd stats`: estadísticas de tus peleas (por prueba, por sello inicial) por sello inicial y activaciones de Command por minuto. `/pfd last`: la última pelea. `/pfd quiet`: activa o desactiva el resumen tras cada pelea. `/pfd resetstats`: borra las peleas guardadas.
 - `/pfd ui`: estado de la ventana (si está visible, dónde y qué iconos tiene).
 - `/pfd debug`: lo que ve el addon (spec y de dónde la saca, nivel, contenido, sellos conocidos, objetivo) y la recomendación.
 - `/pfd spec ret | prot | holy | auto`: fija la spec a mano si la detección automática no funciona.
@@ -22,6 +23,29 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 - `fights`: todas las peleas.
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
+
+## Plan de pruebas de rotación (v0.2.2)
+Qué queremos saber: (1) cuántas veces por minuto se activa Command en Forever, (2) Command o Righteousness con tu arma de 3,0 s, (3) si el cambio de sellos con Unsealed Wrath compensa.
+
+Bloques de **15-20 peleas** contra el mismo tipo de enemigo (misma zona, nivel parecido). Antes de cada bloque, activa su etiqueta; la ventana muestra "prueba X" mientras está activa.
+
+**Prueba A: solo Command** → `/pfd test A`
+- Seal of Command puesto **antes** de atacar, sin cambiarlo en toda la pelea. Sin Crusader.
+- Judgement y Holy Strike en cuanto estén listos.
+- Entrar a pegar enseguida: sin abrir con Exorcism a distancia y sin correr detrás.
+
+**Prueba B: solo Righteousness** → `/pfd test B`
+- Igual que la A con Seal of Righteousness. **Antes entrena su rango más alto** (el 5; el 6 en el nivel 42): con el rango 1 la comparación no vale.
+
+**Prueba C: Unsealed Wrath** → `/pfd test C`
+- Empieza con Command. Con 3 "Echo of Command" en tus buffs, cambia a Righteousness, da **un** golpe y vuelve a Command. Repite.
+- Judgement y Holy Strike en cuanto estén listos. Si te quedas sin maná, apúntalo.
+
+**Al terminar:** `/pfd test off`, `/reload` y manda `PaladinForDummies.lua`. `/pfd stats` enseña cada prueba por separado.
+
+**Comprobaciones a ojo (una vez):**
+- Juzga Crusader y luego juzga con Command: ¿desaparece el icono de Crusader de los debuffs del enemigo?
+- Pasa el ratón por Judgement en tu barra: ¿qué enfriamiento pone?
 
 ## Pruebas de la v0.2.1
 1. Juega con normalidad (varias peleas, alguna con otro sello) y haz `/reload`.

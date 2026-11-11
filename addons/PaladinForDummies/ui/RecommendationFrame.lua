@@ -163,8 +163,22 @@ function RecommendationFrame.create(db)
     self.judgement.steps = ns.Core.Plan.prepull(recommendation)
   end
 
+  -- Línea de estado: "en combate" y la prueba activa, si la hay.
+  local function updateStatus(self)
+    local parts = {}
+    if self.frozen then parts[#parts + 1] = "en combate" end
+    if self.test then parts[#parts + 1] = "prueba " .. self.test end
+    self.status:SetText(table.concat(parts, " · "))
+  end
+
   function frame:SetFrozen(frozen)
-    self.status:SetText(frozen and "en combate" or "")
+    self.frozen = frozen
+    updateStatus(self)
+  end
+
+  function frame:SetTest(test)
+    self.test = test
+    updateStatus(self)
   end
 
   -- Para /pfd ui: estado de la ventana en texto. Todo con pcall y sin tocar secrets.
