@@ -1,0 +1,8 @@
+## Interface: 16001
+## Title: PalaProbe
+## Notes: Sondeo de la API de WoW Forever para el helper de paladin (no es el addon final)
+## Author: Jorge Hernandez
+## Version: 0.1.0
+## SavedVariables: PalaProbeDB
+
+PalaProbe.lua

@@ -1,0 +1,96 @@
+# Pala Helper (nombre provisional) — addon de paladín para WoW: Forever
+
+## Qué es
+Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que ayuda al paladín a elegir **qué sello y qué Sentencia** usar según la situación. No es un asistente de rotación: es un **planificador y coach** que decide antes del pull, enseña en combate y analiza después.
+
+Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
+
+## Fase actual
+**Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
+
+## Hechos técnicos de Forever (verificados en fuentes oficiales o en la Warcraft Wiki)
+- Usa la familia de código **Mainline** (la API moderna de 12.1.5), no la de Classic Era. Los tutoriales de Classic no sirven; la referencia es la API de retail/Midnight.
+- TOC: `## Interface: 16001`. Sufijos: `_Forever.toc` o `_Camelot.toc` (Camelot es el nombre interno). Para comprobarlo: `/dump select(4, GetBuildInfo())`.
+- Lua 5.1.
+- `WOW_PROJECT_ID` = 18 (`WOW_PROJECT_CAMELOT`), confirmado en el sondeo 1 (cliente 1.60.1, build 70888, toc 16001). **No** detectar Forever con `WOW_PROJECT_CLASSIC`.
+- Carpeta de addons: `World of Warcraft\_forever_\Interface\AddOns`.
+- SavedVariables en: `World of Warcraft\_forever_\WTF\Account\<CUENTA>\SavedVariables\<Addon>.lua`. Se escriben en disco al hacer `/reload` o al salir.
+- **Las restricciones de addons de Midnight están activas** (comunicado de Blizzard del 15 sep 2026):
+  - En combate muchos valores son **secret**: se pueden mostrar (pasarlos a widgets), pero no comparar, operar con ellos, indexar, usarlos como clave ni medir su longitud. Guarda: `issecretvalue(v)`.
+  - El registro de combate no está disponible para addons (`COMBAT_LOG_EVENT_UNFILTERED`).
+  - Dentro de instancias los addons no pueden enviarse mensajes.
+  - Principio de Blizzard: los addons no deben dar ventaja competitiva en combate.
+- APIs cambiadas: `C_Spell.GetSpellInfo`, `C_Item.GetItemInfo`, `C_SpellBook.*`, `C_AddOns.GetAddOnMetadata`, la Settings API para las opciones (no `InterfaceOptions_AddCategory`).
+- `C_CurveUtil.EvaluateColorValueFromBoolean(bool, siTrue, siFalse)` existe y funciona en Forever (sondeo 1). Deja al motor del juego aplicar una condición secret a un valor visual. No se pueden combinar dos secrets.
+
+### Confirmado en el sondeo 1 (11 nov 2026)
+- **Vida y maná son secret siempre**, también fuera de combate: `UnitHealth`, `UnitHealthMax(target)`, `UnitPower(player, mana)`. `UnitPowerMax` sí es legible. Las reglas basadas en el maná o la vida no pueden leerlos directamente.
+- **Legibles en todo momento:** tipo de criatura (usar el ID numérico, 2.º retorno de `UnitCreatureType`, no el nombre), clasificación, nivel y nombre del objetivo, posición, orientación y datos del grupo y la instancia.
+- **Auras propias:** legibles fuera de combate. En combate `C_UnitAuras.GetAuraDataByIndex` da error ("Auras cannot be accessed when secret while tainted"). En `PLAYER_REGEN_DISABLED` todavía se leen (`InCombatLockdown()` es `false`): es la ventana para registrar el sello al empezar la pelea.
+- **`UNIT_SPELLCAST_SUCCEEDED` (player) no es secret en combate.** También llegan los procs (activación de Seal of Command = 20424).
+- `C_SuperTrack.SetSuperTrackedUserWaypoint` **no está protegido**: el marcador se ve en el mundo.
+- Mensajes de addon por PARTY fuera de instancia: funcionan.
+
+Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar como hipótesis hasta que el sondeo lo confirme.
+
+## Reglas de diseño (no negociables)
+1. **En combate no se calcula nada, solo se muestra** lo decidido antes. Así el addon sobrevive a futuros recortes de Blizzard.
+2. Nunca comparar, operar ni indexar un valor sin comprobar antes `issecretvalue`. Usar `pcall` en el límite con la API de WoW.
+3. **Nunca identificar hechizos por su nombre**: el cliente puede estar en español (esES). Siempre por `spellID`.
+4. Nunca guardar valores secret en SavedVariables.
+5. Política de addons: gratis, código legible, sin publicidad ni donaciones dentro del juego.
+
+## Arquitectura prevista
+- `core/`: Lua puro, **sin dependencias de WoW**: motor de reglas, dominio (Situación → Recomendación) y estadísticas de peleas. Se prueba con **busted** fuera del juego (TDD).
+- `adapters/`: la única capa que toca la API de WoW. Lee el contexto (jugador, objetivo, grupo, instancia) y lo convierte en un objeto `Situation` plano, que es lo que recibe el core.
+- `ui/`: icono de recomendación, tooltips ampliados y panel de opciones (Settings API).
+- `data/`: reglas declarativas en tablas Lua, versionadas por build del juego. Cada regla lleva el porqué y su confianza (`mechanic` = sale de la mecánica, `consensus` = consenso de guías, `measured` = confirmada con datos propios).
+
+## Producto: capas planeadas
+1. **Asesor antes del pull (MVP):** con el contexto fuera de combate (spec, talentos, nivel, maná, objetivo, tipo de contenido y grupo) muestra "Sello X + Sentencia Y" con su porqué. Se congela al entrar en combate.
+2. **Perfiles y macros (MVP):** solo, mazmorra de tanque, mazmorra de Ret y banda. Fuera de combate genera macros con condicionales (las evalúa el juego al pulsar).
+3. **Repaso tras el combate y A/B personal (MVP):** guarda el sello al empezar, el tipo y nivel del enemigo, la duración y el maná. Con el tiempo da estadísticas propias por sello.
+4. **Capa didáctica:** tooltips ampliados, un códice y un simulador de escenarios. Aquí va el seal twisting de Ret (Twist of Light).
+5. **Fase 2:** reparto de Sentencias entre paladines **antes de entrar** en la instancia, y paquetes de reglas para exportar e importar.
+
+## Qué se sabe de los sellos en Forever
+Confirmado con el grimorio (sondeo 1): la Sentencia **no consume el sello** y cada paladín solo puede tener una Sentencia activa en el objetivo. Las filas marcadas ✔ están confirmadas con el texto del cliente; el resto, por confirmar.
+
+| Sello | Nivel | Mientras está activo | Su Sentencia |
+|---|---|---|---|
+| Righteousness ✔ | 1 | Daño Sagrado extra por golpe; **las armas lentas hacen más daño por golpe** | Golpe de daño Sagrado |
+| Crusader ✔ | 6 | Más poder de ataque **y** ataques un 40% más rápidos con menos daño por golpe | 40 s: el objetivo recibe más daño Sagrado; tus golpes la refrescan |
+| Fury (nuevo, tanque) | 10 | Daño Sagrado fijo por golpe y un escudo del 50% de ese daño | Daño extra y provoca a 10 m (3 o 4 s según la fuente) |
+| Command ✔ (talento Ret) | 20 | Golpe Sagrado extra del **74%** del daño del arma (lo de 7 PPM no sale en la descripción) | Daño Sagrado, el doble contra aturdidos o incapacitados |
+| Justice | 22 | Probabilidad de aturdir 2 s | El objetivo no puede huir a toda velocidad |
+| Light ✔ | 30 | Probabilidad de curarte | 40 s: quien golpee al objetivo puede curarse |
+| Wisdom | 38 | Probabilidad de recuperar maná | Quien golpee al objetivo recupera maná |
+
+Talentos relacionados: Twist of Light (confirmado: aura `Echo of Command`, 1311703) (Ret 31: el sello anterior deja un Eco y el siguiente golpe aplica los dos; −20% de coste), Sacred Arbiter (Holy Strike refresca todas las Sentencias del objetivo, incluidas las de otros paladines), Sanctified Judgement, Swift Judgement (Prot), Improved Seal of Fury, Improved Seals, Benediction.
+
+### Primeras reglas (hipótesis)
+- Arma lenta → Command. ~~Arma rápida → Righteousness~~: en duda, Righteousness también premia el arma lenta. `mechanic`
+- Antes del pull: Sentencia de Crusader y luego cambiar al sello de daño (el debuff se queda). `consensus`
+- Humanoides que huyen → Justice. `mechanic`
+- En solitario con poco maná o en peleas largas → Wisdom. Con poca vida → Light. `consensus` (ojo: maná y vida son secret, no se pueden leer para decidir)
+- En grupo: un paladín mantiene la Sentencia de Wisdom (mucho maná en el grupo) o de Light (mucho daño en área) en el jefe. `consensus`
+- Tanque → Fury, y Swift Judgement si falla una provocación. `mechanic`
+
+## Preguntas abiertas (las responde el sondeo)
+Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Siguen abiertas:
+- ¿`ENCOUNTER_START` da el `encounterID`? (Necesita un jefe de mazmorra.)
+- ¿Los mensajes de addon funcionan dentro de instancias?
+- ¿`C_UnitAuras.GetPlayerAuraBySpellID` también falla en combate?
+- ¿Hay alguna forma legible del % de maná o solo se puede mostrar (barras, `C_CurveUtil`)?
+- Grimorio de Fury, Justice y Wisdom (no estaban entrenados).
+
+## Herramientas
+- VS Code con la extensión `ketho.wow-api` (anotaciones de la API para el Lua Language Server).
+- Referencia: Warcraft Wiki, en especial la página "Patch 1.60.1/API changes/notes".
+- WoWUIDev Discord: donde Blizzard anuncia los cambios de API.
+- Tests: busted (Lua 5.1) para `core/`.
+
+## Forma de trabajar
+- Iteraciones cortas: Claude escribe → Jorge prueba en el juego → pega la salida del chat o el SavedVariables → se ajusta.
+- Antes de usar una API, comprobar en la Warcraft Wiki que existe en Mainline 12.1.5 y anotar si devuelve secrets.
+- Responder a Jorge en español; el código y los identificadores en inglés.
