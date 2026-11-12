@@ -129,3 +129,40 @@ Fuentes: Warcraft Wiki (Secret Values, notas de API de 12.0.x y 12.1.0, páginas
 ### Sin confirmar en Forever
 - Que el contenedor de la rama live de Midnight (12.1.5) sea igual en Forever: Blizzard fue cambiando la API semana a semana durante las pruebas de 12.1.0.
 - Las opciones válidas de la barra de acumulaciones, más allá de `minApplications`, `maxApplications` e `interpolation`, las valida una función interna (`C_AuraContainerUtil.ProcessCustomAuraButtonApplicationBarOptions`).
+
+## Macros de paladín (investigación del 12 nov 2026)
+
+Fuentes: Warcraft Wiki (Macro conditionals, Making a macro, notas de API de 12.x), páginas de macros de Forever ([wowf.io](https://wowf.io/en/macros/paladin), sin fecha, datos de la beta; [classicwowforever.com](https://classicwowforever.com/macros/paladin/), 3 nov, "no probadas en el cliente final"), [wowforevertierlist.com/macros](https://wowforevertierlist.com/macros) (23 oct, cita el soporte de Blizzard "Are Macros Allowed") y guías de Classic y retail (Icy Veins, NoobToBoss, Method).
+
+### Qué permite Forever
+- Forever usa **el sistema de macros moderno**, el de retail, no el de Classic. Las notas de API de 12.x no traen restricciones nuevas para macros. Lo único que Midnight limitó en macros es **marcar objetivos** (unas 3 marcas en muy poco tiempo) y **mensajes de chat durante encuentros**. Nada que afecte a lo que usamos.
+- Existen: `[@mouseover]`, `[@player]`, `[@targettarget]`, `[@focus]`, `[@cursor]`, `[help]`/`[harm]`, `[dead]`/`[nodead]`, `[exists]`, `[combat]`, `[mod:shift|ctrl|alt]`, `[known]`, `[spec]`, `[channeling]` y las alternativas con `;`. Comandos: `/cast`, `/castsequence`, `/use`, `/cancelaura`, `/stopcasting`, `/startattack`, `/cleartarget`, `/targetenemy`.
+- Límites: 255 caracteres por macro y 18 macros por personaje (120 de cuenta).
+- Norma de Blizzard: **una pulsación, una acción**. Las macros no pueden mirar buffs ni enfriamientos para decidir.
+- `/cast` con el nombre usa el rango más alto. Bajar de rango para ahorrar maná rinde menos en Forever: las notas del 1 oct dicen que los rangos muy por debajo de tu nivel aprovechan menos el poder de sanación.
+- Forever trae de serie un **temporizador de golpes** (*swing timer*) y el Cooldown Manager, los dos desactivados por defecto. El temporizador de golpes ayuda con el cambio de sellos.
+
+### El patrón clave: sin cambiar de objetivo
+`[@mouseover,help,nodead][help,nodead][@player]` lanza sobre el aliado bajo el ratón (en el mundo o en su marco), si no sobre tu objetivo amistoso y si no sobre ti. **Tu objetivo enemigo no cambia**, así que PFD Unsealed no se reinicia y no pierdes el hilo de la pelea. Para enemigos: `[@mouseover,harm,nodead][harm,nodead]`.
+
+### Macros que recomiendan las fuentes, filtradas a tu kit (grimorio del sondeo 1)
+| Macro | Texto (simplificado) | Fuente | ¿La tienes? |
+|---|---|---|---|
+| Golpe + atacar | `/cast Judgement` `/cast Holy Strike` `/startattack` | wowf.io | ✔ (PFD Golpe, falta `/startattack`) |
+| Cura sin cambiar de objetivo | `/cast [mod:shift,…] Holy Light; [@mouseover,help,nodead][help,nodead][@player] Flash of Light` | wowf.io, classicwowforever | ✔ |
+| Blessing of Protection, Alt = Divine Protection | `[mod:alt] Divine Protection; [@mouseover,help,nodead][help,nodead][@targettarget,help,nodead] Blessing of Protection` | classicwowforever | ✔ |
+| Blessing of Freedom | `[@mouseover,help,nodead][help,nodead][@player]` | wowf.io | ✔ |
+| Lay on Hands | `[@mouseover,help,nodead][help,nodead][@player]` | classicwowforever | ✔ |
+| Divine Shield que se quita pulsando otra vez | `/cancelaura Divine Shield` (y Divine Protection, BoP) `/cast Divine Shield` | classicwowforever, Icy Veins | ✔ |
+| Hammer of Justice que corta tu lanzamiento | `/stopcasting` `/cast [@mouseover,harm,nodead][harm,nodead] Hammer of Justice` | wowf.io | ✔ |
+| Repentance sin cambiar de objetivo | `[@mouseover,harm,nodead][harm,nodead]` | wowf.io | ✔ |
+| Bendiciones en un botón | Might; Shift = Wisdom; Ctrl = Kings, al ratón o al objetivo | classicwowforever | Might y Kings ✔; Wisdom sin entrenar |
+| Purify | `[@mouseover,help,nodead][help,nodead][@player]` | (patrón) | ✔ |
+| Exorcism; Shift = Turn Undead | `[mod:shift,harm,nodead] Turn Undead; [harm,nodead] Exorcism` | classicwowforever | Exorcism ✔; Turn Undead no está en el grimorio |
+| Redemption sin cambiar de objetivo | `[@mouseover,help,dead][help,dead]` | classicwowforever | ✔ |
+| Auras en un botón | Devotion; Shift = Concentration; Ctrl = Retribution | classicwowforever | Devotion y Retribution ✔ |
+| Divine Shield + Hearthstone | `/cast Divine Shield` `/use Hearthstone` | wowf.io | ✔ |
+| Quitar objetivo muerto y atacar al más cercano | `/cleartarget [dead][help]` `/targetenemy [noexists]` `/startattack` | wowf.io | genérica |
+| Tanque y Sagrado | Seal of Fury, Swift Judgement, Templar's Bulwark, Holy Shock, Light's Vigil, Divine Favor | wowf.io | no son de tu spec |
+
+Sin probar en el cliente final de Forever: todas las fuentes lo avisan. Por eso el addon solo genera las de hechizos que tienes (por spellID) y guarda el resultado en `db.macroStatus`.
