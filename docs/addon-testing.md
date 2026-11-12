@@ -9,6 +9,7 @@
 Cada vez que haya cambios: `git pull` y `/reload`.
 
 ## Comandos
+- `/pfd macros`: crea o actualiza las macros PFD Apertura, PFD Unsealed y PFD Sello (de personaje), y mantiene PFD Apertura al día con la recomendación. `/pfd macros off` deja de actualizarlas.
 - `/pfd test A | B | C | off`: etiqueta las peleas siguientes con una prueba (ver el plan más abajo); `/pfd test` dice cuál está activa.
 - `/pfd stats`: estadísticas de tus peleas (por prueba, por sello inicial) por sello inicial y activaciones de Command por minuto. `/pfd last`: la última pelea. `/pfd quiet`: activa o desactiva el resumen tras cada pelea. `/pfd resetstats`: borra las peleas guardadas.
 - `/pfd ui`: estado de la ventana (si está visible, dónde y qué iconos tiene).
@@ -23,6 +24,16 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 - `fights`: todas las peleas.
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
+
+## Pruebas de la v0.4.0: macros
+1. `git pull`, `/reload` y escribe `/pfd macros`. Debe decir qué macros ha creado.
+2. Abre `/macro`, pestaña de tu personaje: deben estar **PFD Apertura**, **PFD Unsealed** y **PFD Sello**. Arrástralas a tu barra.
+3. **PFD Apertura:** antes de atacar, púlsala tres veces: Crusader → Judgement → Command.
+4. **PFD Unsealed:** con Command puesto, púlsala cuando el widget diga "¡CAMBIA!" (Righteousness) y cuando diga "¡VUELVE!" (Command).
+5. **PFD Sello:** Command; con Shift, Righteousness.
+6. Marca otro tipo de enemigo: si cambia la recomendación, PFD Apertura se actualiza sola (fuera de combate).
+
+Pega de `/castsequence`: si lanzas un sello a mano entre medias, la secuencia se desincroniza. Se reinicia al cambiar de objetivo o al salir de combate.
 
 ## Pruebas de la v0.3.0: widget de Unsealed Wrath (experimental)
 1. `git pull`, `/reload` y escribe `/pfd echo`. Debe decir "Widget de Unsealed Wrath activado". Si sale un error, también queda en el archivo.

@@ -34,7 +34,7 @@ describe("PaladinForDummies.toc", function()
   local env_now = 1000
 
   local function wowEnv()
-    local frames, printed = {}, {}
+    local frames, printed, createdMacros = {}, {}, {}
     local env = setmetatable({
       print = function(...)
         local parts = {}
@@ -54,7 +54,21 @@ describe("PaladinForDummies.toc", function()
       UnitClassification = function() return "normal" end,
       IsInInstance = function() return false, "none" end,
       IsInGroup = function() return false end,
-      C_Spell = { GetSpellTexture = function() return 135000 end },
+      C_Spell = {
+        GetSpellTexture = function() return 135000 end,
+        GetSpellName = function(id)
+          return ({ [20918] = "Seal of Command", [20375] = "Seal of Command", [20306] = "Seal of the Crusader",
+            [21084] = "Seal of Righteousness", [20271] = "Judgement" })[id]
+        end,
+      },
+      MAX_CHARACTER_MACROS = 18,
+      GetNumMacros = function() return 0, 0 end,
+      GetMacroIndexByName = function() return 0 end,
+      CreateMacro = function(name, _, body)
+        createdMacros[name] = body
+        return 121
+      end,
+      createdMacros = createdMacros,
       GetTime = function() return env_now end,
       time = function() return 1794416000 end,
       GetBuildInfo = function() return "1.60.1", "70888", "Nov  9 2026", 16001 end,
@@ -144,6 +158,12 @@ describe("PaladinForDummies.toc", function()
       ns.UI.EchoTracker.initializer(echo, function(key, err) slotErrors[#slotErrors + 1] = key .. ": " .. tostring(err) end)(mock())
     end
     assert.are.same({}, slotErrors)
+    -- Macros: con Command y Crusader conocidos, se crea la de apertura.
+    env.SlashCmdList.PALADINFORDUMMIES("macros")
+    assert.are.equal("#showtooltip\n/castsequence reset=target/combat Seal of the Crusader, Judgement, Seal of Command",
+      env.createdMacros["PFD Apertura"])
+    assert.is_true(env.PaladinForDummiesDB.macros)
+
     -- Una pelea de 20 s con Command: Sentencia, Holy Strike y dos activaciones.
     env.SlashCmdList.PALADINFORDUMMIES("test a")
     env_now = 1000
@@ -179,14 +199,14 @@ describe("PaladinForDummies.toc", function()
     assert.are.same({ command = 20 }, f.sealSeconds)
     assert.is_true(math.abs(f.context.weaponSpeed - 2.4) < 0.001)
     assert.are.equal(6, f.context.target.creatureType)
-    assert.truthy(output:find("[prueba A] Solo command | 20 s | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
+    assert.truthy(output:find("[prueba A] Solo Seal of Command | 20 s | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
     assert.are.same({
       { t = 2, kind = "judgement" },
       { t = 4, kind = "holyStrike" },
       { t = 6, kind = "commandProc" },
       { t = 12, kind = "commandProc" },
     }, f.timeline)
-    assert.truthy(output:find("Solo command | peleas: 1 | duración media: 20 s", 1, true), output)
+    assert.truthy(output:find("Solo Seal of Command | peleas: 1 | duración media: 20 s", 1, true), output)
     assert.are.equal("A", f.context.test)
     assert.truthy(output:find("Prueba A | peleas: 1 | duración media: 20 s", 1, true), output)
     assert.truthy(output:find("Command: 2 activaciones en 20 s con el sello puesto = 6 por minuto", 1, true), output)
@@ -195,7 +215,7 @@ describe("PaladinForDummies.toc", function()
     assert.truthy(output:find("Peleas guardadas: 1.", 1, true), output)
     assert.truthy(output:find("Widget desbloqueado", 1, true), output)
     assert.truthy(output:find("Widget fijado en su sitio", 1, true), output)
-    assert.truthy(output:find("Total con command: 2 activaciones en 20 s = 6 por minuto", 1, true), output)
+    assert.truthy(output:find("Total con Seal of Command: 2 activaciones en 20 s = 6 por minuto", 1, true), output)
     assert.truthy(output:find("Arma: velocidad 2.4, daño 110.35-160", 1, true), output)
 
     -- Todo lo de /pfd debug queda también en el archivo de SavedVariables

@@ -56,6 +56,48 @@ local function saveSnapshot()
   }
 end
 
+local MACRO_ACTION_TEXT = {
+  created = "creada",
+  updated = "actualizada",
+  unchanged = "sin cambios",
+  full = "no hay hueco libre en tus macros de personaje",
+}
+
+local function spellNameOf(spellId)
+  if not (C_Spell and C_Spell.GetSpellName) then return nil end
+  local ok, name = pcall(C_Spell.GetSpellName, spellId)
+  if not ok or type(name) ~= "string" or (issecretvalue and issecretvalue(name)) then return nil end
+  return name
+end
+
+-- Crea o actualiza las macros del addon (core/Macros.lua) a partir de la última
+-- recomendación. Solo fuera de combate; verbose = contarlo en el chat.
+local macrosPending = false
+local function syncMacros(verbose)
+  if not (db and db.macros and last.situation) then return end
+  local macros = ns.Core.Macros.build({
+    recommendation = last.recommendation,
+    seals = Seals,
+    knownSpells = last.situation.player.knownSpells,
+    judgementSpellId = ns.Data.Spells.judgement,
+    nameOf = spellNameOf,
+  })
+  local results, reason = ns.Adapters.MacroWriter.write(_G, macros)
+  if not results then
+    macrosPending = (reason == "combat")
+    if verbose then p("Estás en combate: las macros se crearán al salir.") end
+    return
+  end
+  macrosPending = false
+  for _, r in ipairs(results) do
+    if r.action == "error" then
+      reportError("la macro " .. r.name, r.error)
+    elseif verbose or r.action == "created" or r.action == "full" then
+      p(("Macro %s: %s."):format(r.name, MACRO_ACTION_TEXT[r.action] or r.action))
+    end
+  end
+end
+
 local function refresh()
   if frozen or not ui then return end
   local ok, err = pcall(function()
@@ -64,6 +106,7 @@ local function refresh()
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
     ui:ShowRecommendation(recommendation)
     saveSnapshot()
+    syncMacros(false)
   end)
   if not ok then reportError("la recomendación", err) end
 end
@@ -85,7 +128,10 @@ end
 local function setFrozen(value)
   frozen = value
   if ui then ui:SetFrozen(value) end
-  if not value then refresh() end
+  if not value then
+    refresh()
+    if macrosPending then syncMacros(true) end
+  end
 end
 
 ---------------------------------------------------------------------------
@@ -276,6 +322,16 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
       db.echo = true
       p("Widget de Unsealed Wrath visible.")
     end
+  elseif cmd == "macros" then
+    if arg == "off" then
+      db.macros = nil
+      p("Las macros ya no se actualizan solas. Siguen en tu lista de macros; puedes borrarlas desde /macro.")
+      return
+    end
+    db.macros = true
+    refresh()
+    syncMacros(true)
+    p("Ábrelas con /macro, pestaña de tu personaje, y arrástralas a tu barra. PFD Apertura se actualiza sola con la recomendación. /pfd macros off para dejar de actualizarlas.")
   elseif cmd == "stats" then
     for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
   elseif cmd == "last" then
@@ -292,6 +348,6 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     ui:ResetPosition()
     p("Posición restablecida.")
   else
-    p("Comandos: /pfd debug | ui | echo [move|reset] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd debug | ui | echo [move|reset] | macros [off] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
   end
 end
