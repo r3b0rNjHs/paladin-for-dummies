@@ -109,4 +109,9 @@ ns.Locales.register("enUS", {
   OPT_TONE_DESC = "With humor, some messages come with a joke. Warnings are always plain. Some texts change after /reload.",
   OPT_TONE_FUN = "With humor",
   OPT_TONE_PLAIN = "Serious",
+
+  WHY_HUMANOID_JUSTICE = "Humanoids run away at low health; Justice stuns them and its Judgement stops them from fleeing.",
+  WHY_RET_COMMAND = "Command hits for 74% of your weapon damage: it is the Retribution damage seal.",
+  WHY_PREPULL_CRUSADER = "Judgement no longer uses up the seal: judge Crusader before the pull (the target takes more Holy damage for 40 s), then switch to your damage seal.",
+  WHY_FALLBACK_RIGHTEOUSNESS = "Righteousness is available from level 1 and adds Holy damage to every hit.",
 })

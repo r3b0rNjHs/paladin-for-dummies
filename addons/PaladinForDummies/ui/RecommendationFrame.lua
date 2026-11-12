@@ -15,7 +15,7 @@ local RecommendationFrame = {}
 ns.UI.RecommendationFrame = RecommendationFrame
 
 local ICON_SIZE = 36
-local GAP = 6
+local GAP = 22 -- deja sitio a las etiquetas ("Judgement" es más ancha que el icono)
 local LABEL_HEIGHT = 14
 local QUESTION_MARK = 134400 -- INV_Misc_QuestionMark
 local DEFAULT_POINT = { "CENTER", "CENTER", 0, -180 }
@@ -52,14 +52,32 @@ local STEP_TEXT = {
 
 local function c(name) return Style.COLORS[name] end
 
+-- Cuadradito de color dentro del texto (la fuente del juego no tiene "●").
+local function swatch(name)
+  local col = c(name)
+  return ("|TInterface\\Buttons\\WHITE8X8:8:8:0:0:8:8:0:8:0:8:%d:%d:%d|t"):format(
+    math.floor(col[1] * 255), math.floor(col[2] * 255), math.floor(col[3] * 255))
+end
+
+-- La razón de la regla en el idioma activo (Locales/*: WHY_<id>); si no está,
+-- la de data/Rules.lua.
+local function whyText(entry)
+  if entry.ruleId then
+    local key = ns.Locales.whyKey(entry.ruleId)
+    local text = L[key]
+    if text ~= key then return text end
+  end
+  return entry.why
+end
+
 local function addReason(entry, test)
   GameTooltip:AddLine(" ")
   GameTooltip:AddLine(L.TIP_WHY, c("muted")[1], c("muted")[2], c("muted")[3])
-  GameTooltip:AddLine(entry.why, c("text")[1], c("text")[2], c("text")[3], true)
+  GameTooltip:AddLine(whyText(entry), c("text")[1], c("text")[2], c("text")[3], true)
   local conf = CONFIDENCE[entry.confidence]
   if conf then
     local color = c(conf.color)
-    GameTooltip:AddLine("● " .. conf.text(), color[1], color[2], color[3], true)
+    GameTooltip:AddLine(swatch(conf.color) .. " " .. conf.text(), color[1], color[2], color[3], true)
   end
   if test then
     GameTooltip:AddLine(L.TIP_TEST:format(test), c("muted")[1], c("muted")[2], c("muted")[3])

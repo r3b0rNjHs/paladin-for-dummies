@@ -70,3 +70,14 @@ describe("Locale files", function()
     for key in pairs(es) do assert.is_string(en[key], "sobra en esES: " .. key) end
   end)
 end)
+
+describe("Rule reasons", function()
+  it("every rule explains itself in English and Spanish (WHY_<id>)", function()
+    local ns = Addon.load({ "Locales/Locales.lua", "Locales/enUS.lua", "Locales/esES.lua", "data/Rules.lua" })
+    for _, rule in ipairs(ns.Data.Rules) do
+      local key = ns.Locales.whyKey(rule.id)
+      assert.is_string(ns.Locales.tables.enUS[key], "falta en enUS: " .. key)
+      assert.is_string(ns.Locales.tables.esES[key], "falta en esES: " .. key)
+    end
+  end)
+end)

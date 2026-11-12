@@ -101,4 +101,9 @@ ns.Locales.register("esES", {
   OPT_TONE_DESC = "Con humor, algunos mensajes llevan su chiste. Los avisos siempre van en serio. Algunos textos cambian tras /reload.",
   OPT_TONE_FUN = "Con humor",
   OPT_TONE_PLAIN = "Serio",
+
+  WHY_HUMANOID_JUSTICE = "Los humanoides huyen con poca vida; Justice los aturde y su Sentencia impide que huyan.",
+  WHY_RET_COMMAND = "Command golpea por el 74 % del daño del arma: es el sello de daño de Retribución.",
+  WHY_PREPULL_CRUSADER = "La Sentencia ya no consume el sello: juzga Crusader antes del pull (el objetivo recibe más daño Sagrado durante 40 s) y cambia a tu sello de daño.",
+  WHY_FALLBACK_RIGHTEOUSNESS = "Righteousness está disponible desde el nivel 1 y añade daño Sagrado a cada golpe.",
 })

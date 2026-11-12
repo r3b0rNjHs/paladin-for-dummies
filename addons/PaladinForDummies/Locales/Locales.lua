@@ -30,6 +30,11 @@ function Locales.use(code)
   Locales.active = code
 end
 
+-- Clave de la razón de una regla de data/Rules.lua: "ret-command" → "WHY_RET_COMMAND".
+function Locales.whyKey(ruleId)
+  return "WHY_" .. tostring(ruleId):upper():gsub("%W", "_")
+end
+
 -- "fun" (por defecto) o "plain".
 function Locales.setTone(tone)
   Locales.tone = (tone == "plain") and "plain" or "fun"
