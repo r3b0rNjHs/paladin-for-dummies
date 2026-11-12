@@ -285,10 +285,12 @@ describe("PaladinForDummies.toc", function()
     assert.truthy(fights.name():find("Fights saved: |cfff2c14e1|r", 1, true))
     assert.truthy(fights.name():find("|cfff2c14e9|r out of every 10", 1, true)) -- 7 de 8 posibles
 
-    -- Abrir el panel: /pfd sin nada y el menú del minimapa
+    -- /pfd options abre el panel; /pfd a secas y el minimapa, la ventana principal.
+    env.SlashCmdList.PALADINFORDUMMIES("options")
+    assert.are.same({ 42 }, w.opened)
     env.SlashCmdList.PALADINFORDUMMIES("")
     env.PaladinForDummies_OnAddonCompartmentClick()
-    assert.are.same({ 42, 42 }, w.opened)
+    assert.are.same({ 42 }, w.opened)
   end)
 
   it("shows the before-pull alert only when something is missing", function()
@@ -344,13 +346,28 @@ describe("PaladinForDummies.toc", function()
     assert.is_number(char.trainer.previous.judgement)
   end)
 
+  it("opens the main window with all its tabs", function()
+    local env, w = wowEnv()
+    local _, _, _, char = start(env, w)
+    local window
+    for _, f in ipairs(w.frames) do if rawget(f, "Open") then window = f end end
+    assert.is_table(window)
+
+    char.fights[1] = { duration = 40, time = 1, openingSeal = "command", sealSeconds = { command = 40 },
+      counts = { judgement = 4, holyStrike = 3, commandProc = 2, sealCast = 0 }, context = {},
+      damage = { total = 8000, spells = { [6603] = 5000, [20424] = 3000 } } }
+    for _, tab in ipairs({ "today", "fights", "macros" }) do window:Open(tab) end -- no falla ninguna
+
+    assert.is_nil(char.onboarded) -- la bienvenida sigue pendiente hasta pulsar "Entendido"
+  end)
+
   it("waits until the end of combat to open the options (the game blocks it in combat)", function()
     local env, w = wowEnv()
     start(env, w)
     env.InCombatLockdown = function() return true end
 
-    env.SlashCmdList.PALADINFORDUMMIES("")
-    env.PaladinForDummies_OnAddonCompartmentClick()
+    env.SlashCmdList.PALADINFORDUMMIES("options")
+    env.SlashCmdList.PALADINFORDUMMIES("config")
     assert.are.same({}, w.opened)
     assert.truthy(output(w):find("stops hitting you", 1, true))
 
@@ -380,7 +397,7 @@ describe("PaladinForDummies.toc", function()
     for _, f in ipairs(w.frames) do
       if f.scripts.OnEnter then f.scripts.OnEnter(f); hovered = hovered + 1 end
     end
-    assert.are.equal(5, hovered) -- los cinco huecos del aviso antes del pull
+    assert.is_true(hovered >= 5) -- los huecos del aviso, las macros de la ventana...
     assert.is_table(char.snapshot.alerts)
 
     -- Indicador de Unsealed Wrath: se crea por defecto y su inicialización no falla

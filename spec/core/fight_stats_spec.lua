@@ -128,3 +128,28 @@ describe("FightStats.summarize", function()
     assert.are.equal(6.2, s.command.perMinute) -- 3 procs en 29 s
   end)
 end)
+
+describe("FightStats.breakdown", function()
+  local FightStats
+
+  before_each(function()
+    FightStats = Addon.load({ "core/FightStats.lua" }).Core.FightStats
+  end)
+
+  it("tells where your damage comes from, biggest first, with percentages", function()
+    local fights = {
+      { damage = { total = 300, spells = { [6603] = 200, [20424] = 100 } } },
+      { damage = { total = 100, spells = { [6603] = 50, [2495] = 50 } } },
+      { damageStatus = "secret" },
+    }
+    local b = FightStats.breakdown(fights)
+    assert.are.equal(400, b.total)
+    assert.are.same({ spellId = 6603, amount = 250, percent = 62.5 }, b.spells[1])
+    assert.are.same({ spellId = 20424, amount = 100, percent = 25 }, b.spells[2])
+    assert.are.equal(2, b.fights)
+  end)
+
+  it("is nil without damage data", function()
+    assert.is_nil(FightStats.breakdown({ { duration = 10 } }))
+  end)
+end)

@@ -28,6 +28,7 @@ local DEFAULTS = {
 local MAX_ERRORS = 50
 
 local guidePlan, guideName -- la guía (más abajo)
+local windowHandlers        -- la ventana principal (más abajo)
 local db              -- objeto AceDB
 local profile, char   -- db.profile y db.char
 local enabled = false -- solo con paladines
@@ -203,6 +204,7 @@ local function refresh()
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation, alerts = alerts }
     ui:ShowAlerts(alerts, recommendation)
     updateAdvisorVisibility()
+    if window then window:RefreshIfShown() end
     saveSnapshot()
     syncMacros(false)
   end)
@@ -418,6 +420,7 @@ end
 ---------------------------------------------------------------------------
 
 local toast                -- ui/Toast.lua
+local window               -- ui/MainWindow.lua
 local lastToastAt = 0
 local TOAST_GAP = 180      -- como mucho un consejo cada 3 minutos
 
@@ -586,9 +589,86 @@ local function openOptions(which)
   if not ns.UI.Options.open(which) then p(L.OPTIONS_UNAVAILABLE) end
 end
 
+-- La ventana principal (ui/MainWindow.lua): lo que necesita de Main.lua.
+local function spellTextureOf(token)
+  local spellId = ns.Data.GuideSpells[token]
+  if not (spellId and C_Spell and C_Spell.GetSpellTexture) then return nil end
+  local ok, icon = pcall(C_Spell.GetSpellTexture, spellId)
+  return ok and icon or nil
+end
+
+local function styleText(fight)
+  local style = ns.Core.FightStyle.classify(fight)
+  local kind, seal = style:match("^([^:]+):?(.*)$")
+  local sealSpell = Seals[seal] and Seals[seal].spellIds[1]
+  local sealText = sealSpell and guideName(seal:upper()) or seal
+  if kind == "twist" then return L.STYLE_TWIST end
+  if kind == "solo" then return sealText or "" end
+  if kind == "crusader-then" then return (guideName("CRUSADER") or "Crusader") .. " > " .. (sealText or "") end
+  if kind == "none" then return L.STYLE_NONE end
+  return L.STYLE_MIXED
+end
+
+local function lastFightRows()
+  local rows, fights = {}, char.fights or {}
+  for i = #fights, math.max(1, #fights - 7), -1 do
+    local f = fights[i]
+    local duration = type(f.duration) == "number" and f.duration or 0
+    local usage = ns.Core.Guide.usage({ f })
+    local dps = (f.damage and f.damage.total and duration > 0) and tostring(math.floor(f.damage.total / duration + 0.5)) or "-"
+    rows[#rows + 1] = {
+      ("%d s"):format(math.floor(duration + 0.5)),
+      dps,
+      usage.judgement.possible > 0 and ("%d / %d"):format(usage.judgement.used, usage.judgement.possible) or "-",
+      styleText(f),
+    }
+  end
+  return rows
+end
+
+local function recentFights(n)
+  local fights, out = char.fights or {}, {}
+  for i = math.max(1, #fights - n + 1), #fights do out[#out + 1] = fights[i] end
+  return out
+end
+
+windowHandlers = {
+  windowData = function()
+    local target = last.situation and last.situation.target
+    return {
+      plan = guidePlan().steps,
+      fill = function(text) return ns.Core.Guide.fill(text, guideName) end,
+      icon = spellTextureOf,
+      hasTarget = target and target.exists or false,
+      alerts = last.alerts or {},
+      fightsText = optionHandlers.guideFights(),
+      trainerActive = char.trainer.active,
+      welcome = not char.onboarded,
+      breakdown = ns.Core.FightStats.breakdown(recentFights(200)),
+      lastFights = lastFightRows(),
+      macroExists = function(name)
+        local ok, index = pcall(GetMacroIndexByName, name)
+        return ok and type(index) == "number" and index > 0
+      end,
+    }
+  end,
+  toggleTrainer = function() setTrainer(not char.trainer.active) end,
+  finishWelcome = function() char.onboarded = true end,
+  pickupMacro = function(name)
+    if inCombat() then p(L.WIN_COMBAT) return end
+    pcall(PickupMacro, name)
+  end,
+  openGuide = function() openOptions("guide") end,
+  openSettings = function() openOptions() end,
+}
+
+local function openWindow()
+  if window then window:Open() else openOptions() end
+end
+
 -- Entrada del menú de addons del minimapa (AddonCompartmentFunc en el .toc).
 function PaladinForDummies_OnAddonCompartmentClick()
-  if enabled then openOptions() else p(L.NOT_A_PALADIN) end
+  if enabled then openWindow() else p(L.NOT_A_PALADIN) end
 end
 
 ---------------------------------------------------------------------------
@@ -640,6 +720,9 @@ local function enable()
   ui:SetTest(char.test)
   if profile.echo.shown then echoes = createEchoes() end
   toast = ns.UI.Toast.create(function() openOptions("guide") end)
+  window = ns.UI.MainWindow.create(windowHandlers)
+  -- Primeros pasos: la primera vez se abre sola, con la bienvenida.
+  if not char.onboarded then window:Open("today") end
 
   safely("el panel de opciones", ns.UI.Options.register, optionHandlers, db)
 
@@ -683,6 +766,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
       local record = ns.Recorder.finish(char)
       if record and profile.review.chatSummary then p(ns.Recorder.describe(record)) end
       coachAfterFight(record)
+      if window then window:RefreshIfShown() end
     end)
     setFrozen(false)
     if optionsPending then openOptions() end
@@ -765,7 +849,9 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     return
   end
   local cmd, arg = (msg or ""):lower():match("^(%S*)%s*(%S*)")
-  if cmd == "" or cmd == "options" or cmd == "opciones" or cmd == "config" then
+  if cmd == "" or cmd == "window" or cmd == "ventana" then
+    openWindow()
+  elseif cmd == "options" or cmd == "opciones" or cmd == "config" then
     openOptions()
   elseif cmd == "stats" then
     printStats()

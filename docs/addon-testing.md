@@ -25,6 +25,15 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.15.0: ventana principal
+**Archivo nuevo: cierra el juego y vuelve a abrirlo.**
+- Al entrar, la ventana se abre sola con la **bienvenida** (una sola vez). Pulsa "¡Entendido!".
+- `/pfd` (o el menú del minimapa) abre la ventana; `/pfd opciones`, los ajustes. Se mueve arrastrando y se cierra con Escape.
+- **Hoy:** Tu plan con iconos; "Ahora mismo" con un enemigo seleccionado; Tus peleas; botón del modo entrenador.
+- **Peleas:** barras de dónde sale tu daño y tus últimas 8 peleas.
+- **Macros:** arrastra una a la barra; las grises aún no existen.
+- Botones Guía y Ajustes.
+
 ## Pruebas de la v0.14.0: modo entrenador
 **Archivos nuevos: cierra el juego y vuelve a abrirlo.**
 - `/pfd entrenador` (o Repaso del combate > Modo entrenador): sale "Modo entrenador activado".

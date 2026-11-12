@@ -103,3 +103,28 @@ function FightStats.summarize(fights, classify)
     command = commandRate(all),
   }
 end
+
+-- De dónde sale tu daño (medidor de daño de Blizzard, fight.damage): por
+-- hechizo, de más a menos, con su porcentaje. nil si no hay datos.
+function FightStats.breakdown(fights)
+  local amounts, total, counted = {}, 0, 0
+  for _, fight in ipairs(fights or {}) do
+    local damage = fight.damage
+    if type(damage) == "table" and type(damage.spells) == "table" then
+      counted = counted + 1
+      for spellId, amount in pairs(damage.spells) do
+        if type(amount) == "number" then
+          amounts[spellId] = (amounts[spellId] or 0) + amount
+          total = total + amount
+        end
+      end
+    end
+  end
+  if counted == 0 or total == 0 then return nil end
+  local spells = {}
+  for spellId, amount in pairs(amounts) do
+    spells[#spells + 1] = { spellId = spellId, amount = amount, percent = round1(amount / total * 100) }
+  end
+  table.sort(spells, function(a, b) return a.amount > b.amount end)
+  return { total = total, fights = counted, spells = spells }
+end
