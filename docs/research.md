@@ -187,3 +187,29 @@ Fuentes: Warcraft Wiki (Settings API, Addon compartment, TOC format, Edit Mode),
 - Un estilo común para la ventana del asesor y el widget (hoy cada uno tiene uno distinto).
 - Opción de elegir qué macros crear (hay un límite de 18 por personaje).
 - Textos traducibles (inglés y español), si se va a publicar.
+
+## Comida para Retribución (investigación del 12 nov 2026)
+
+Fuentes: [MaxDPS: comida por nivel](https://maxdps.com/forever/buff-food), [foreverguide.net: cocina](https://foreverguide.net/professions/cooking/) (build 1.60.1.70790), [Kami-Labs](https://kami-labs.fr/en/guide-cuisine-wow-forever/), [Warcraft Tavern](https://www.warcrafttavern.com/forever/guides/cooking/), [Icy Veins: +5 % de experiencia](https://www.icy-veins.com/wow-forever/news/crafted-food-in-wow-forever-gives-you-5-more-xp-from-kills/). Guías de la comunidad, de la beta en parte: los niveles exactos para comer cada cosa no salen; mirarlos en el tooltip del juego.
+
+### Cómo funciona en Forever
+- Come **al menos 10 s** sentado para el buff *Well Fed*: casi siempre 15 min.
+- 103 de las 123 recetas dan además **+5 % de experiencia por muertes** (no de misiones): útil mientras subes.
+- Casi todas las comidas se han rehecho para dar **una sola estadística**.
+- Algunas recetas de 275+ necesitan el **Iron Oven** (objeto de campamento de Cocina 300, plano que cae en mazmorras y bandas).
+
+### Qué estadística para Retribución
+- **Fuerza o poder de ataque.** En Classic, a un paladín **1 de Fuerza = 2 de poder de ataque** (sin confirmar en Forever): +20 Fuerza ≈ +40 poder de ataque.
+
+### Las mejores por tramo (Fuerza / poder de ataque)
+| Comida | Da | Receta | Notas |
+|---|---|---|---|
+| Savory Stag Sliders | +15 Fuerza (nivel 35) | Cocina 225, Qia (Winterspring), 2 o | Carne de ciervo ×2 |
+| Cooked Glossy Mightfish | +30 poder de ataque | Cocina 225, Kelsey Yance (Bahía del Botín), 1 o 60 p | Pescado: Raw Glossy Mightfish |
+| Steaming Stag Steak | +20 Fuerza (nivel 45) | Cocina 275, misión "Now We're Cooking" (Monte Hyjal) | Iron Oven |
+| Bear Bruscitti | +20 Fuerza | Cocina 275, fuente desconocida | Iron Oven |
+| Smoked Desert Dumplings | +20 Fuerza | Sin receta: preguntar al instructor | Carne de gusano de arena |
+| Poached Sunscale Salmon | +40 poder de ataque | Cocina 250, Gikkix (Tanaris), 2 o | Pescado; Iron Oven según foreverguide |
+| Mightfish Steak | +40 poder de ataque | Cocina 275, Vivianna / Sheendra Tallgrass (Feralas), 2 o | Pescado |
+| Prowler Steak | +25 Fuerza y +10 Aguante (nivel 55) | Cocina 250, fuente desconocida | Carne de tigre ×2, Holy Salts |
+| Grand Lobster Banquet / Specklefin Feast | Festín de 45 min para el grupo: +20 poder de ataque y más | Cocina 280, fuente desconocida | Para mazmorras |
