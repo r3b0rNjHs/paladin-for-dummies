@@ -98,6 +98,10 @@ local TOOLTIP = {
   blessing = function(alert) line(L.ALERT_BLESSING:format(gold(spellName(alert.spellId)))) end,
   fury = function(alert) line(L.ALERT_FURY:format(gold(spellName(alert.spellId)))) end,
   tip = function(alert) line(L.ALERT_EXORCISM:format(gold(spellName(alert.spellId)))) end,
+  food = function(alert)
+    line(L.ALERT_FOOD)
+    if alert.detail then GameTooltip:AddLine(" "); line(alert.detail) end
+  end,
 }
 
 local LABEL = {
@@ -106,6 +110,7 @@ local LABEL = {
   blessing = function() return L.ALERT_LABEL_BLESSING end,
   fury = function() return L.ALERT_LABEL_FURY end,
   tip = function() return L.ALERT_LABEL_TIP end,
+  food = function() return L.ALERT_LABEL_FOOD end,
 }
 
 local function showTooltip(slot)

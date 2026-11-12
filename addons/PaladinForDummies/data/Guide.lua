@@ -46,6 +46,7 @@ ns.Data.GuideSpells = {
   KINGS = 20217,
   DEVOTION = 465,
   RETRIBUTION_AURA = 7294,
+  WELL_FED = 19705,
 }
 
 local BOOK = "Interface\\Icons\\INV_Misc_Book_09"
@@ -105,7 +106,14 @@ ns.Data.Guide = {
     { text = "SIT_FLEE", icon = "HAMMER" },
     { text = "SIT_UNDEAD", icon = "EXORCISM" },
     { text = "SIT_DANGER", icon = "DIVINE_SHIELD" },
+    { text = "SIT_SUSTAIN", icon = "WISDOM" },
     { text = "SIT_JOKE", fun = true },
+  } },
+  { id = "FOOD", blocks = {
+    { text = "FOOD_HOW", icon = "WELL_FED" },
+    { food = true },
+    { text = "FOOD_OVEN" },
+    { text = "FOOD_JOKE", fun = true },
   } },
   { id = "MACROS", blocks = {
     { text = "MACROS_INTRO" },

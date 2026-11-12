@@ -7,6 +7,7 @@
 --   blessing  no llevas ninguna bendición (vale la de otro paladín)
 --   fury      eres tanque y no llevas Righteous Fury
 --   tip       no-muerto o demonio en mundo abierto: Exorcism
+--   food      no estás bien alimentado (si el jugador lo pidió; desde nivel 10)
 local _, ns = ...
 ns.Core = ns.Core or {}
 
@@ -39,7 +40,10 @@ end
 
 -- spells = { sealBySpellId, auras = { devotion, retribution, ... }, blessings =
 -- { might, kings, ... }, righteousFury, exorcism } (listas de spellIDs).
-function Prepull.alerts(situation, recommendation, spells)
+-- options = { food = true } para el aviso de comida.
+local FOOD_LEVEL = 10
+
+function Prepull.alerts(situation, recommendation, spells, options)
   local alerts = {}
   local player, target = situation.player or {}, situation.target or {}
   local buffs, known = player.buffs, player.knownSpells or {}
@@ -74,6 +78,10 @@ function Prepull.alerts(situation, recommendation, spells)
   if openWorld and (target.creatureType == CREATURE_UNDEAD or target.creatureType == CREATURE_DEMON) then
     local exorcism = highestKnown(spells.exorcism, known)
     if exorcism then alerts[#alerts + 1] = { kind = "tip", spellId = exorcism, state = "recommended" } end
+  end
+
+  if options and options.food and player.wellFed == false and (player.level or 0) >= FOOD_LEVEL then
+    alerts[#alerts + 1] = { kind = "food", spellId = spells.foodBuff, state = "expiring" }
   end
 
   return alerts

@@ -289,4 +289,42 @@ describe("SituationReader.read", function()
       assert.are.equal("TANK", situation.player.role)
     end)
   end)
+
+  describe("rest and food (by the client's own name of reference spells)", function()
+    local names = { [19705] = "Bien alimentado", [430] = "Beber", [433] = "Comida" }
+    local function withAuras(auras)
+      return fakeApi({
+        InCombatLockdown = function() return false end,
+        C_Spell = { GetSpellName = function(id) return names[id] end },
+        C_UnitAuras = { GetAuraDataByIndex = function(_, i) return auras[i] end },
+      })
+    end
+
+    it("knows when you are well fed, drinking or eating, whatever the food", function()
+      local situation = SituationReader.read(withAuras({
+        { spellId = 99999, name = "Bien alimentado" }, { spellId = 88888, name = "Beber" },
+      }), seals)
+      assert.is_true(situation.player.wellFed)
+      assert.is_true(situation.player.drinking)
+      assert.is_false(situation.player.eating)
+    end)
+
+    it("says false when there is none, and nil in combat", function()
+      local situation = SituationReader.read(withAuras({ { spellId = 465, name = "Aura" } }), seals)
+      assert.is_false(situation.player.wellFed)
+      local api = withAuras({})
+      api.InCombatLockdown = function() return true end
+      assert.is_nil(SituationReader.read(api, seals).player.wellFed)
+    end)
+
+    it("reads your Cooking skill (skill line 185)", function()
+      local api = withAuras({})
+      api.GetProfessions = function() return 1, 2, nil, 4, 5 end
+      api.GetProfessionInfo = function(index)
+        if index == 5 then return "Cocina", 133971, 280, 300, 0, 0, 185 end
+        return "Otra", 1, 100, 300, 0, 0, 999
+      end
+      assert.are.same({ skill = 280, max = 300 }, SituationReader.read(api, seals).player.cooking)
+    end)
+  end)
 end)

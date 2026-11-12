@@ -25,6 +25,12 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.16.0: comida y descanso
+**Archivos nuevos: cierra el juego y vuelve a abrirlo.**
+- Sin comer, selecciona un enemigo: aviso ámbar de comida con lo mejor para tu nivel en el tooltip. Come: desaparece.
+- Guía > **Comida**: tu Cocina, lo mejor para ti ahora y lo siguiente, con recetas.
+- Tras varias peleas bebiendo después de cada una, Tus peleas (guía o ventana) sugiere Wisdom.
+
 ## Pruebas de la v0.15.0: ventana principal
 **Archivo nuevo: cierra el juego y vuelve a abrirlo.**
 - Al entrar, la ventana se abre sola con la **bienvenida** (una sola vez). Pulsa "¡Entendido!".

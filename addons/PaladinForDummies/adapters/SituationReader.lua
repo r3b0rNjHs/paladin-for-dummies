@@ -2,7 +2,8 @@
 -- Lee el estado del juego y lo convierte en una Situation plana para el core:
 --   player  = { level, spec, knownSpells = { [spellID] = true },
 --               weapon = { speed, minDamage, maxDamage }, spellPower,
---               buffs = { [spellID] = true } (solo fuera de combate), role }
+--               buffs = { [spellID] = true }, wellFed, drinking, eating (solo fuera
+--               de combate), role, cooking = { skill, max } }
 --             (el arma y el poder con hechizos pueden ser secret: SecretWhenUnitStatsRestricted)
 --   content = "solo" | "group" | "dungeon" | "raid" | "pvp"
 --   target  = { exists = false } o { exists = true, creatureType, classification, level }
@@ -189,20 +190,55 @@ end
 local HOLY_SCHOOL = 2 -- GetSpellBonusDamage(2) = Sagrado
 local MAX_AURAS = 40
 
--- Tus buffs, por spellID, para el aviso antes del pull. Solo fuera de combate:
--- en combate las auras son secret (sondeo 1) y se devuelve nil.
+-- Hechizos de referencia: todas las comidas dan un buff que se llama como el
+-- 19705 ("Well Fed") y todas las bebidas y comidas mientras te sientas, como el
+-- 430 ("Drink") y el 433 ("Food"). El nombre lo da el cliente en su idioma (como
+-- al descubrir rangos): se compara con el de tus buffs.
+local WELL_FED, DRINK, FOOD = 19705, 430, 433
+
+-- Tus buffs, por spellID, para el aviso antes del pull, y si estás bien
+-- alimentado, bebiendo o comiendo. Solo fuera de combate: en combate las auras
+-- son secret (sondeo 1) y se devuelve nil.
 local function readBuffs(call, api)
   if call(api.InCombatLockdown) then return nil end
   local getAura = field(api.C_UnitAuras, "GetAuraDataByIndex")
   if type(getAura) ~= "function" then return nil end
-  local buffs = {}
+  local getName = field(api.C_Spell, "GetSpellName")
+  local wellFedName, drinkName, foodName = call(getName, WELL_FED), call(getName, DRINK), call(getName, FOOD)
+  local buffs, rest = {}, { wellFed = false, drinking = false, eating = false }
   for i = 1, MAX_AURAS do
     local aura = call(getAura, "player", i, "HELPFUL")
     if type(aura) ~= "table" then break end
     local spellId = call(function() return aura.spellId end)
     if type(spellId) == "number" then buffs[spellId] = true end
+    local name = call(function() return aura.name end)
+    if type(name) == "string" then
+      if wellFedName and name == wellFedName then rest.wellFed = true end
+      if drinkName and name == drinkName then rest.drinking = true end
+      if foodName and name == foodName then rest.eating = true end
+    end
   end
-  return buffs
+  return buffs, rest
+end
+
+-- Tu nivel de Cocina (línea de habilidad 185), o nil si no tienes la profesión.
+-- GetProfessionInfo da la línea en el 7.º valor: pcall directo, con la
+-- comprobación de secrets valor a valor.
+local COOKING = 185
+local function readCooking(call, api, isSecret)
+  local professions = { call(api.GetProfessions) }
+  if type(api.GetProfessionInfo) ~= "function" then return nil end
+  for i = 1, 5 do
+    local index = professions[i]
+    if type(index) == "number" then
+      local ok, _, _, skill, max, _, _, line = pcall(api.GetProfessionInfo, index)
+      if ok and not (isSecret(skill) or isSecret(max) or isSecret(line))
+        and line == COOKING and type(skill) == "number" then
+        return { skill = skill, max = max }
+      end
+    end
+  end
+  return nil
 end
 
 local function readWeapon(tagged, api)
@@ -228,11 +264,20 @@ function SituationReader.read(api, seals, options)
       knownSpells = knownSpells,
       weapon = readWeapon(tagged, api),
       spellPower = tagged("spellPower", api.GetSpellBonusDamage, HOLY_SCHOOL),
-      buffs = readBuffs(call, api),
     },
     content = readContent(call, api),
     target = readTarget(call, tagged, api),
   }
   situation.player.role = diagnostics.role
+  local buffs, rest = readBuffs(call, api)
+  situation.player.buffs = buffs
+  if rest then
+    situation.player.wellFed, situation.player.drinking, situation.player.eating = rest.wellFed, rest.drinking, rest.eating
+  end
+  situation.player.cooking = readCooking(call, api, function(v)
+    if type(api.issecretvalue) ~= "function" then return false end
+    local ok, secret = pcall(api.issecretvalue, v)
+    return ok and secret == true
+  end)
   return situation, diagnostics
 end

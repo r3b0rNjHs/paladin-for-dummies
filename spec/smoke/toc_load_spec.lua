@@ -77,7 +77,7 @@ describe("PaladinForDummies.toc", function()
         GetSpellTexture = function() return 135000 end,
         GetSpellName = function(id)
           return ({ [20918] = "Seal of Command", [20375] = "Seal of Command", [20306] = "Seal of the Crusader",
-            [21084] = "Seal of Righteousness", [20271] = "Judgement", [679] = "Holy Strike" })[id]
+            [21084] = "Seal of Righteousness", [20271] = "Judgement", [679] = "Holy Strike", [19705] = "Well Fed", [430] = "Drink", [433] = "Food" })[id]
         end,
       },
       MAX_CHARACTER_MACROS = 18,
@@ -309,8 +309,9 @@ describe("PaladinForDummies.toc", function()
     assert.is_true(alert:HasAlerts())
     alert.slots[1].scripts.OnEnter(alert.slots[1]) -- el tooltip no falla
 
-    -- Con Seal of Command puesto, no hay nada que decir.
+    -- Con Seal of Command puesto y bien alimentado, no hay nada que decir.
     auras[1] = { spellId = 20918 }
+    auras[2] = { spellId = 123456, name = "Well Fed" }
     fire(w, "PLAYER_TARGET_CHANGED")
     assert.are.same({}, alert.alerts)
     assert.is_false(alert:HasAlerts())
@@ -344,6 +345,21 @@ describe("PaladinForDummies.toc", function()
     assert.is_false(char.trainer.active)
     assert.truthy(output(w):find("Session summary: 1 fights.", 1, true))
     assert.is_number(char.trainer.previous.judgement)
+  end)
+
+  it("notes when you drink after a fight, and fills the Food chapter", function()
+    local env, w = wowEnv()
+    local auras = {}
+    env.C_UnitAuras = { GetAuraDataByIndex = function(_, i) return auras[i] end }
+    local _, seen, _, char = start(env, w)
+    env_now = 3000; fire(w, "PLAYER_REGEN_DISABLED")
+    env_now = 3020; fire(w, "PLAYER_REGEN_ENABLED")
+    auras[1] = { spellId = 777, name = "Drink" }
+    fire(w, "UNIT_AURA", "player")
+    assert.is_true(char.fights[#char.fights].drankAfter)
+
+    local food = seen.options.PaladinForDummies_Guide.args.food.args
+    assert.truthy(food.b2.name():find("Best for you now", 1, true))
   end)
 
   it("opens the main window with all its tabs", function()

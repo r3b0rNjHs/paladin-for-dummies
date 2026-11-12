@@ -11,13 +11,14 @@ local L = ns.L
 local SituationReader = ns.Adapters.SituationReader
 local RuleEngine = ns.Core.RuleEngine
 local Seals, Rules = ns.Data.Seals, ns.Data.Rules
+local Style = ns.UI.Style
 
 local DEFAULTS = {
   profile = {
     language = "auto",
     tone = "fun", -- Locales: chistes en algunos mensajes (nunca en los avisos)
     devMode = false,
-    advisor = { shown = true, scale = 1 }, -- el aviso antes del pull (core/Prepull.lua)
+    advisor = { shown = true, scale = 1, food = true }, -- el aviso antes del pull (core/Prepull.lua)
     echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
     macros = { auto = false, disabled = {} },
     review = { chatSummary = false },
@@ -28,6 +29,7 @@ local DEFAULTS = {
 local MAX_ERRORS = 50
 
 local guidePlan, guideName -- la guía (más abajo)
+local foodSuggestion, watchRest -- comida y descanso (más abajo)
 local windowHandlers        -- la ventana principal (más abajo)
 local db              -- objeto AceDB
 local profile, char   -- db.profile y db.char
@@ -187,7 +189,7 @@ end
 -- Qué mira el aviso antes del pull: los sellos que reconoce el catálogo (con
 -- los rangos descubiertos) y las auras y bendiciones de data/MacroSpells.lua.
 local function prepullSpells()
-  local spells = { sealBySpellId = ns.Data.Catalog.sealBySpellId }
+  local spells = { sealBySpellId = ns.Data.Catalog.sealBySpellId, foodBuff = ns.Data.FoodBuffSpell }
   for key, value in pairs(ns.Data.PrepullSpells) do spells[key] = value end
   return spells
 end
@@ -200,7 +202,11 @@ local function refresh()
     -- peleas los reconozcan (cada rango tiene su propio spellID).
     ns.Data.LearnRanks(diagnostics.discoveredRanks)
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
-    local alerts = ns.Core.Prepull.alerts(situation, recommendation, prepullSpells())
+    local alerts = ns.Core.Prepull.alerts(situation, recommendation, prepullSpells(), { food = profile.advisor.food })
+    for _, alert in ipairs(alerts) do
+      if alert.kind == "food" then alert.detail = foodSuggestion(situation.player) end
+    end
+    watchRest(situation.player)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation, alerts = alerts }
     ui:ShowAlerts(alerts, recommendation)
     updateAdvisorVisibility()
@@ -376,6 +382,66 @@ local function debug()
 end
 
 ---------------------------------------------------------------------------
+-- Comida (core/Food.lua) y descanso (core/Sustain.lua)
+---------------------------------------------------------------------------
+
+local function foodLine(item)
+  local stat = L["FOOD_STAT_" .. item.stat]:format(item.amount)
+  local parts = { ("- %s (%s): %s, %s %d"):format(Style.color("gold", item.name), stat,
+    L["FOOD_SRC_" .. item.source], L.FOOD_SKILL, item.skill) }
+  if item.canCook == true then parts[#parts + 1] = L.FOOD_CAN_COOK
+  elseif item.canCook == false then parts[#parts + 1] = L.FOOD_MISSING:format(item.skillMissing) end
+  if item.oven then parts[#parts + 1] = L.FOOD_OVEN end
+  return table.concat(parts, " ")
+end
+
+-- La mejor comida para tu nivel, en una línea (para el aviso antes del pull).
+foodSuggestion = function(player)
+  local plan = ns.Core.Food.forPlayer(ns.Data.Food, player.level, player.cooking)
+  local names = {}
+  for _, item in ipairs(plan.now) do names[#names + 1] = item.name end
+  if #names == 0 then return nil end
+  return L.ALERT_FOOD_BEST:format(table.concat(names, ", "))
+end
+
+-- El capítulo Comida de la guía, según tu nivel y tu Cocina.
+local function guideFood()
+  local player = last.situation and last.situation.player or {}
+  local plan = ns.Core.Food.forPlayer(ns.Data.Food, player.level, player.cooking)
+  local lines = {}
+  if player.cooking then
+    lines[#lines + 1] = L.FOOD_YOUR_SKILL:format(Style.color("gold", player.cooking.skill .. " / " .. (player.cooking.max or "?")))
+  else
+    lines[#lines + 1] = L.FOOD_NO_COOKING
+  end
+  lines[#lines + 1] = "\n" .. Style.color("gold", L.FOOD_NOW:format(player.level or "?"))
+  for _, item in ipairs(plan.now) do lines[#lines + 1] = foodLine(item) end
+  if plan.nextLevel then
+    lines[#lines + 1] = "\n" .. Style.color("gold", L.FOOD_NEXT:format(plan.nextLevel))
+    for _, item in ipairs(plan.next) do lines[#lines + 1] = foodLine(item) end
+  end
+  lines[#lines + 1] = "\n" .. L.FOOD_NOTE
+  return table.concat(lines, "\n")
+end
+
+-- Tras cada pelea, si te ve beber o comer antes de la siguiente, lo apunta en
+-- esa pelea (core/Sustain.lua lo usa para sugerir Wisdom o Light).
+local restFight
+watchRest = function(player)
+  if not restFight then return end
+  if player.drinking then restFight.drankAfter = true end
+  if player.eating then restFight.ateAfter = true end
+end
+
+local function sustainText()
+  local advice = ns.Core.Sustain.advice(char.fights)
+  if not advice.key then return nil end
+  local key = advice.key == "LIGHT" and advice.ate or advice.drank
+  return ns.Core.Guide.fill(L["SUSTAIN_" .. advice.key], guideName):format(Style.color("gold", key), advice.fights)
+    .. " " .. L.SUSTAIN_NOTE
+end
+
+---------------------------------------------------------------------------
 -- La guía: qué hechizos conoces y cómo se llaman en tu cliente
 ---------------------------------------------------------------------------
 
@@ -449,6 +515,8 @@ local function setTrainer(value)
     if s.holyStrike and guidePlan().known.holyStrike then
       p(coachFill(L.TRAINER_SUMMARY_STRIKE):format(s.holyStrike, changeText(s.holyStrikeChange)))
     end
+    local sustain = sustainText()
+    if sustain then p(sustain) end
     t.previous = { judgement = s.judgement, holyStrike = s.holyStrike }
   end
   if ns.UI.Options.refresh then ns.UI.Options.refresh() end
@@ -555,10 +623,15 @@ local optionHandlers = {
     local s = ns.Core.FightStats.summarize(fights, ns.Core.FightStyle.classify)
     local twist = s.byStyle and s.byStyle.twist
     if twist then lines[#lines + 1] = L.GUIDE_FIGHTS_TWIST:format(gold("gold", twist.fights)) end
+    local sustain = sustainText()
+    if sustain then lines[#lines + 1] = sustain end
     return table.concat(lines, "\n\n")
   end,
   getTrainer = function() return char.trainer.active end,
   setTrainer = setTrainer,
+  guideFood = function() return guideFood() end,
+  getAdvisorFood = function() return profile.advisor.food end,
+  setAdvisorFood = function(value) profile.advisor.food = value and true or false; refresh() end,
   getTone = function() return profile.tone end,
   setTone = function(value)
     profile.tone = value
@@ -731,6 +804,8 @@ local function enable()
   events:RegisterEvent("ADDON_ACTION_BLOCKED")
   events:RegisterEvent("ADDON_ACTION_FORBIDDEN")
   events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+  -- Tus buffs cambian (sello, comida, beber...): recalcular el aviso.
+  pcall(events.RegisterUnitEvent, events, "UNIT_AURA", "player")
   for _, event in ipairs(REFRESH_EVENTS) do
     -- Algunos eventos pueden no existir en Forever: registrar uno inexistente da error.
     pcall(events.RegisterEvent, events, event)
@@ -766,6 +841,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
       local record = ns.Recorder.finish(char)
       if record and profile.review.chatSummary then p(ns.Recorder.describe(record)) end
       coachAfterFight(record)
+      restFight = record
       if window then window:RefreshIfShown() end
     end)
     setFrozen(false)

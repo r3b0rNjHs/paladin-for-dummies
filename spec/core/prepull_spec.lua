@@ -87,4 +87,14 @@ describe("Prepull.alerts", function()
     s.content = "dungeon"
     assert.are.same({}, Prepull.alerts(s, recommendation, spells))
   end)
+
+  it("reminds you to eat when you are not well fed, if you asked for it", function()
+    local s = situation(); s.player.wellFed = false; s.player.level = 42
+    assert.are.same({ "food:expiring" }, kinds(Prepull.alerts(s, recommendation, spells, { food = true })))
+    assert.are.same({}, Prepull.alerts(s, recommendation, spells, { food = false }))
+    s.player.wellFed = true
+    assert.are.same({}, Prepull.alerts(s, recommendation, spells, { food = true }))
+    s.player.wellFed = false; s.player.level = 8 -- antes de nivel 10 no merece la pena
+    assert.are.same({}, Prepull.alerts(s, recommendation, spells, { food = true }))
+  end)
 end)

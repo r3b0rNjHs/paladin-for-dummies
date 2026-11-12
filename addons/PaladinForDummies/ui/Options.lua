@@ -91,6 +91,7 @@ function Options.build(h)
         args = {
           description = description(0, L.OPT_ADVISOR_DESC),
           shown = toggle(1, L.OPT_SHOW, L.OPT_ADVISOR_SHOW_DESC, h.getAdvisorShown, h.setAdvisorShown),
+          food = toggle(1.5, L.OPT_ADVISOR_FOOD, L.OPT_ADVISOR_FOOD_DESC, h.getAdvisorFood, h.setAdvisorFood),
           move = button(2, L.OPT_ECHO_MOVE, L.OPT_ALERT_MOVE_DESC, h.toggleAdvisorMove),
           scale = scale(4, h.getAdvisorScale, h.setAdvisorScale),
           reset = button(5, L.OPT_RESET_POSITION, nil, h.resetAdvisorPosition),
@@ -199,6 +200,8 @@ function Options.buildGuide(h)
         local entry = { type = "description", order = j * 100, fontSize = "medium" }
         if block.fights then
           entry.name = function() return h.guideFights() end
+        elseif block.food then
+          entry.name = function() return h.guideFood() end
         else
           local key = "GUIDE_" .. block.text
           -- Una línea en blanco detrás para que los bloques respiren.
