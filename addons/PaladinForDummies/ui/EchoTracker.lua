@@ -85,6 +85,21 @@ function EchoTracker.initializer(echo, onError)
 end
 
 local DEFAULT_POSITION = { point = "CENTER", relativePoint = "CENTER", x = 0, y = -80 }
+-- Tamaño del recuadro hasta la v0.9.2 (dos huecos en fila): las posiciones
+-- guardadas entonces son de una esquina de un recuadro de este tamaño.
+local LEGACY_WIDTH, LEGACY_HEIGHT = 144, 88
+
+-- Convierte una posición guardada por una esquina o un lado (lo que da GetPoint
+-- tras arrastrar) en la del centro de un recuadro de width x height. Así la
+-- posición no se mueve aunque cambie el tamaño del recuadro.
+function EchoTracker.toCenter(pos, width, height)
+  if type(pos) ~= "table" or type(pos.point) ~= "string"
+    or type(pos.x) ~= "number" or type(pos.y) ~= "number" then return nil end
+  local x, y = pos.x, pos.y
+  if pos.point:find("LEFT") then x = x + width / 2 elseif pos.point:find("RIGHT") then x = x - width / 2 end
+  if pos.point:find("TOP") then y = y - height / 2 elseif pos.point:find("BOTTOM") then y = y + height / 2 end
+  return { point = "CENTER", relativePoint = pos.relativePoint or pos.point, x = x, y = y }
+end
 
 -- Ancla propia (un marco normal, movible) a la que se sujeta el contenedor. El
 -- contenedor de Blizzard tiene partes protegidas: no le ponemos scripts, solo lo
@@ -99,7 +114,10 @@ local function createAnchor(db, width, height)
   anchor:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
     local ok, point, _, relativePoint, x, y = pcall(self.GetPoint, self)
-    if ok and point then db.position = { point = point, relativePoint = relativePoint, x = x, y = y } end
+    if ok and point then
+      db.position = EchoTracker.toCenter({ point = point, relativePoint = relativePoint, x = x, y = y },
+        self:GetWidth(), self:GetHeight())
+    end
   end)
   -- Clic derecho: fijarlo sin volver a las opciones.
   anchor:SetScript("OnMouseUp", function(self, mouseButton)
@@ -126,6 +144,10 @@ local function createAnchor(db, width, height)
   anchor.box = box
 
   function anchor:ApplyPosition()
+    -- Posiciones antiguas, guardadas por una esquina: se pasan al centro una vez.
+    if db.position and db.position.point ~= "CENTER" then
+      db.position = EchoTracker.toCenter(db.position, LEGACY_WIDTH, LEGACY_HEIGHT)
+    end
     local pos = db.position or DEFAULT_POSITION
     self:ClearAllPoints()
     self:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
