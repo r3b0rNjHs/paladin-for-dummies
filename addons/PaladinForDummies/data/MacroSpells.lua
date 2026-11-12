@@ -26,7 +26,30 @@ ns.Data.MacroSpells = {
   exorcism             = { spellIds = { 879, 5614, 5615, 10312, 10313, 10314 } },           -- 10312+: classic
 }
 
--- Sellos y hechizos de macros juntos: lo que el adaptador busca en el grimorio.
+-- Todo lo que el adaptador busca en el grimorio: sellos, hechizos de macros y
+-- otros grupos. Son las mismas tablas, así que LearnRanks las amplía todas.
 ns.Data.TrackedSpells = {}
 for key, spell in pairs(ns.Data.Seals) do ns.Data.TrackedSpells[key] = spell end
 for key, spell in pairs(ns.Data.MacroSpells) do ns.Data.TrackedSpells["macro:" .. key] = spell end
+for key, spell in pairs(ns.Data.SpellGroups) do ns.Data.TrackedSpells["spell:" .. key] = spell end
+
+-- Añade los rangos descubiertos en el grimorio ({ [clave] = { spellIDs en orden
+-- del grimorio } }). Los IDs listados que no aparecieron van delante (no se
+-- conocen); los descubiertos detrás, en orden, para que el rango más alto sea el
+-- último. Después rehace el catálogo de peleas.
+function ns.Data.LearnRanks(discovered)
+  for key, ids in pairs(discovered or {}) do
+    local spell = ns.Data.TrackedSpells[key]
+    if spell and #ids > 0 then
+      local found = {}
+      for _, id in ipairs(ids) do found[id] = true end
+      local merged = {}
+      for _, id in ipairs(spell.spellIds) do
+        if not found[id] then merged[#merged + 1] = id end
+      end
+      for _, id in ipairs(ids) do merged[#merged + 1] = id end
+      spell.spellIds = merged
+    end
+  end
+  ns.Data.RebuildCatalog()
+end

@@ -111,6 +111,9 @@ local function refresh()
     -- TrackedSpells viene de data/MacroSpells.lua; si falta (archivo nuevo sin
     -- reiniciar el juego), al menos se leen los sellos.
     local situation, diagnostics = SituationReader.read(_G, ns.Data.TrackedSpells or Seals, { specOverride = db.specOverride })
+    -- Rangos nuevos del grimorio: que el motor, las macros y el registro de
+    -- peleas los reconozcan (cada rango tiene su propio spellID).
+    if ns.Data.LearnRanks then ns.Data.LearnRanks(diagnostics.discoveredRanks) end
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
     ui:ShowRecommendation(recommendation)

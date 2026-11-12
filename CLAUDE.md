@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.7.1). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.7.2). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -44,6 +44,7 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 - **Enfriamiento de Judgement: 8 s. Enfriamiento de Holy Strike: 10 s** (intervalos mínimos entre lanzamientos).
 - **Seal of Command: unas 3,7 activaciones por minuto con el sello puesto** (102 en 1669 s; 3 por minuto en peleas largas). Muy por debajo de las 7 que asumen las guías, aunque el tiempo incluye ratos sin golpear y golpes fallados.
 - `UnitAttackSpeed` incluye el +40% de Crusader si está puesto: desde la v0.7.1 se guarda `weaponBaseSpeed`.
+- **Cada rango de un hechizo tiene su propio spellID.** Hasta la v0.7.1 solo se conocía el rango 1 de Righteousness (21084), así que los lanzamientos del rango 5 no se registraban: las peleas de antes no tienen datos del cambio de sellos. Desde la v0.7.2 el adaptador **descubre los rangos en el grimorio** por el nombre del ID conocido (nombre del cliente, vale en cualquier idioma) y `Data.LearnRanks` los añade y rehace el catálogo. Los IDs descubiertos quedan en `snapshot.diagnostics.discoveredRanks`.
 
 - **La ventana funciona (v0.1.2):** se ve con fondo, los tooltips muestran el hechizo, el porqué y la confianza, y la posición se guarda entre `/reload`. Sin fondo (v0.1.0/0.1.1) no se distinguía.
 

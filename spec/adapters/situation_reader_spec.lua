@@ -44,6 +44,31 @@ describe("SituationReader.read", function()
     assert.are.same({ [20375] = true, [20918] = true, [21082] = true }, situation.player.knownSpells)
   end)
 
+  it("discovers other ranks of a spell from the spellbook by the name of the known rank", function()
+    local book = {
+      { spellID = 21084, name = "Seal of Righteousness" }, -- rango 1, el que conocemos
+      { spellID = 20290, name = "Seal of Righteousness" }, -- rango 5, ID nuevo
+      { spellID = 20918, name = "Seal of Command" },
+      { spellID = 999, name = "Something Else" },
+    }
+    local situation, diagnostics = SituationReader.read(fakeApi({
+      C_SpellBook = {
+        GetNumSpellBookSkillLines = function() return 1 end,
+        GetSpellBookSkillLineInfo = function() return { itemIndexOffset = 0, numSpellBookItems = #book } end,
+        GetSpellBookItemInfo = function(i) return book[i] end,
+      },
+      C_Spell = {
+        GetSpellName = function(id)
+          return ({ [21084] = "Seal of Righteousness", [20375] = "Seal of Command" })[id]
+        end,
+      },
+    }), { righteousness = { spellIds = { 21084 } }, command = { spellIds = { 20375, 20918 } } })
+
+    assert.is_true(situation.player.knownSpells[20290])
+    assert.are.same({ 21084, 20290 }, diagnostics.discoveredRanks.righteousness)
+    assert.are.same({ 20918 }, diagnostics.discoveredRanks.command)
+  end)
+
   it("reads the weapon and the Holy spell power", function()
     local situation = SituationReader.read(fakeApi({
       UnitAttackSpeed = function() return 2.4, nil end,

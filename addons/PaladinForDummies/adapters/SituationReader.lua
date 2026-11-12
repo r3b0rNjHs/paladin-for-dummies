@@ -68,13 +68,23 @@ local function field(tbl, key)
   return tbl[key]
 end
 
-local function readKnownSeals(api, call, seals)
-  local wanted = {}
-  for _, seal in pairs(seals) do
-    for _, id in ipairs(seal.spellIds) do wanted[id] = true end
+-- Lee el grimorio. Devuelve los spellIDs conocidos de los grupos buscados y los
+-- rangos descubiertos: cada rango tiene su propio spellID, así que para un grupo
+-- se busca en el grimorio todo lo que se llame igual que su primer ID conocido
+-- (nombre que da el propio cliente: vale en cualquier idioma).
+local function readKnownSpells(api, call, groups)
+  local wanted, keysByName = {}, {}
+  local getName = field(api.C_Spell, "GetSpellName")
+  for key, group in pairs(groups) do
+    for _, id in ipairs(group.spellIds) do wanted[id] = true end
+    local refName = group.spellIds[1] and call(getName, group.spellIds[1])
+    if type(refName) == "string" then
+      keysByName[refName] = keysByName[refName] or {}
+      table.insert(keysByName[refName], key)
+    end
   end
 
-  local known = {}
+  local known, discovered = {}, {}
   local book = api.C_SpellBook
   local bank = field(field(api.Enum, "SpellBookSpellBank"), "Player") or 0
   local lines = call(field(book, "GetNumSpellBookSkillLines")) or 0
@@ -85,11 +95,20 @@ local function readKnownSeals(api, call, seals)
       for i = offset + 1, offset + count do
         local item = call(field(book, "GetSpellBookItemInfo"), i, bank)
         local id = field(item, "spellID")
-        if type(id) == "number" and wanted[id] then known[id] = true end
+        if type(id) == "number" then
+          if wanted[id] then known[id] = true end
+          local name = field(item, "name")
+          if type(name) ~= "string" then name = call(getName, id) end
+          for _, key in ipairs((type(name) == "string" and keysByName[name]) or {}) do
+            discovered[key] = discovered[key] or {}
+            table.insert(discovered[key], id)
+            known[id] = true
+          end
+        end
       end
     end
   end
-  return known
+  return known, discovered
 end
 
 local function readSpecFromSpecialization(api, call, diagnostics)
@@ -180,11 +199,14 @@ function SituationReader.read(api, seals, options)
   local diagnostics = { secret = {} }
   local call, tagged = reader(api, diagnostics)
 
+  local knownSpells, discoveredRanks = readKnownSpells(api, call, seals)
+  diagnostics.discoveredRanks = discoveredRanks
+
   local situation = {
     player = {
       level = call(api.UnitLevel, "player"),
       spec = readSpec(api, call, options, diagnostics),
-      knownSpells = readKnownSeals(api, call, seals),
+      knownSpells = knownSpells,
       weapon = readWeapon(tagged, api),
       spellPower = tagged("spellPower", api.GetSpellBonusDamage, HOLY_SCHOOL),
     },

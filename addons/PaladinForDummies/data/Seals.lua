@@ -24,7 +24,10 @@ ns.Data.Spells = {
 -- Catálogo para registrar peleas (core/Fight.lua): qué es cada spellID.
 -- Holy Strike y Command (activación) salen del sondeo 1. Echo of Righteousness
 -- (1311704) sale de Icy Veins, sin confirmar en nuestro cliente.
-local HOLY_STRIKE_RANKS = { 679, 678, 1866, 680, 2495 }
+-- Otros grupos de rangos que hay que reconocer (se amplían con LearnRanks).
+ns.Data.SpellGroups = {
+  holyStrike = { spellIds = { 679, 678, 1866, 680, 2495 } },
+}
 
 local function set(ids)
   local out = {}
@@ -32,15 +35,21 @@ local function set(ids)
   return out
 end
 
-local sealBySpellId = {}
-for key, seal in pairs(ns.Data.Seals) do
-  for _, id in ipairs(seal.spellIds) do sealBySpellId[id] = key end
-end
-
 ns.Data.Catalog = {
-  sealBySpellId = sealBySpellId,
   echoBySpellId = { [1311703] = "command", [1311704] = "righteousness" },
   judgement = set({ ns.Data.Spells.judgement }),
-  holyStrike = set(HOLY_STRIKE_RANKS),
   commandProc = set({ 20424 }),
 }
+
+-- Rehace las partes del catálogo que dependen de los rangos. Modifica la misma
+-- tabla, así que quien la guardó (Recorder) ve los cambios.
+function ns.Data.RebuildCatalog()
+  local sealBySpellId = {}
+  for key, seal in pairs(ns.Data.Seals) do
+    for _, id in ipairs(seal.spellIds) do sealBySpellId[id] = key end
+  end
+  ns.Data.Catalog.sealBySpellId = sealBySpellId
+  ns.Data.Catalog.holyStrike = set(ns.Data.SpellGroups.holyStrike.spellIds)
+end
+
+ns.Data.RebuildCatalog()
