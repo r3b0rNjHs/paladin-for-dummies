@@ -75,7 +75,7 @@ end
 local macrosPending = false
 local function syncMacros(verbose)
   if not (db and db.macros and last.situation) then return end
-  local macros = ns.Core.Macros.build({
+  local macros, skipped = ns.Core.Macros.build({
     recommendation = last.recommendation,
     seals = Seals,
     knownSpells = last.situation.player.knownSpells,
@@ -83,6 +83,11 @@ local function syncMacros(verbose)
     nameOf = spellNameOf,
   })
   local results, reason = ns.Adapters.MacroWriter.write(_G, macros)
+  -- Queda en el archivo de SavedVariables para poder revisarlo.
+  db.macroStatus = { time = time(), results = results, skipped = skipped, reason = reason }
+  if verbose then
+    for _, s in ipairs(skipped) do p(("Macro %s: no creada, %s."):format(s.name, s.reason)) end
+  end
   if not results then
     macrosPending = (reason == "combat")
     if verbose then p("Estás en combate: las macros se crearán al salir.") end

@@ -9,8 +9,8 @@
 --   recommendation, seals, knownSpells, judgementSpellId,
 --   nameOf = function(spellId) -> nombre o nil,
 -- }
--- Devuelve una lista de { name, body }. Se omite una macro si falta algún
--- hechizo o algún nombre. Lua puro: sin dependencias de WoW.
+-- Devuelve la lista de { name, body } y la de las omitidas, { name, reason },
+-- para poder explicar por qué falta alguna. Lua puro: sin dependencias de WoW.
 local _, ns = ...
 ns.Core = ns.Core or {}
 
@@ -28,46 +28,62 @@ local function highestKnown(seal, knownSpells)
   return nil
 end
 
--- Nombres de varios spellIDs, o nil si falta alguno.
-local function namesOf(nameOf, ...)
+-- Nombres de varios spellIDs, o nil y el primer ID sin nombre.
+local function namesOf(nameOf, ids)
   local names = {}
-  for i = 1, select("#", ...) do
-    local id = select(i, ...)
-    local name = id and nameOf(id)
-    if type(name) ~= "string" or name == "" then return nil end
+  for _, id in ipairs(ids) do
+    local name = nameOf(id)
+    if type(name) ~= "string" or name == "" then return nil, id end
     names[#names + 1] = name
   end
   return names
 end
 
+local function missingName(id)
+  return ("falta el nombre de algún hechizo (spellID %s)"):format(tostring(id))
+end
+
+-- Devuelve el cuerpo, o nil y el motivo.
 local function opener(input)
-  local steps = ns.Core.Plan.prepull(input.recommendation)
-  if #steps == 0 then return nil end
+  local steps = ns.Core.Plan.prepull(input.recommendation or {})
+  if #steps == 0 then return nil, "no hay recomendación todavía" end
   local ids = {}
   for _, step in ipairs(steps) do
     ids[#ids + 1] = (step.action == "judge") and input.judgementSpellId or step.spellId
   end
-  local names = namesOf(input.nameOf, unpack(ids))
-  if not names then return nil end
+  local names, missing = namesOf(input.nameOf, ids)
+  if not names then return nil, missingName(missing) end
   if #names == 1 then return HEADER .. "/cast " .. names[1] end
   return HEADER .. "/castsequence reset=target/combat " .. table.concat(names, ", ")
 end
 
 function Macros.build(input)
-  local macros = {}
-  local function add(name, body)
-    if body and #body <= MAX_BODY then macros[#macros + 1] = { name = name, body = body } end
+  local macros, skipped = {}, {}
+  local function add(name, body, reason)
+    if body and #body > MAX_BODY then body, reason = nil, "el texto pasa de 255 caracteres" end
+    if body then
+      macros[#macros + 1] = { name = name, body = body }
+    else
+      skipped[#skipped + 1] = { name = name, reason = reason }
+    end
   end
 
   add("PFD Apertura", opener(input))
 
   local command = highestKnown(input.seals.command, input.knownSpells)
   local righteousness = highestKnown(input.seals.righteousness, input.knownSpells)
-  local names = command and righteousness and namesOf(input.nameOf, righteousness, command)
-  if names then
-    add("PFD Unsealed", HEADER .. "/castsequence reset=combat " .. names[1] .. ", " .. names[2])
-    add("PFD Sello", HEADER .. "/cast [mod:shift] " .. names[1] .. "; " .. names[2])
+  local names, reason
+  if not righteousness then
+    reason = "no conoces Seal of Righteousness"
+  elseif not command then
+    reason = "no conoces Seal of Command"
+  else
+    local missing
+    names, missing = namesOf(input.nameOf, { righteousness, command })
+    if not names then reason = missingName(missing) end
   end
+  add("PFD Unsealed", names and (HEADER .. "/castsequence reset=combat " .. names[1] .. ", " .. names[2]), reason)
+  add("PFD Sello", names and (HEADER .. "/cast [mod:shift] " .. names[1] .. "; " .. names[2]), reason)
 
-  return macros
+  return macros, skipped
 end

@@ -78,6 +78,25 @@ describe("Macros.build", function()
     assert.is_string(macros["PFD Sello"])
   end)
 
+  it("explains why each skipped macro could not be built", function()
+    local _, skipped = Macros.build(input({
+      knownSpells = { [20918] = true, [20306] = true },
+      nameOf = function(id) return id ~= 20271 and NAMES[id] or nil end,
+    }))
+
+    assert.are.same({
+      { name = "PFD Apertura", reason = "falta el nombre de algún hechizo (spellID 20271)" },
+      { name = "PFD Unsealed", reason = "no conoces Seal of Righteousness" },
+      { name = "PFD Sello", reason = "no conoces Seal of Righteousness" },
+    }, skipped)
+  end)
+
+  it("explains an empty opener", function()
+    local _, skipped = Macros.build(input({ recommendation = {} }))
+
+    assert.are.same({ name = "PFD Apertura", reason = "no hay recomendación todavía" }, skipped[1])
+  end)
+
   it("keeps names within 16 characters and bodies within 255", function()
     for _, m in ipairs(Macros.build(input())) do
       assert.is_true(#m.name <= 16, m.name)
