@@ -32,7 +32,7 @@ El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de man
 5. Lo importante es que funcione **en combate**: si solo se ve fuera de combate, dímelo.
 6. Haz capturas del widget en plena pelea, `/reload` y manda el archivo.
 
-`/pfd echo` otra vez lo oculta.
+`/pfd echo` otra vez lo oculta. `/pfd echo move` lo desbloquea para arrastrarlo (y lo vuelve a fijar); `/pfd echo reset` lo devuelve a su sitio. La posición se guarda.
 
 ## Plan de pruebas de rotación (v0.2.3)
 Qué queremos saber: (1) cuántas veces por minuto se activa Command en Forever, (2) Command o Righteousness con tu arma de 3,0 s, (3) si el cambio de sellos con Unsealed Wrath compensa.

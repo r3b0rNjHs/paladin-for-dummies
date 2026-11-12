@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.3.0). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.3.1). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -56,7 +56,7 @@ Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar
 Todo vive en `addons/PaladinForDummies/` (WoW solo carga lo que está dentro de la carpeta del addon). Orden de carga en el `.toc`.
 Tests: `busted` desde la raíz del repo (Lua 5.1; en Ubuntu, `apt install lua5.1 lua-busted`). `spec/support/addon.lua` carga los archivos como WoW, pasando `(addonName, ns)`; `spec/smoke/` carga el `.toc` entero con un WoW simulado.
 
-- **Widget de Unsealed Wrath** (`ui/EchoTracker.lua`, `/pfd echo`, experimental desde la v0.3.0): AuraContainer de Blizzard con un hueco por copia (Echo of Command 1311703, Echo of Righteousness 1311704) filtrado por ID; el juego pinta el número de copias y una barra con `minApplications` que solo se muestra al llegar a 3 (o a 1 para volver). Resultado de la creación en `db.echoStatus`. Detalle en `docs/research.md`.
+- **Widget de Unsealed Wrath** (`ui/EchoTracker.lua`, `/pfd echo`, experimental desde la v0.3.0): AuraContainer de Blizzard con un hueco por copia (Echo of Command 1311703, Echo of Righteousness 1311704) filtrado por ID; el juego pinta el número de copias y una barra con `minApplications` que solo se muestra al llegar a 3 (o a 1 para volver). Resultado de la creación en `db.echoStatus`. **Funciona en Forever: el widget aparece** (12 nov). El contenedor va sujeto a un ancla propia movible (`/pfd echo move`, posición en `db.echoPosition`): al contenedor no se le ponen scripts. Detalle en `docs/research.md`.
 
 - La Sentencia (Judgement, 20271) es **un solo hechizo** que libera el sello puesto. La recomendación de "Sentencia" es el sello que hay que llevar al juzgar; `core/Plan.lua` la convierte en pasos (ponte X, lanza Judgement, cambia a Y) y la interfaz muestra el icono de Judgement con el sello en la esquina.
 

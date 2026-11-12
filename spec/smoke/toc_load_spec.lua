@@ -136,6 +136,9 @@ describe("PaladinForDummies.toc", function()
     env.SlashCmdList.PALADINFORDUMMIES("echo")
     assert.is_true(env.PaladinForDummiesDB.echo)
     assert.is_true(env.PaladinForDummiesDB.echoStatus.created)
+    env.SlashCmdList.PALADINFORDUMMIES("echo move")
+    env.SlashCmdList.PALADINFORDUMMIES("echo move")
+    env.SlashCmdList.PALADINFORDUMMIES("echo reset")
     local slotErrors = {}
     for _, echo in ipairs(ns.UI.EchoTracker.ECHOES) do
       ns.UI.EchoTracker.initializer(echo, function(key, err) slotErrors[#slotErrors + 1] = key .. ": " .. tostring(err) end)(mock())
@@ -190,6 +193,8 @@ describe("PaladinForDummies.toc", function()
     assert.truthy(output:find("No hay ninguna prueba activa", 1, true), output)
     assert.is_nil(env.PaladinForDummiesDB.test)
     assert.truthy(output:find("Peleas guardadas: 1.", 1, true), output)
+    assert.truthy(output:find("Widget desbloqueado", 1, true), output)
+    assert.truthy(output:find("Widget fijado en su sitio", 1, true), output)
     assert.truthy(output:find("Total con command: 2 activaciones en 20 s = 6 por minuto", 1, true), output)
     assert.truthy(output:find("Arma: velocidad 2.4, daño 110.35-160", 1, true), output)
 

@@ -71,7 +71,7 @@ end
 -- Crea el widget de copias de Unsealed Wrath y guarda en db.echoStatus si
 -- funcionó, para verlo en el archivo de SavedVariables.
 local function createEchoes()
-  local container, err = ns.UI.EchoTracker.create(function(key, slotErr)
+  local container, err = ns.UI.EchoTracker.create(db, function(key, slotErr)
     reportError("el widget de Echo (" .. key .. ")", slotErr)
   end)
   db.echoStatus = { time = time(), created = container ~= nil, error = err and tostring(err) or nil }
@@ -250,12 +250,22 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
       return
     end
     ui:SetTest(db.test)
+  elseif cmd == "echo" and arg == "move" then
+    if not echoes then p("Activa primero el widget con /pfd echo.") return end
+    echoes:Show()
+    echoes:SetUnlocked(not echoes.unlocked)
+    p(echoes.unlocked and "Widget desbloqueado: arrástralo y escribe /pfd echo move para fijarlo."
+      or "Widget fijado en su sitio.")
+  elseif cmd == "echo" and arg == "reset" then
+    db.echoPosition = nil
+    if echoes then echoes:ApplyPosition() end
+    p("Widget de vuelta a su sitio inicial.")
   elseif cmd == "echo" then
     if not echoes then
       echoes = createEchoes()
       if echoes then
         db.echo = true
-        p("Widget de Unsealed Wrath activado (experimental). Aparece cuando tienes Echo of Command o Echo of Righteousness. /pfd echo para ocultarlo.")
+        p("Widget de Unsealed Wrath activado (experimental). Aparece cuando tienes Echo of Command o Echo of Righteousness. /pfd echo move para moverlo, /pfd echo para ocultarlo.")
       end
     elseif echoes:IsShown() then
       echoes:Hide()
@@ -282,6 +292,6 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     ui:ResetPosition()
     p("Posición restablecida.")
   else
-    p("Comandos: /pfd debug | ui | echo | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd debug | ui | echo [move|reset] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
   end
 end

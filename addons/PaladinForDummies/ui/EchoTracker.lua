@@ -67,14 +67,72 @@ function EchoTracker.initializer(echo, onError)
   end
 end
 
--- Crea el contenedor con un hueco por cada copia. Devuelve el contenedor, o
--- nil y el error si el cliente no lo permite.
-function EchoTracker.create(onError)
+local DEFAULT_POSITION = { point = "CENTER", relativePoint = "CENTER", x = 0, y = -80 }
+
+-- Ancla propia (un marco normal, movible) a la que se sujeta el contenedor. El
+-- contenedor de Blizzard tiene partes protegidas: no le ponemos scripts, solo lo
+-- anclamos a este marco. Con el ancla desbloqueada se ve un recuadro para arrastrar.
+local function createAnchor(db, width, height)
+  local anchor = CreateFrame("Frame", "PaladinForDummiesEchoAnchor", UIParent, "BackdropTemplate")
+  anchor:SetSize(width, height)
+  anchor:SetMovable(true)
+  anchor:SetClampedToScreen(true)
+  anchor:RegisterForDrag("LeftButton")
+  anchor:SetScript("OnDragStart", function(self) self:StartMoving() end)
+  anchor:SetScript("OnDragStop", function(self)
+    self:StopMovingOrSizing()
+    local ok, point, _, relativePoint, x, y = pcall(self.GetPoint, self)
+    if ok and point then db.echoPosition = { point = point, relativePoint = relativePoint, x = x, y = y } end
+  end)
+
+  if anchor.SetBackdrop then
+    anchor:SetBackdrop({
+      bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+      tile = true, tileSize = 16, edgeSize = 12,
+      insets = { left = 3, right = 3, top = 3, bottom = 3 },
+    })
+    anchor:SetBackdropColor(0.1, 0.4, 0.8, 0.5)
+  end
+  anchor.hint = anchor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  anchor.hint:SetPoint("BOTTOM", anchor, "TOP", 0, 4)
+  anchor.hint:SetText("Arrastra para mover · /pfd echo move para fijar")
+
+  function anchor:ApplyPosition()
+    local pos = db.echoPosition or DEFAULT_POSITION
+    self:ClearAllPoints()
+    self:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
+  end
+
+  -- Bloqueado: sin fondo, sin texto y sin ratón (no estorba en combate).
+  function anchor:SetUnlocked(unlocked)
+    self.unlocked = unlocked
+    self:EnableMouse(unlocked)
+    if self.SetBackdrop then
+      self:SetBackdropColor(0.1, 0.4, 0.8, unlocked and 0.5 or 0)
+      self:SetBackdropBorderColor(1, 1, 1, unlocked and 1 or 0)
+    end
+    self.hint:SetShown(unlocked)
+  end
+
+  anchor:ApplyPosition()
+  anchor:SetUnlocked(false)
+  return anchor
+end
+
+-- Crea el widget: el ancla y el contenedor con un hueco por cada copia.
+-- Devuelve el ancla (que mueve, muestra y oculta el conjunto), o nil y el error
+-- si el cliente no lo permite.
+function EchoTracker.create(db, onError)
   local ok, result = pcall(function()
-    local container = CreateFrame("AuraContainer", "PaladinForDummiesEchoes", UIParent, "CustomAuraContainerTemplate")
-    container:SetSize(#EchoTracker.ECHOES * (SIZE + GAP), SIZE + 40)
-    container:SetPoint("CENTER", UIParent, "CENTER", 0, -80)
+    local width, height = #EchoTracker.ECHOES * (SIZE + GAP), SIZE + 40
+    local anchor = createAnchor(db, width, height)
+
+    local container = CreateFrame("AuraContainer", "PaladinForDummiesEchoes", anchor, "CustomAuraContainerTemplate")
+    container:SetSize(width, height)
+    container:SetPoint("CENTER", anchor, "CENTER", 0, 0)
     container:SetUnit("player")
+    anchor.container = container
 
     for i, echo in ipairs(EchoTracker.ECHOES) do
       local frame = container:AddAuraSlot(echo.key, "HELPFUL", {
@@ -83,7 +141,7 @@ function EchoTracker.create(onError)
       })
       frame:SetPoint("LEFT", container, "LEFT", (i - 1) * (SIZE + GAP), 0)
     end
-    return container
+    return anchor
   end)
   if not ok then return nil, result end
   return result
