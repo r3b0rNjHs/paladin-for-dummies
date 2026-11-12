@@ -18,7 +18,10 @@ local EchoTracker = {}
 ns.UI.EchoTracker = EchoTracker
 
 local SIZE = 48
-local GAP = 24
+local GLOW = 1.9 -- el brillo de "¡CAMBIA!" es 1,9 veces el icono
+local TEXT_HEIGHT = 26 -- texto del aviso debajo del icono
+-- Margen para que el brillo quepa dentro del recuadro de mover.
+local PAD = math.ceil(SIZE * (GLOW - 1) / 2) + 4
 
 -- ready: con cuántas copias toca cambiar (Icy Veins: 3 de Command; volver con 1 de Righteousness).
 EchoTracker.ECHOES = {
@@ -64,7 +67,7 @@ function EchoTracker.initializer(echo, onError)
       glow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
       glow:SetBlendMode("ADD")
       glow:SetVertexColor(1, 0.85, 0.2)
-      glow:SetSize(SIZE * 1.9, SIZE * 1.9)
+      glow:SetSize(SIZE * GLOW, SIZE * GLOW)
       glow:SetPoint("CENTER", button, "CENTER")
 
       local text = bar:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -178,12 +181,14 @@ function EchoTracker.describe()
   return lines
 end
 
--- Crea el widget: el ancla y el contenedor con un hueco por cada copia.
+-- Crea el widget: el ancla y el contenedor con un hueco por cada copia. Los dos
+-- huecos van en el mismo sitio: nunca hay copias de los dos sellos a la vez (el
+-- golpe con el otro sello gasta las que había), así que solo se ve uno.
 -- Devuelve el ancla (que mueve, muestra y oculta el conjunto), o nil y el error
 -- si el cliente no lo permite.
 function EchoTracker.create(db, onError)
   local ok, result = pcall(function()
-    local width, height = #EchoTracker.ECHOES * (SIZE + GAP), SIZE + 40
+    local width, height = SIZE + 2 * PAD, PAD + SIZE + TEXT_HEIGHT
     local anchor = createAnchor(db, width, height)
 
     local container = CreateFrame("AuraContainer", "PaladinForDummiesEchoes", anchor, "CustomAuraContainerTemplate")
@@ -192,12 +197,12 @@ function EchoTracker.create(db, onError)
     container:SetUnit("player")
     anchor.container = container
 
-    for i, echo in ipairs(EchoTracker.ECHOES) do
+    for _, echo in ipairs(EchoTracker.ECHOES) do
       local frame = container:AddAuraSlot(echo.key, "HELPFUL", {
         candidateFilters = { includeSpellIDs = { [echo.spellId] = true } },
         initializeFrame = EchoTracker.initializer(echo, onError),
       })
-      frame:SetPoint("LEFT", container, "LEFT", (i - 1) * (SIZE + GAP), 0)
+      frame:SetPoint("TOP", container, "TOP", 0, -PAD)
     end
     return anchor
   end)
