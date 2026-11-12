@@ -1,21 +1,30 @@
--- Ventana de recomendación: dos iconos con su porqué en el tooltip.
---   Sello:     el sello para la pelea.
---   Sentencia: el icono de Judgement con el sello que se juzga en la esquina; el
---              tooltip da los pasos antes del pull (core/Plan.lua).
+-- El asesor: dos iconos con el sistema de diseño (ui/Style.lua) y su porqué en
+-- el tooltip.
+--   Sello:     el sello para la pelea, con el anillo de oro de "recomendado".
+--   Sentencia: el icono de Judgement con el sello que se juzga en la insignia;
+--              el tooltip da los pasos antes del pull (core/Plan.lua).
+-- Sin fondo ni título: solo iconos y una etiqueta pequeña debajo. Cuándo se ve
+-- lo decide core/HudState.lua (atenuado sin objetivo, oculto en combate).
 -- Solo muestra lo que le pasan: no decide nada.
 local _, ns = ...
 ns.UI = ns.UI or {}
+local L = ns.L
+local Style = ns.UI.Style
 
 local RecommendationFrame = {}
 ns.UI.RecommendationFrame = RecommendationFrame
 
 local ICON_SIZE = 36
+local GAP = 6
+local LABEL_HEIGHT = 14
 local QUESTION_MARK = 134400 -- INV_Misc_QuestionMark
+local DEFAULT_POINT = { "CENTER", "CENTER", 0, -180 }
 
-local CONFIDENCE_TEXT = {
-  mechanic = "Confianza: sale de la mecánica del hechizo",
-  consensus = "Confianza: consenso de guías (por medir)",
-  measured = "Confianza: medido con tus peleas",
+-- Color de cada nivel de confianza (sistema de diseño: verde = medido por ti).
+local CONFIDENCE = {
+  mechanic = { color = "blue", text = function() return L.CONF_MECHANIC end },
+  consensus = { color = "amber", text = function() return L.CONF_CONSENSUS end },
+  measured = { color = "green", text = function() return L.CONF_MEASURED end },
 }
 
 local function spellTexture(spellId)
@@ -36,47 +45,60 @@ local function spellName(spellId)
 end
 
 local STEP_TEXT = {
-  apply = function(step) return "Ponte " .. spellName(step.spellId) end,
-  judge = function() return "Lanza " .. spellName(ns.Data.Spells.judgement) .. " sobre el objetivo" end,
-  switch = function(step) return "Cambia a " .. spellName(step.spellId) .. " para la pelea" end,
+  apply = function(step) return L.STEP_APPLY:format(spellName(step.spellId)) end,
+  judge = function() return L.STEP_JUDGE:format(spellName(ns.Data.Spells.judgement)) end,
+  switch = function(step) return L.STEP_SWITCH:format(spellName(step.spellId)) end,
 }
 
-local function addReason(entry)
+local function c(name) return Style.COLORS[name] end
+
+local function addReason(entry, test)
   GameTooltip:AddLine(" ")
-  GameTooltip:AddLine(entry.why, 1, 1, 1, true)
-  GameTooltip:AddLine(CONFIDENCE_TEXT[entry.confidence] or entry.confidence, 0.6, 0.8, 1, true)
+  GameTooltip:AddLine(L.TIP_WHY, c("muted")[1], c("muted")[2], c("muted")[3])
+  GameTooltip:AddLine(entry.why, c("text")[1], c("text")[2], c("text")[3], true)
+  local conf = CONFIDENCE[entry.confidence]
+  if conf then
+    local color = c(conf.color)
+    GameTooltip:AddLine("● " .. conf.text(), color[1], color[2], color[3], true)
+  end
+  if test then
+    GameTooltip:AddLine(L.TIP_TEST:format(test), c("muted")[1], c("muted")[2], c("muted")[3])
+  end
+end
+
+local function showEmptyTooltip(slot)
+  GameTooltip:SetOwner(slot, "ANCHOR_RIGHT")
+  GameTooltip:AddLine(L.TIP_NO_ADVICE, c("muted")[1], c("muted")[2], c("muted")[3], true)
+  GameTooltip:Show()
 end
 
 -- Sello: el tooltip del propio hechizo y debajo el porqué.
 local function showSealTooltip(slot)
   local entry = slot.entry
-  if not entry then return end
+  if not entry then return showEmptyTooltip(slot) end
   GameTooltip:SetOwner(slot, "ANCHOR_RIGHT")
   GameTooltip:SetSpellByID(entry.spellId)
-  addReason(entry)
+  addReason(entry, slot:GetParent().test)
   GameTooltip:Show()
 end
 
 -- Sentencia: los pasos antes del pull y debajo el porqué.
 local function showJudgementTooltip(slot)
   local entry = slot.entry
-  if not entry then return end
+  if not entry then return showEmptyTooltip(slot) end
   GameTooltip:SetOwner(slot, "ANCHOR_RIGHT")
-  GameTooltip:AddLine("Antes del pull")
+  GameTooltip:AddLine(L.TIP_BEFORE_PULL, c("gold")[1], c("gold")[2], c("gold")[3])
   for i, step in ipairs(slot.steps or {}) do
-    GameTooltip:AddLine(("%d. %s"):format(i, STEP_TEXT[step.action](step)), 1, 0.82, 0, true)
+    GameTooltip:AddLine(("%d. %s"):format(i, STEP_TEXT[step.action](step)), c("text")[1], c("text")[2], c("text")[3], true)
   end
-  addReason(entry)
+  addReason(entry, slot:GetParent().test)
   GameTooltip:Show()
 end
 
-local function createSlot(parent, label, onEnter)
-  local slot = CreateFrame("Frame", nil, parent)
-  slot:SetSize(ICON_SIZE, ICON_SIZE)
-  slot.icon = slot:CreateTexture(nil, "ARTWORK")
-  slot.icon:SetAllPoints()
-  slot.label = slot:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  slot.label:SetPoint("TOP", slot, "BOTTOM", 0, -2)
+local function createSlot(parent, label, onEnter, withBadge)
+  local slot = Style.icon(parent, ICON_SIZE, withBadge)
+  slot.label = Style.text(slot, "GameFontNormalSmall", "muted")
+  slot.label:SetPoint("TOP", slot, "BOTTOM", 0, -3)
   slot.label:SetText(label)
 
   slot:EnableMouse(true)
@@ -89,54 +111,40 @@ local function createSlot(parent, label, onEnter)
 end
 
 -- iconSpellId: el hechizo cuyo icono se muestra (para la Sentencia, Judgement).
-local function fill(slot, entry, iconSpellId)
+local function fill(slot, entry, iconSpellId, state)
   slot.entry = entry
   if entry then
     slot.icon:SetTexture(spellTexture(iconSpellId or entry.spellId))
-    slot.icon:SetDesaturated(false)
+    slot:SetState(state or "normal")
   else
     slot.icon:SetTexture(QUESTION_MARK)
+    slot:SetState("normal")
     slot.icon:SetDesaturated(true)
   end
   if slot.badge then
     slot.badge:SetShown(entry ~= nil)
-    if entry then slot.badge:SetTexture(spellTexture(entry.spellId)) end
+    if entry then slot.badge.icon:SetTexture(spellTexture(entry.spellId)) end
+  end
+end
+
+local function applyPoint(frame, pos)
+  frame:ClearAllPoints()
+  if pos then
+    frame:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
+  else
+    frame:SetPoint(DEFAULT_POINT[1], UIParent, DEFAULT_POINT[2], DEFAULT_POINT[3], DEFAULT_POINT[4])
   end
 end
 
 -- db: tabla donde se guarda la posición (profile.advisor de AceDB).
 function RecommendationFrame.create(db)
-  local frame = CreateFrame("Frame", "PaladinForDummiesFrame", UIParent, "BackdropTemplate")
-  frame:SetSize(ICON_SIZE * 2 + 60, ICON_SIZE + 52)
+  local frame = CreateFrame("Frame", "PaladinForDummiesFrame", UIParent)
+  frame:SetSize(ICON_SIZE * 2 + GAP, ICON_SIZE + LABEL_HEIGHT + 3)
   frame:SetFrameStrata("MEDIUM")
   frame:SetMovable(true)
   frame:SetClampedToScreen(true)
-  frame:EnableMouse(true)
-  frame:RegisterForDrag("LeftButton")
-  frame:SetScript("OnDragStart", function(self) if not self.locked then self:StartMoving() end end)
-  frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing(); self:SavePosition() end)
 
-  -- Fondo oscuro con borde para que la ventana se vea siempre.
-  if frame.SetBackdrop then
-    frame:SetBackdrop({
-      bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-      edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-      tile = true, tileSize = 16, edgeSize = 12,
-      insets = { left = 3, right = 3, top = 3, bottom = 3 },
-    })
-    frame:SetBackdropColor(0, 0, 0, 0.75)
-  end
-
-  frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  frame.title:SetPoint("TOP", frame, "TOP", 0, -6)
-  frame.title:SetText("Paladin for Dummies")
-
-  local pos = db.position
-  if pos then
-    frame:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
-  else
-    frame:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
-  end
+  applyPoint(frame, db.position)
 
   function frame:SavePosition()
     local ok, point, _, relativePoint, x, y = pcall(self.GetPoint, self)
@@ -145,49 +153,45 @@ function RecommendationFrame.create(db)
     end
   end
 
-  frame.seal = createSlot(frame, "Sello", showSealTooltip)
-  frame.seal:SetPoint("TOPLEFT", frame, "TOPLEFT", 20, -20)
-  frame.judgement = createSlot(frame, "Sentencia", showJudgementTooltip)
-  -- Icono pequeño del sello que se juzga, en la esquina del icono de Judgement.
-  frame.judgement.badge = frame.judgement:CreateTexture(nil, "OVERLAY")
-  frame.judgement.badge:SetSize(ICON_SIZE / 2, ICON_SIZE / 2)
-  frame.judgement.badge:SetPoint("BOTTOMRIGHT", frame.judgement, "BOTTOMRIGHT", 4, -4)
-  frame.judgement:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -20, -20)
-
-  frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  frame.status:SetPoint("BOTTOM", frame, "BOTTOM", 0, 4)
+  frame.seal = createSlot(frame, L.ADVISOR_SEAL, showSealTooltip)
+  frame.seal:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+  frame.judgement = createSlot(frame, L.ADVISOR_JUDGEMENT, showJudgementTooltip, true)
+  frame.judgement:SetPoint("TOPLEFT", frame.seal, "TOPRIGHT", GAP, 0)
 
   function frame:ShowRecommendation(recommendation)
-    fill(self.seal, recommendation.seal)
-    fill(self.judgement, recommendation.judgement, ns.Data.Spells.judgement)
+    fill(self.seal, recommendation.seal, nil, "recommended")
+    fill(self.judgement, recommendation.judgement, ns.Data.Spells.judgement, "normal")
     self.judgement.steps = ns.Core.Plan.prepull(recommendation)
   end
 
-  -- Línea de estado: "en combate" y la prueba activa, si la hay.
-  local function updateStatus(self)
-    local parts = {}
-    if self.frozen then parts[#parts + 1] = "en combate" end
-    if self.test then parts[#parts + 1] = "prueba " .. self.test end
-    self.status:SetText(table.concat(parts, " · "))
-  end
-
+  -- En combate la recomendación está congelada (regla 1). La visibilidad la
+  -- da HudState a través de ApplyVisibility.
   function frame:SetFrozen(frozen)
     self.frozen = frozen
-    updateStatus(self)
   end
 
+  -- La prueba activa (/pfd test) se ve en el tooltip.
   function frame:SetTest(test)
     self.test = test
-    updateStatus(self)
+  end
+
+  -- shown: la opción "Mostrar"; alpha: la de core/HudState.lua (0 = oculto).
+  function frame:ApplyVisibility(shown, alpha)
+    if not shown or alpha <= 0 then
+      self:Hide()
+    else
+      self:SetAlpha(alpha)
+      self:Show()
+    end
   end
 
   -- Para /pfd ui: estado de la ventana en texto. Todo con pcall y sin tocar secrets.
   function frame:Describe()
     local function get(method, ...)
-      local ok, a, b, c, d, e = pcall(self[method], self, ...)
+      local ok, a, b, cc, d, e = pcall(self[method], self, ...)
       if not ok then return "error" end
       local out = {}
-      for _, v in ipairs({ a, b, c, d, e }) do
+      for _, v in ipairs({ a, b, cc, d, e }) do
         if issecretvalue and issecretvalue(v) then
           out[#out + 1] = "<secret>"
         elseif type(v) == "number" then
@@ -215,19 +219,12 @@ function RecommendationFrame.create(db)
   -- Cambia la tabla donde se guarda la posición (al cambiar de perfil).
   function frame:UseStore(store)
     db = store
-    self:ClearAllPoints()
-    local p = db.position
-    if p then
-      self:SetPoint(p.point, UIParent, p.relativePoint, p.x, p.y)
-    else
-      self:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
-    end
+    applyPoint(self, db.position)
   end
 
   function frame:ResetPosition()
     db.position = nil
-    self:ClearAllPoints()
-    self:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
+    applyPoint(self, nil)
   end
 
   return frame

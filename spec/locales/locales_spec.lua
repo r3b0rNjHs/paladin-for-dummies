@@ -33,6 +33,35 @@ describe("Locales", function()
   end)
 end)
 
+describe("Locales tone", function()
+  local ns
+
+  before_each(function()
+    ns = Addon.load({ "Locales/Locales.lua" })
+    ns.Locales.register("enUS", { HELLO = "Hello", HELLO_FUN = "Ahoy, holy one", ONLY_EN = "Plain" })
+    ns.Locales.register("esES", { HELLO = "Hola", ONLY_EN = "Solo", ONLY_EN_FUN = "Solo, con gracia" })
+  end)
+
+  it("uses the funny variant of a text when the tone is fun", function()
+    ns.Locales.use("enUS")
+    ns.Locales.setTone("fun")
+    assert.are.equal("Ahoy, holy one", ns.L.HELLO)
+  end)
+
+  it("never mixes languages for a joke: no Spanish joke means the plain Spanish text", function()
+    ns.Locales.use("esES")
+    ns.Locales.setTone("fun")
+    assert.are.equal("Hola", ns.L.HELLO)
+    assert.are.equal("Solo, con gracia", ns.L.ONLY_EN)
+  end)
+
+  it("keeps it serious when the player asks", function()
+    ns.Locales.use("enUS")
+    ns.Locales.setTone("plain")
+    assert.are.equal("Hello", ns.L.HELLO)
+  end)
+end)
+
 describe("Locale files", function()
   it("Spanish translates every English key and nothing else", function()
     local ns = Addon.load({ "Locales/Locales.lua", "Locales/enUS.lua", "Locales/esES.lua" })

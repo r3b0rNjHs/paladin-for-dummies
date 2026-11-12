@@ -26,8 +26,8 @@ local PAD = math.ceil(SIZE * (GLOW - 1) / 2) + 4
 -- ready: con cuántas copias toca cambiar (Icy Veins: 3 de Command; volver con 1 de Righteousness).
 -- switchTo: el sello al que hay que ir (su icono es el que se ve; Jorge, 12 nov).
 EchoTracker.ECHOES = {
-  { key = "echoCommand", spellId = 1311703, ready = 3, label = "¡CAMBIA!", switchTo = 21084 },      -- a Righteousness
-  { key = "echoRighteousness", spellId = 1311704, ready = 1, label = "¡VUELVE!", switchTo = 20375 }, -- a Command
+  { key = "echoCommand", spellId = 1311703, ready = 3, labelKey = "ECHO_SWITCH", switchTo = 21084 },      -- a Righteousness
+  { key = "echoRighteousness", spellId = 1311704, ready = 1, labelKey = "ECHO_BACK", switchTo = 20375 }, -- a Command
 }
 
 -- Icono del sello al que hay que cambiar, o nil si no se puede leer.
@@ -60,14 +60,22 @@ function EchoTracker.initializer(echo, onError)
       -- El juego pinta el icono del aura (el sello que llevas) en `auraIcon`.
       -- Si se puede leer el del sello al que hay que ir, ese es el que se ve y
       -- el del aura queda invisible.
+      -- Sistema de diseño (ui/Style.lua): borde negro de 1 px e icono recortado.
+      local border = button:CreateTexture(nil, "BACKGROUND")
+      border:SetAllPoints(button)
+      border:SetColorTexture(0, 0, 0, 1)
       local auraIcon = button:CreateTexture(nil, "ARTWORK")
-      auraIcon:SetAllPoints(button)
+      auraIcon:SetPoint("TOPLEFT", button, "TOPLEFT", 1, -1)
+      auraIcon:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -1, 1)
+      auraIcon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
       button:SetIcon(auraIcon)
       local destination = EchoTracker.destinationIcon(echo, spellTexture())
       if destination then
         auraIcon:SetAlpha(0)
         local icon = button:CreateTexture(nil, "ARTWORK", nil, 1)
-        icon:SetAllPoints(button)
+        icon:SetPoint("TOPLEFT", button, "TOPLEFT", 1, -1)
+        icon:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -1, 1)
+        icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
         icon:SetTexture(destination)
       end
       progress.icon = true
@@ -87,16 +95,24 @@ function EchoTracker.initializer(echo, onError)
       bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
       bar:GetStatusBarTexture():SetVertexColor(0, 0, 0, 0)
 
+      -- Anillo de oro (sistema de diseño) y un halo suave que late.
+      local Style = ns.UI.Style
+      local ring = Style.ring(bar, 2)
+      ring:SetColor("gold")
+      local gold = Style.COLORS.gold
       local glow = bar:CreateTexture(nil, "OVERLAY")
       glow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border")
       glow:SetBlendMode("ADD")
-      glow:SetVertexColor(1, 0.85, 0.2)
+      glow:SetVertexColor(gold[1], gold[2], gold[3])
       glow:SetSize(SIZE * GLOW, SIZE * GLOW)
       glow:SetPoint("CENTER", button, "CENTER")
+      -- Sin scripts en la barra (la maneja el juego): el latido corre siempre y
+      -- solo se ve cuando el juego muestra la barra.
+      Style.pulse(glow):Start()
 
-      local text = bar:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+      local text = Style.text(bar, "GameFontNormalLarge", "gold")
       text:SetPoint("TOP", button, "BOTTOM", 0, -4)
-      text:SetText(echo.label)
+      text:SetText(ns.L[echo.labelKey])
 
       button:SetApplicationBar(bar, { minApplications = echo.ready, maxApplications = echo.ready })
       progress.bar = true

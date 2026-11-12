@@ -160,7 +160,7 @@ describe("PaladinForDummies.toc", function()
     assert.is_nil(env.PaladinForDummiesDB)
     assert.is_nil(seen.options.PaladinForDummies)
     env.SlashCmdList.PALADINFORDUMMIES("")
-    assert.truthy(output(w):find("only for paladins", 1, true))
+    assert.truthy(output(w):find("for paladins only", 1, true)) -- con humor por defecto
   end)
 
   local function fire(w, event, ...)
@@ -182,7 +182,8 @@ describe("PaladinForDummies.toc", function()
     local env, w = wowEnv()
     local _, _, profile, char = start(env, w)
 
-    assert.truthy(output(w):find("Welcome!", 1, true))
+    assert.truthy(output(w):find("Welcome, paladin!", 1, true))
+    assert.are.equal("fun", profile.tone)       -- con humor por defecto
     assert.is_true(char.welcomed)
     assert.is_false(profile.review.chatSummary) -- sin mensajes en el chat por defecto
     assert.is_false(profile.macros.auto)        -- no toca tus macros si no se lo pides
@@ -268,7 +269,7 @@ describe("PaladinForDummies.toc", function()
     env.SlashCmdList.PALADINFORDUMMIES("")
     env.PaladinForDummies_OnAddonCompartmentClick()
     assert.are.same({}, w.opened)
-    assert.truthy(output(w):find("after combat", 1, true))
+    assert.truthy(output(w):find("stops hitting you", 1, true))
 
     env.InCombatLockdown = function() return false end
     fire(w, "PLAYER_REGEN_ENABLED")

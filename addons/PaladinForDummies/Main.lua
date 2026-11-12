@@ -15,11 +15,13 @@ local Seals, Rules = ns.Data.Seals, ns.Data.Rules
 local DEFAULTS = {
   profile = {
     language = "auto",
+    tone = "fun", -- Locales: chistes en algunos mensajes (nunca en los avisos)
     devMode = false,
-    advisor = { shown = true, locked = false, scale = 1 },
+    advisor = { shown = true, locked = false, scale = 1, visibility = "fade" }, -- core/HudState.lua
     echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
     macros = { auto = false, disabled = {} },
     review = { chatSummary = false },
+    reduceMotion = false,
   },
   char = { fights = {}, errors = {}, welcomed = false },
 }
@@ -173,6 +175,18 @@ local function saveSnapshot()
   }
 end
 
+-- Cuándo se ve el asesor: la opción "Mostrar" y core/HudState.lua.
+local function updateAdvisorVisibility()
+  if not ui then return end
+  local target = last.situation and last.situation.target
+  local alpha = ns.Core.HudState.advisorAlpha({
+    mode = profile.advisor.visibility,
+    inCombat = frozen and true or false,
+    hasTarget = target and target.exists and true or false,
+  })
+  ui:ApplyVisibility(profile.advisor.shown, alpha)
+end
+
 local function refresh()
   if frozen or not ui then return end
   safely("la recomendación", function()
@@ -183,6 +197,7 @@ local function refresh()
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
     ui:ShowRecommendation(recommendation)
+    updateAdvisorVisibility()
     saveSnapshot()
     syncMacros(false)
   end)
@@ -204,6 +219,7 @@ end
 local function setFrozen(value)
   frozen = value
   if ui then ui:SetFrozen(value) end
+  updateAdvisorVisibility()
   if not value then
     refresh()
     if macrosPending then syncMacros(true) end
@@ -251,7 +267,7 @@ end
 local function applyProfile()
   profile, char = db.profile, db.char
   ui:UseStore(profile.advisor)
-  ui:SetShown(profile.advisor.shown)
+  updateAdvisorVisibility()
   ui:SetScale(profile.advisor.scale)
   ui:SetLocked(profile.advisor.locked)
   if echoes then
@@ -361,8 +377,15 @@ local optionHandlers = {
   getAdvisorShown = function() return profile.advisor.shown end,
   setAdvisorShown = function(value)
     profile.advisor.shown = value
-    ui:SetShown(value)
+    updateAdvisorVisibility()
   end,
+  getAdvisorVisibility = function() return profile.advisor.visibility end,
+  setAdvisorVisibility = function(value)
+    profile.advisor.visibility = value
+    updateAdvisorVisibility()
+  end,
+  getReduceMotion = function() return profile.reduceMotion end,
+  setReduceMotion = function(value) profile.reduceMotion = value and true or false end,
   getAdvisorLocked = function() return profile.advisor.locked end,
   setAdvisorLocked = function(value)
     profile.advisor.locked = value
@@ -416,6 +439,11 @@ local optionHandlers = {
   setLanguage = function(value)
     profile.language = value
     p(L.OPT_LANGUAGE_DESC)
+  end,
+  getTone = function() return profile.tone end,
+  setTone = function(value)
+    profile.tone = value
+    ns.Locales.setTone(value)
   end,
   getDevMode = function() return profile.devMode end,
   setDevMode = function(value) profile.devMode = value end,
@@ -486,9 +514,11 @@ local events = CreateFrame("Frame")
 local function enable()
   initDatabase()
   ns.Locales.use(ns.Locales.resolve(profile.language, GetLocale and GetLocale() or "enUS"))
+  ns.Locales.setTone(profile.tone)
 
+  ns.UI.Style.reduceMotion = profile.reduceMotion
   ui = ns.UI.RecommendationFrame.create(profile.advisor)
-  ui:SetShown(profile.advisor.shown)
+  updateAdvisorVisibility()
   ui:SetScale(profile.advisor.scale)
   ui:SetLocked(profile.advisor.locked)
   ui:SetTest(char.test)

@@ -92,6 +92,11 @@ Viabilidad: ✅ se puede con lo que sabemos · 🔍 hay que sondearlo en Forever
 | 14 | Reparto de bendiciones | Grupos | Ya lo hacen otros: no duplicarlo. Como mucho, leer su reparto |
 | 15 | Consejo de rotación en combate en tiempo real | — | ⛔ y contra el principio de Blizzard |
 
+## Decisión de Jorge (12 nov)
+- Sí a las ideas 1, 2, 4, 5, 6 y 7. La 8 (Holy y Protección), más adelante. La 3 (¿lo tienes en la barra?), no.
+- Dirección visual de las maquetas aprobada.
+- **Tono con humor y satírico** (nos llamamos *for Dummies*): chistes en bienvenida, mensajes vacíos, tarjeta tras la pelea y códice; nunca en los avisos que hay que atender. Opción para ponerlo serio.
+
 ## 6. Plan propuesto
 
 1. **Sistema de diseño y HUD nuevo**: rehacer el asesor y Unsealed Wrath con el estilo común, los estados (atenuado, con objetivo, en combate) y la tarjeta tras la pelea. Probar en el juego.

@@ -25,6 +25,14 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.10.0: estilo nuevo y humor
+**Archivos nuevos (`ui/Style.lua`, `core/HudState.lua`): cierra el juego y vuelve a abrirlo** tras el `git pull`.
+- **Asesor:** ya sin fondo ni título; dos iconos con "Sello" y "Sentencia" debajo, anillo de oro en el sello. Sin objetivo se ve atenuado; con un enemigo seleccionado, entero; en combate desaparece. Opción "Cuándo se ve" en Asesor.
+- **Tooltips:** "Por qué" y la confianza con un punto de color (azul = mecánica, ámbar = guías, verde = medido).
+- **Unsealed Wrath:** borde fino, anillo de oro y halo que late al llegar a 3 copias (o a 1 para volver). "Reducir animaciones" en Avanzado (tras `/reload`).
+- **Humor:** la bienvenida, los mensajes vacíos y algunos avisos llevan chiste. Opción Tono en Avanzado (Con humor / Serio).
+- Idioma en Avanzado: los textos nuevos ya salen en inglés o español.
+
 ## Pruebas de la v0.9.0: base pública
 **Archivos y librerías nuevos: cierra el juego y vuelve a abrirlo** tras el `git pull`.
 - Tus datos se migran solos (ajustes al perfil, peleas al personaje). No verás la bienvenida porque ya eras usuario.
