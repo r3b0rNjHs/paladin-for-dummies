@@ -32,17 +32,51 @@ local function button(order, name, desc, func, confirmText)
     confirm = confirmText and true or nil, confirmText = confirmText }
 end
 
+local function spellIcon(spellId)
+  if not (spellId and C_Spell and C_Spell.GetSpellTexture) then return nil end
+  local ok, icon = pcall(C_Spell.GetSpellTexture, spellId)
+  return ok and icon or nil
+end
+
+-- icon: una marca de data/Guide.lua (GuideSpells) o la ruta de un icono.
+local function iconOf(icon)
+  if not icon then return nil end
+  local spellId = ns.Data.GuideSpells[icon]
+  if spellId then return spellIcon(spellId) end
+  if icon:find("\\") then return icon end
+  return nil
+end
+
 function Options.build(h)
+  -- Macros por grupos: icono, qué hace (con los nombres de hechizo del cliente)
+  -- y la casilla para crearla al lado.
   local macroToggles = {
     description = description(0, L.OPT_MACROS_DESC),
+    how = description(0.5, L.OPT_MACROS_HOW),
     auto = toggle(1, L.OPT_MACROS_AUTO, L.OPT_MACROS_AUTO_DESC, h.getMacrosAuto, h.setMacrosAuto, "full"),
     now = button(2, L.OPT_MACROS_NOW, nil, h.syncMacrosNow),
-    list = { type = "header", order = 10, name = L.OPT_MACROS_LIST },
   }
-  for i, name in ipairs(h.macroNames) do
-    macroToggles["macro" .. i] = toggle(10 + i, name, L.OPT_MACRO_TOGGLE_DESC,
-      function() return h.getMacroEnabled(name) end,
-      function(value) h.setMacroEnabled(name, value) end)
+  local groupOrder = {}
+  for i, group in ipairs(ns.Data.MacroGroups) do groupOrder[group] = i end
+  for i, info in ipairs(ns.Data.MacroInfo) do
+    local base = groupOrder[info.group] * 100
+    macroToggles["group" .. info.group] = macroToggles["group" .. info.group]
+      or { type = "header", order = base, name = L["MACRO_GROUP_" .. info.group] }
+    local order = base + i
+    macroToggles["about" .. i] = {
+      type = "description", order = order, width = 2.4, fontSize = "medium",
+      name = function()
+        return Style.color("gold", info.name) .. "\n" .. h.guideFill(L["MACRO_DESC_" .. info.key]) .. "\n"
+      end,
+      image = function()
+        local icon = iconOf(info.icon)
+        if icon then return icon, 36, 36 end
+        return nil
+      end,
+    }
+    macroToggles["macro" .. i] = toggle(order + 0.5, L.OPT_MACRO_CREATE, L.OPT_MACRO_TOGGLE_DESC,
+      function() return h.getMacroEnabled(info.name) end,
+      function(value) h.setMacroEnabled(info.name, value) end, 0.6)
   end
 
   return {
@@ -119,21 +153,6 @@ end
 -- La guía (data/Guide.lua): un capítulo por grupo, en árbol. Los nombres de
 -- hechizo los pone Main.lua (h.guideFill, en el idioma del cliente); los chistes
 -- solo se ven con el tono con humor; Tu plan y Tus peleas dependen del jugador.
-local function spellIcon(spellId)
-  if not (spellId and C_Spell and C_Spell.GetSpellTexture) then return nil end
-  local ok, icon = pcall(C_Spell.GetSpellTexture, spellId)
-  return ok and icon or nil
-end
-
--- icon: una marca de data/Guide.lua (GuideSpells) o la ruta de un icono.
-local function iconOf(icon)
-  if not icon then return nil end
-  local spellId = ns.Data.GuideSpells[icon]
-  if spellId then return spellIcon(spellId) end
-  if icon:find("\\") then return icon end
-  return nil
-end
-
 local ICON_SIZE = 40
 local PLAN_SLOTS = 16
 

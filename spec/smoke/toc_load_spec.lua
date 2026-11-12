@@ -235,7 +235,11 @@ describe("PaladinForDummies.toc", function()
     assert.truthy(output(w):find("Display unlocked", 1, true))
 
     -- Macros: una casilla por macro; desmarcada no se crea
-    assert.are.equal("PFD Golpe", o.macros.args.macro1.name)
+    assert.truthy(o.macros.args.about1.name():find("PFD Golpe", 1, true))
+    assert.truthy(o.macros.args.about1.name():find("|cfff2c14eJudgement|r", 1, true)) -- qué hace, con el nombre del cliente
+    assert.are.equal(135000, (o.macros.args.about1.image()))
+    assert.are.equal("header", o.macros.args.groupCOMBAT.type)
+    assert.are.equal("Create", o.macros.args.macro1.name)
     o.macros.args.macro1.set(nil, false)
     o.macros.args.now.func()
     assert.is_nil(env.createdMacros["PFD Golpe"])

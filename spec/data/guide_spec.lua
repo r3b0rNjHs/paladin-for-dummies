@@ -79,3 +79,20 @@ describe("Guide", function()
     end
   end)
 end)
+
+describe("Macro catalog", function()
+  it("describes every macro the addon can create, in both languages", function()
+    local ns = Addon.load({ "Locales/Locales.lua", "Locales/enUS.lua", "Locales/esES.lua", "data/Seals.lua",
+      "data/Guide.lua", "data/MacroSpells.lua", "core/Macros.lua" })
+    local described = {}
+    for _, info in ipairs(ns.Data.MacroInfo) do
+      described[info.name] = true
+      assert.is_not_nil(ns.Data.GuideSpells[info.icon], info.icon)
+      for _, lang in ipairs({ "enUS", "esES" }) do
+        assert.is_string(ns.Locales.tables[lang]["MACRO_DESC_" .. info.key], info.key .. " " .. lang)
+        assert.is_string(ns.Locales.tables[lang]["MACRO_GROUP_" .. info.group], info.group .. " " .. lang)
+      end
+    end
+    for _, name in ipairs(ns.Core.Macros.ALL_NAMES) do assert.is_true(described[name], name) end
+  end)
+end)

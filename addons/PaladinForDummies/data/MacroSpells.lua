@@ -53,3 +53,25 @@ function ns.Data.LearnRanks(discovered)
   end
   ns.Data.RebuildCatalog()
 end
+
+-- Cómo se presentan las macros en las opciones: grupo, icono (marca de
+-- data/Guide.lua GuideSpells) y descripción (Locales: MACRO_DESC_<key>).
+-- Los nombres tienen que coincidir con core/Macros.lua (Macros.ALL_NAMES).
+ns.Data.MacroGroups = { "COMBAT", "HEAL", "SAFETY", "CONTROL", "BUFFS" }
+ns.Data.MacroInfo = {
+  { name = "PFD Golpe", group = "COMBAT", icon = "JUDGEMENT", key = "GOLPE" },
+  { name = "PFD Unsealed", group = "COMBAT", icon = "COMMAND", key = "UNSEALED" },
+  { name = "PFD Sello", group = "COMBAT", icon = "RIGHTEOUSNESS", key = "SELLO" },
+  { name = "PFD Exorcismo", group = "COMBAT", icon = "EXORCISM", key = "EXORCISMO" },
+  { name = "PFD Cura", group = "HEAL", icon = "FLASH_OF_LIGHT", key = "CURA" },
+  { name = "PFD Purificar", group = "HEAL", icon = "PURIFY", key = "PURIFICAR" },
+  { name = "PFD Libertad", group = "HEAL", icon = "FREEDOM", key = "LIBERTAD" },
+  { name = "PFD Resucitar", group = "HEAL", icon = "REDEMPTION", key = "RESUCITAR" },
+  { name = "PFD Escudo", group = "SAFETY", icon = "DIVINE_SHIELD", key = "ESCUDO" },
+  { name = "PFD Proteccion", group = "SAFETY", icon = "PROTECTION", key = "PROTECCION" },
+  { name = "PFD Manos", group = "SAFETY", icon = "LAY_ON_HANDS", key = "MANOS" },
+  { name = "PFD Martillo", group = "CONTROL", icon = "HAMMER", key = "MARTILLO" },
+  { name = "PFD Arrepentir", group = "CONTROL", icon = "REPENTANCE", key = "ARREPENTIR" },
+  { name = "PFD Bendicion", group = "BUFFS", icon = "MIGHT", key = "BENDICION" },
+  { name = "PFD Auras", group = "BUFFS", icon = "DEVOTION", key = "AURAS" },
+}

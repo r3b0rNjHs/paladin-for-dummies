@@ -36,6 +36,16 @@ ns.Data.GuideSpells = {
   DIVINE_SHIELD = 642,
   DIVINE_PROTECTION = 498,
   HOLY_LIGHT = 635,
+  FLASH_OF_LIGHT = 19750,
+  PURIFY = 1152,
+  FREEDOM = 1044,
+  REDEMPTION = 7328,
+  PROTECTION = 1022, -- Blessing of Protection
+  LAY_ON_HANDS = 2800,
+  MIGHT = 19740,
+  KINGS = 20217,
+  DEVOTION = 465,
+  RETRIBUTION_AURA = 7294,
 }
 
 local BOOK = "Interface\\Icons\\INV_Misc_Book_09"
