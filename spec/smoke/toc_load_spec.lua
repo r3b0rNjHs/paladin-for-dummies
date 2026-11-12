@@ -163,7 +163,7 @@ describe("PaladinForDummies.toc", function()
     -- Macros: se crea PFD Golpe; ya no hay macro de apertura.
     env.SlashCmdList.PALADINFORDUMMIES("macros")
     assert.is_nil(env.createdMacros["PFD Apertura"])
-    assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/run UIErrorsFrame:Clear()",
+    assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/startattack\n/run UIErrorsFrame:Clear()",
       env.createdMacros["PFD Golpe"])
     assert.is_true(env.PaladinForDummiesDB.macros)
 

@@ -25,6 +25,24 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.7.0: macros de utilidad
+`git pull`, `/reload` y `/pfd macros`: el chat dice cuáles crea y, si alguna no, por qué (por ejemplo, un hechizo sin entrenar o que no queda hueco: máximo 18 macros de personaje).
+
+| Macro | Qué hace | Modificador |
+|---|---|---|
+| PFD Cura | Flash of Light al aliado bajo el ratón, si no a tu objetivo, si no a ti | Shift: Holy Light |
+| PFD Proteccion | Blessing of Protection al aliado bajo el ratón o a tu objetivo | Alt: Divine Protection |
+| PFD Libertad / Manos / Purificar | Blessing of Freedom / Lay on Hands / Purify, igual que la cura | |
+| PFD Martillo | Corta tu lanzamiento y aturde al enemigo bajo el ratón o a tu objetivo | |
+| PFD Arrepentir | Repentance al enemigo bajo el ratón o a tu objetivo | |
+| PFD Escudo | Divine Shield; pulsar otra vez te lo quita | |
+| PFD Bendicion | Blessing of Might al ratón o al objetivo | Ctrl: Kings |
+| PFD Auras | Devotion Aura | Ctrl: Retribution Aura |
+| PFD Resucitar | Redemption al aliado muerto bajo el ratón | |
+| PFD Exorcismo | Exorcism y empezar a atacar | |
+
+Comprueba sobre todo que **las curas y bendiciones con el ratón encima de un compañero no cambian tu objetivo** (PFD Unsealed no se reinicia).
+
 ## Pruebas de la v0.6.0: sin macro de apertura
 `git pull` y `/reload`. El addon ya no crea PFD Apertura: **bórrala tú** desde `/macro` (el addon no borra macros). PFD Unsealed se reescribe sola.
 

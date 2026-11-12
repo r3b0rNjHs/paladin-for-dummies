@@ -78,6 +78,7 @@ local function syncMacros(verbose)
   local macros, skipped = ns.Core.Macros.build({
     recommendation = last.recommendation,
     seals = Seals,
+    macroSpells = ns.Data.MacroSpells,
     knownSpells = last.situation.player.knownSpells,
     judgementSpellId = ns.Data.Spells.judgement,
     holyStrikeSpellId = ns.Data.Spells.holyStrike,
@@ -107,7 +108,7 @@ end
 local function refresh()
   if frozen or not ui then return end
   local ok, err = pcall(function()
-    local situation, diagnostics = SituationReader.read(_G, Seals, { specOverride = db.specOverride })
+    local situation, diagnostics = SituationReader.read(_G, ns.Data.TrackedSpells, { specOverride = db.specOverride })
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
     ui:ShowRecommendation(recommendation)
@@ -163,7 +164,7 @@ local function debug()
     tostring(s.player.spec), tostring(d.specSource),
     d.unknownSpecId and (" | ID de spec desconocido: %s, rol %s"):format(d.unknownSpecId, tostring(d.specRole)) or "",
     tostring(s.player.level), tostring(s.content)))
-  p("Sellos conocidos (spellIDs):", sortedKeys(s.player.knownSpells))
+  p("Hechizos conocidos (spellIDs):", sortedKeys(s.player.knownSpells))
   if s.target.exists then
     local function show(field)
       if d.secret[field] then return "<secret>" end

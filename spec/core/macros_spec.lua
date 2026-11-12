@@ -45,10 +45,10 @@ describe("Macros.build", function()
     assert.is_nil(macros["PFD Apertura"])
   end)
 
-  it("builds PFD Golpe with Judgement and Holy Strike, hiding the 'not ready' error", function()
+  it("builds PFD Golpe with Judgement and Holy Strike, starting the attack and hiding the 'not ready' error", function()
     local macros = byName(Macros.build(input()))
 
-    assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/run UIErrorsFrame:Clear()", macros["PFD Golpe"])
+    assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/startattack\n/run UIErrorsFrame:Clear()", macros["PFD Golpe"])
   end)
 
   it("builds the Unsealed Wrath toggle, starting with Command and restarting on a new target, and the shift macro", function()
