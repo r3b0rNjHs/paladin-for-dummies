@@ -1,16 +1,17 @@
 -- Texto de las macros que genera el addon. Las decisiones se toman por spellID;
 -- los nombres (en el idioma del cliente) solo se usan para escribir la macro,
 -- porque /cast necesita el nombre. Sin rango: /cast usa el rango más alto.
---   PFD Apertura  fuera de combate, el sello de la Sentencia (Crusader); en combate,
---                 el sello de la pelea (Command). Sin secuencia: no guarda en qué paso
---                 va, así que nunca se queda a medias. Uso: Apertura → Golpe → Apertura.
 --   PFD Golpe     Judgement y Holy Strike: lanza lo que esté disponible. Judgement no
 --                 ocupa el tiempo global, así que no bloquea a Holy Strike.
---   PFD Unsealed  alterna Righteousness y Command (cambio con Unsealed Wrath)
+--   PFD Unsealed  Command y Righteousness alternados (cambio con Unsealed Wrath).
+--                 Empieza por Command y vuelve a empezar al cambiar de objetivo o
+--                 salir de combate: tras juzgar Crusader en un enemigo nuevo, la
+--                 primera pulsación pone Command. (Ya no hay macro de apertura:
+--                 Crusader se lanza desde su propio botón.)
 --   PFD Sello     Command; con Shift, Righteousness
 --
 -- input = {
---   recommendation, seals, knownSpells, judgementSpellId, holyStrikeSpellId,
+--   seals, knownSpells, judgementSpellId, holyStrikeSpellId,
 --   nameOf = function(spellId) -> nombre o nil,
 -- }
 -- Devuelve la lista de { name, body } y la de las omitidas, { name, reason },
@@ -47,24 +48,6 @@ local function missingName(id)
   return ("falta el nombre de algún hechizo (spellID %s)"):format(tostring(id))
 end
 
--- Devuelve el cuerpo, o nil y el motivo.
-local function opener(input)
-  local rec = input.recommendation or {}
-  local fightId = rec.seal and rec.seal.spellId
-  local judgeId = rec.judgement and rec.judgement.spellId
-  if not (fightId or judgeId) then return nil, "no hay recomendación todavía" end
-
-  if fightId and judgeId and fightId ~= judgeId then
-    local names, missing = namesOf(input.nameOf, { judgeId, fightId })
-    if not names then return nil, missingName(missing) end
-    return HEADER .. "/cast [nocombat] " .. names[1] .. "; " .. names[2]
-  end
-
-  local names, missing = namesOf(input.nameOf, { fightId or judgeId })
-  if not names then return nil, missingName(missing) end
-  return HEADER .. "/cast " .. names[1]
-end
-
 -- Judgement y Holy Strike en un botón. La última línea borra el aviso rojo de
 -- "aún no está listo" cuando uno de los dos está en enfriamiento.
 local function strike(input)
@@ -84,7 +67,6 @@ function Macros.build(input)
     end
   end
 
-  add("PFD Apertura", opener(input))
   add("PFD Golpe", strike(input))
 
   local command = highestKnown(input.seals.command, input.knownSpells)
@@ -99,7 +81,7 @@ function Macros.build(input)
     names, missing = namesOf(input.nameOf, { righteousness, command })
     if not names then reason = missingName(missing) end
   end
-  add("PFD Unsealed", names and (HEADER .. "/castsequence reset=combat " .. names[1] .. ", " .. names[2]), reason)
+  add("PFD Unsealed", names and (HEADER .. "/castsequence reset=target/combat " .. names[2] .. ", " .. names[1]), reason)
   add("PFD Sello", names and (HEADER .. "/cast [mod:shift] " .. names[1] .. "; " .. names[2]), reason)
 
   return macros, skipped

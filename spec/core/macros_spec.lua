@@ -39,29 +39,10 @@ describe("Macros.build", function()
     return out
   end
 
-  describe("PFD Apertura", function()
-    it("puts on the judgement seal out of combat and the fight seal in combat, with no state to get stuck", function()
-      local macros = byName(Macros.build(input()))
+  it("no longer builds an opener: Crusader is cast from its own button", function()
+    local macros = byName(Macros.build(input()))
 
-      assert.are.equal("#showtooltip\n/cast [nocombat] Seal of the Crusader; Seal of Command", macros["PFD Apertura"])
-    end)
-
-    it("is just the fight seal when there is nothing different to judge", function()
-      local onlySeal = byName(Macros.build(input({ recommendation = { seal = { seal = "command", spellId = 20918 } } })))
-      local same = byName(Macros.build(input({ recommendation = {
-        seal = { seal = "command", spellId = 20918 },
-        judgement = { seal = "command", spellId = 20918 },
-      } })))
-
-      assert.are.equal("#showtooltip\n/cast Seal of Command", onlySeal["PFD Apertura"])
-      assert.are.equal("#showtooltip\n/cast Seal of Command", same["PFD Apertura"])
-    end)
-
-    it("is just the judgement seal when there is no fight seal", function()
-      local macros = byName(Macros.build(input({ recommendation = { judgement = { seal = "crusader", spellId = 20306 } } })))
-
-      assert.are.equal("#showtooltip\n/cast Seal of the Crusader", macros["PFD Apertura"])
-    end)
+    assert.is_nil(macros["PFD Apertura"])
   end)
 
   it("builds PFD Golpe with Judgement and Holy Strike, hiding the 'not ready' error", function()
@@ -70,10 +51,10 @@ describe("Macros.build", function()
     assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/run UIErrorsFrame:Clear()", macros["PFD Golpe"])
   end)
 
-  it("builds the Unsealed Wrath toggle and the shift macro with Righteousness and Command", function()
+  it("builds the Unsealed Wrath toggle, starting with Command and restarting on a new target, and the shift macro", function()
     local macros = byName(Macros.build(input()))
 
-    assert.are.equal("#showtooltip\n/castsequence reset=combat Seal of Righteousness, Seal of Command",
+    assert.are.equal("#showtooltip\n/castsequence reset=target/combat Seal of Command, Seal of Righteousness",
       macros["PFD Unsealed"])
     assert.are.equal("#showtooltip\n/cast [mod:shift] Seal of Righteousness; Seal of Command",
       macros["PFD Sello"])
@@ -84,7 +65,6 @@ describe("Macros.build", function()
 
     assert.is_nil(macros["PFD Unsealed"])
     assert.is_nil(macros["PFD Sello"])
-    assert.is_string(macros["PFD Apertura"])
     assert.is_string(macros["PFD Golpe"])
   end)
 
@@ -92,7 +72,6 @@ describe("Macros.build", function()
     local macros = byName(Macros.build(input({ nameOf = function(id) return id ~= 20271 and NAMES[id] or nil end })))
 
     assert.is_nil(macros["PFD Golpe"])
-    assert.is_string(macros["PFD Apertura"])
     assert.is_string(macros["PFD Sello"])
   end)
 
@@ -107,12 +86,6 @@ describe("Macros.build", function()
       { name = "PFD Unsealed", reason = "no conoces Seal of Righteousness" },
       { name = "PFD Sello", reason = "no conoces Seal of Righteousness" },
     }, skipped)
-  end)
-
-  it("explains an empty opener", function()
-    local _, skipped = Macros.build(input({ recommendation = {} }))
-
-    assert.are.same({ name = "PFD Apertura", reason = "no hay recomendación todavía" }, skipped[1])
   end)
 
   it("keeps names within 16 characters and bodies within 255", function()

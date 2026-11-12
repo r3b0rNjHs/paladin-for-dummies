@@ -341,7 +341,7 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     db.macros = true
     refresh()
     syncMacros(true)
-    p("Ábrelas con /macro, pestaña de tu personaje, y arrástralas a tu barra. PFD Apertura se actualiza sola con la recomendación. /pfd macros off para dejar de actualizarlas.")
+    p("Ábrelas con /macro, pestaña de tu personaje, y arrástralas a tu barra. Se actualizan solas si aprendes rangos nuevos. /pfd macros off para dejar de actualizarlas.")
   elseif cmd == "stats" then
     for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
   elseif cmd == "last" then
