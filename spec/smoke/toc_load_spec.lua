@@ -201,6 +201,7 @@ describe("PaladinForDummies.toc", function()
     assert.are.same({ judgement = 1, holyStrike = 1, commandProc = 2, sealCast = 0 }, f.counts)
     assert.are.same({ command = 20 }, f.sealSeconds)
     assert.is_true(math.abs(f.context.weaponSpeed - 2.4) < 0.001)
+    assert.is_true(math.abs(f.context.weaponBaseSpeed - 2.4) < 0.001) -- empezó con Command, no con Crusader
     assert.are.equal(6, f.context.target.creatureType)
     assert.truthy(output:find("[prueba A] Solo Seal of Command | 20 s | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
     assert.are.same({

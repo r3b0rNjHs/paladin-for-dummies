@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.7.0). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.7.1). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -40,6 +40,11 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 - **Dentro de las mazmorras el tipo de criatura del objetivo es secret** (3 élites de nivel 37 a 39, v0.1.1). La clasificación y el nivel sí se leen. Las reglas por tipo de criatura solo funcionan en mundo abierto.
 - **El arma y el poder con hechizos se leen fuera de combate** (v0.2.0, nivel 41): `UnitAttackSpeed` 3.0, `UnitDamage` 207-252, `GetSpellBonusDamage(2)` 68. Ninguno secret. Vienen como floats (3.0000001907349): redondear al mostrar.
 - `C_Secrets.GetSpellAuraSecrecy(1311703)` = **2 (ContextuallySecret)**: Echo of Command es secret en combate, no está en la lista de "nunca secret". Para mostrarlo en combate hay que usar AuraContainer.
+### Medido con las peleas (12 nov 2026, `docs/probe-results/2026-11-12-peleas-1.md`)
+- **Enfriamiento de Judgement: 8 s. Enfriamiento de Holy Strike: 10 s** (intervalos mínimos entre lanzamientos).
+- **Seal of Command: unas 3,7 activaciones por minuto con el sello puesto** (102 en 1669 s; 3 por minuto en peleas largas). Muy por debajo de las 7 que asumen las guías, aunque el tiempo incluye ratos sin golpear y golpes fallados.
+- `UnitAttackSpeed` incluye el +40% de Crusader si está puesto: desde la v0.7.1 se guarda `weaponBaseSpeed`.
+
 - **La ventana funciona (v0.1.2):** se ve con fondo, los tooltips muestran el hechizo, el porqué y la confianza, y la posición se guarda entre `/reload`. Sin fondo (v0.1.0/0.1.1) no se distinguía.
 
 Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar como hipótesis hasta que el sondeo lo confirme.
@@ -84,7 +89,7 @@ Confirmado con el grimorio (sondeo 1): la Sentencia **no consume el sello** y ca
 | Righteousness ✔ | 1 | Daño Sagrado extra por golpe; **las armas lentas hacen más daño por golpe** | Golpe de daño Sagrado |
 | Crusader ✔ | 6 | Más poder de ataque **y** ataques un 40% más rápidos con menos daño por golpe | 40 s: el objetivo recibe más daño Sagrado; tus golpes la refrescan |
 | Fury (nuevo, tanque) | 10 | Daño Sagrado fijo por golpe y un escudo del 50% de ese daño | Daño extra y provoca a 10 m durante **3 s** (notas del 2 nov) |
-| Command ✔ (talento Ret) | 20 | Golpe Sagrado extra del **74%** del daño del arma. La tasa la decide el servidor: las "7 por minuto" son de Classic, sin medir | Daño Sagrado, el doble contra aturdidos o incapacitados |
+| Command ✔ (talento Ret) | 20 | Golpe Sagrado extra del **74%** del daño del arma. La tasa la decide el servidor: **medida unas 3,7 por minuto con el sello puesto** (las guías asumen 7) | Daño Sagrado, el doble contra aturdidos o incapacitados |
 | Justice | 22 | Probabilidad de aturdir 2 s | El objetivo no puede huir a toda velocidad |
 | Light ✔ | 30 | Probabilidad de curarte | 40 s: quien golpee al objetivo puede curarse |
 | Wisdom | 38 | Probabilidad de recuperar maná | Quien golpee al objetivo recupera maná |
@@ -116,9 +121,9 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - ¿`C_UnitAuras.GetPlayerAuraBySpellID` también falla en combate?
 - ¿Hay alguna forma legible del % de maná o solo se puede mostrar (barras, `C_CurveUtil`)?
 - Grimorio de Fury, Justice y Wisdom, y rangos 2-6 de Righteousness (no estaban entrenados).
-- Tasa real de Command en Forever y efecto real de Unsealed Wrath (los medirá el repaso tras el combate).
 - ¿El arma y el poder con hechizos siguen legibles dentro de mazmorras? (La wiki los marca `SecretWhenUnitStatsRestricted`.)
-- ¿Judgement de Command quita la Sentencia de Crusader? Enfriamiento de Judgement.
+- ¿Judgement de Command quita la Sentencia de Crusader?
+- Efecto real de Unsealed Wrath: aún no hay peleas con Righteousness.
 
 ## Herramientas
 - VS Code con la extensión `ketho.wow-api` (anotaciones de la API para el Lua Language Server).

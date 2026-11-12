@@ -51,6 +51,12 @@ function Recorder.start(situation, test)
     }
   end
   context.test = test
+  -- UnitAttackSpeed da la velocidad actual: con Crusader puesto, un 40% más
+  -- rápida. Se guarda también la base para poder comparar armas.
+  if context.weaponSpeed then
+    context.weaponSpeedHastedByCrusader = (opening.seal == "crusader") or nil
+    context.weaponBaseSpeed = (opening.seal == "crusader") and (context.weaponSpeed * 1.4) or context.weaponSpeed
+  end
   current = Fight.start(Catalog, opening, context)
 end
 
