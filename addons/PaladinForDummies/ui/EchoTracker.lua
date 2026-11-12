@@ -24,10 +24,23 @@ local TEXT_HEIGHT = 26 -- texto del aviso debajo del icono
 local PAD = math.ceil(SIZE * (GLOW - 1) / 2) + 4
 
 -- ready: con cuántas copias toca cambiar (Icy Veins: 3 de Command; volver con 1 de Righteousness).
+-- switchTo: el sello al que hay que ir (su icono es el que se ve; Jorge, 12 nov).
 EchoTracker.ECHOES = {
-  { key = "echoCommand", spellId = 1311703, ready = 3, label = "¡CAMBIA!" },
-  { key = "echoRighteousness", spellId = 1311704, ready = 1, label = "¡VUELVE!" },
+  { key = "echoCommand", spellId = 1311703, ready = 3, label = "¡CAMBIA!", switchTo = 21084 },      -- a Righteousness
+  { key = "echoRighteousness", spellId = 1311704, ready = 1, label = "¡VUELVE!", switchTo = 20375 }, -- a Command
 }
+
+-- Icono del sello al que hay que cambiar, o nil si no se puede leer.
+function EchoTracker.destinationIcon(echo, getTexture)
+  if not (echo.switchTo and getTexture) then return nil end
+  local ok, icon = pcall(getTexture, echo.switchTo)
+  if ok and icon then return icon end
+  return nil
+end
+
+local function spellTexture()
+  return C_Spell and C_Spell.GetSpellTexture
+end
 
 -- Construye el contenido de un botón de aura. Todo tiene que ser hijo del botón
 -- (el contenedor lo exige). onError recibe los errores, porque el juego llama a
@@ -44,10 +57,21 @@ function EchoTracker.initializer(echo, onError)
     local ok, err = pcall(function()
       button:SetSize(SIZE, SIZE)
 
-      local icon = button:CreateTexture(nil, "ARTWORK")
-      icon:SetAllPoints(button)
-      button:SetIcon(icon)
+      -- El juego pinta el icono del aura (el sello que llevas) en `auraIcon`.
+      -- Si se puede leer el del sello al que hay que ir, ese es el que se ve y
+      -- el del aura queda invisible.
+      local auraIcon = button:CreateTexture(nil, "ARTWORK")
+      auraIcon:SetAllPoints(button)
+      button:SetIcon(auraIcon)
+      local destination = EchoTracker.destinationIcon(echo, spellTexture())
+      if destination then
+        auraIcon:SetAlpha(0)
+        local icon = button:CreateTexture(nil, "ARTWORK", nil, 1)
+        icon:SetAllPoints(button)
+        icon:SetTexture(destination)
+      end
       progress.icon = true
+      progress.destinationIcon = destination and true or false
 
       local count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalHuge")
       count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -2, 2)

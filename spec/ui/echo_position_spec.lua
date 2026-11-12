@@ -32,3 +32,30 @@ describe("EchoTracker.toCenter", function()
     assert.is_nil(EchoTracker.toCenter({ point = "CENTER" }, 100, 100))
   end)
 end)
+
+describe("EchoTracker.destinationIcon", function()
+  local EchoTracker
+
+  before_each(function()
+    EchoTracker = Addon.load({ "ui/EchoTracker.lua" }).UI.EchoTracker
+  end)
+
+  local function echo(key)
+    for _, e in ipairs(EchoTracker.ECHOES) do if e.key == key then return e end end
+  end
+
+  it("shows the seal you have to switch to, not the one you have", function()
+    local asked = {}
+    local getTexture = function(id) asked[#asked + 1] = id; return id * 10 end
+
+    assert.are.equal(210840, EchoTracker.destinationIcon(echo("echoCommand"), getTexture))       -- Righteousness
+    assert.are.equal(203750, EchoTracker.destinationIcon(echo("echoRighteousness"), getTexture)) -- Command
+    assert.are.same({ 21084, 20375 }, asked)
+  end)
+
+  it("returns nil when the icon cannot be read, so the aura icon is used", function()
+    assert.is_nil(EchoTracker.destinationIcon(echo("echoCommand"), function() error("boom") end))
+    assert.is_nil(EchoTracker.destinationIcon(echo("echoCommand"), nil))
+    assert.is_nil(EchoTracker.destinationIcon(echo("echoCommand"), function() return nil end))
+  end)
+end)
