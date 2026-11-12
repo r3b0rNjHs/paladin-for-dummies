@@ -1,7 +1,10 @@
 -- Texto de las macros que genera el addon. Las decisiones se toman por spellID;
 -- los nombres (en el idioma del cliente) solo se usan para escribir la macro,
 -- porque /cast necesita el nombre. Sin rango: /cast usa el rango más alto.
---   PFD Apertura  los pasos antes del pull (core/Plan.lua), una pulsación por paso
+--   PFD Apertura  los pasos antes del pull (core/Plan.lua), una pulsación por paso.
+--                 Vuelve al primer paso al cambiar de objetivo, al salir de combate o
+--                 tras 6 s sin pulsarla (si el enemigo muere a medias, el siguiente
+--                 empieza de cero aunque sigas en combate).
 --   PFD Unsealed  alterna Righteousness y Command (cambio con Unsealed Wrath)
 --   PFD Sello     Command; con Shift, Righteousness
 --
@@ -54,7 +57,7 @@ local function opener(input)
   local names, missing = namesOf(input.nameOf, ids)
   if not names then return nil, missingName(missing) end
   if #names == 1 then return HEADER .. "/cast " .. names[1] end
-  return HEADER .. "/castsequence reset=target/combat " .. table.concat(names, ", ")
+  return HEADER .. "/castsequence reset=6/target/combat " .. table.concat(names, ", ")
 end
 
 function Macros.build(input)

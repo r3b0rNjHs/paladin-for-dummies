@@ -162,7 +162,7 @@ describe("PaladinForDummies.toc", function()
     assert.are.same({}, slotErrors)
     -- Macros: con Command y Crusader conocidos, se crea la de apertura.
     env.SlashCmdList.PALADINFORDUMMIES("macros")
-    assert.are.equal("#showtooltip\n/castsequence reset=target/combat Seal of the Crusader, Judgement, Seal of Command",
+    assert.are.equal("#showtooltip\n/castsequence reset=6/target/combat Seal of the Crusader, Judgement, Seal of Command",
       env.createdMacros["PFD Apertura"])
     assert.is_true(env.PaladinForDummiesDB.macros)
 

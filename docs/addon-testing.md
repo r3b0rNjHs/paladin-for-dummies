@@ -33,7 +33,7 @@ El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de man
 5. **PFD Sello:** Command; con Shift, Righteousness.
 6. Marca otro tipo de enemigo: si cambia la recomendación, PFD Apertura se actualiza sola (fuera de combate).
 
-Pega de `/castsequence`: si lanzas un sello a mano entre medias, la secuencia se desincroniza. Se reinicia al cambiar de objetivo o al salir de combate.
+Pega de `/castsequence`: si lanzas un sello a mano entre medias, la secuencia se desincroniza. PFD Apertura vuelve al primer paso al cambiar de objetivo, al salir de combate o tras 6 s sin pulsarla (v0.4.3); PFD Unsealed, al salir de combate.
 
 ## Pruebas de la v0.3.0: widget de Unsealed Wrath (experimental)
 1. `git pull`, `/reload` y escribe `/pfd echo`. Debe decir "Widget de Unsealed Wrath activado". Si sale un error, también queda en el archivo.

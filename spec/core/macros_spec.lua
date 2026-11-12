@@ -42,7 +42,7 @@ describe("Macros.build", function()
     local macros = byName(Macros.build(input()))
 
     assert.are.equal(
-      "#showtooltip\n/castsequence reset=target/combat Seal of the Crusader, Judgement, Seal of Command",
+      "#showtooltip\n/castsequence reset=6/target/combat Seal of the Crusader, Judgement, Seal of Command",
       macros["PFD Apertura"])
   end)
 
