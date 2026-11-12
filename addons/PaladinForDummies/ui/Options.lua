@@ -193,8 +193,10 @@ function Options.buildGuide(h)
         end
         withIcon(entry, function() return iconOf(block.icon) end)
         if block.fun then
+          -- El chiste, como un aparte: separado, en gris suave y de tamaño normal.
+          local key = "GUIDE_" .. block.text
           entry.hidden = function() return ns.Locales.tone ~= "fun" end
-          entry.fontSize = "small"
+          entry.name = function() return "\n" .. Style.color("muted", h.guideFill(L[key]):gsub("|r", "|r" .. Style.hex("muted"))) .. "\n" end
         end
         args["b" .. j] = entry
       end

@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.12.1). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.12.2). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -133,6 +133,9 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - ¿El arma y el poder con hechizos siguen legibles dentro de mazmorras? (La wiki los marca `SecretWhenUnitStatsRestricted`.)
 - ¿Judgement de Command quita la Sentencia de Crusader?
 - Efecto real de Unsealed Wrath: hay 35 peleas con cambio de sellos, pero gastar las copias no genera 20424. El medidor de daño de Blizzard existe en Forever y desglosa por habilidad (Jorge): desde la v0.9.7 se guarda. ¿Con qué spellID sale el daño de las copias? ¿La sesión "Current" es solo la última pelea?
+
+## Interfaz: lo aprendido en el juego
+- **La fuente del juego solo dibuja caracteres latinos básicos (Latin-1):** "→" y "●" salen como un cuadrado vacío (visto el 12 nov). Usar ">" y cuadraditos de color con `|T...|t`. Un test de `spec/locales` lo comprueba en todos los textos.
 
 ## Herramientas
 - VS Code con la extensión `ketho.wow-api` (anotaciones de la API para el Lua Language Server).

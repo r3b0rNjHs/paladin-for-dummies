@@ -12,7 +12,7 @@ ns.Locales.register("esES", {
   HELP_DEV = "Modo desarrollador: debug | ui | echodebug | test A|B|off | spec ret|prot|holy|auto",
   OPTIONS_AFTER_COMBAT = "No se pueden abrir las opciones en combate: se abrirán al terminar la pelea.",
   OPTIONS_UNAVAILABLE = "No se pudo abrir el panel de opciones. Escribe /pfd help para ver los comandos.",
-  DEV_ONLY = "Ese comando necesita el modo desarrollador (Opciones → Avanzado).",
+  DEV_ONLY = "Ese comando necesita el modo desarrollador (Opciones > Avanzado).",
 
   OPT_INTRO = "Paladin for Dummies te ayuda a elegir sellos y Sentencias, muestra las copias de Unsealed Wrath y guarda estadísticas de tus peleas. Todo es opcional.",
   OPT_SHOW = "Mostrar",
@@ -93,7 +93,7 @@ ns.Locales.register("esES", {
   TIP_NO_ADVICE_FUN = "Selecciona a un enemigo. Pegarle al aire no cuenta como entrenar.",
   OPTIONS_AFTER_COMBAT_FUN = "¿Abrir las opciones en mitad de la pelea? Valiente. El juego no te deja: te las abro en cuanto el bicho deje de pegarte.",
   FIGHTS_DELETED_FUN = "Peleas borradas. Nadie sabrá nunca lo de aquel múrloc.",
-  DEV_ONLY_FUN = "Ese comando es para gente con bata de laboratorio (modo desarrollador, en Opciones → Avanzado).",
+  DEV_ONLY_FUN = "Ese comando es para gente con bata de laboratorio (modo desarrollador, en Opciones > Avanzado).",
   ECHO_LOCKED_FUN = "Indicador fijado. Firme como un paladín a mitad de un Bubble Hearth.",
   ECHO_RESET_FUN = "Indicador de vuelta a casa. Más rápido que un Bubble Hearth.",
   OPT_INTRO_FUN = "Paladin for Dummies: porque nadie nace sabiendo qué sello poner. Consejo antes del pull, avisos de Unsealed Wrath en combate y un repaso cariñoso de tus peleas. Todo es opcional, como el casco.",
@@ -213,7 +213,7 @@ Algunos humanoides salen corriendo con poca vida y traen a sus amigos. {HAMMER} 
 {DIVINE_SHIELD} te hace inmune unos segundos. Aprovecha para curarte o para salir de ahí.]==],
   GUIDE_SIT_JOKE = [==[Situación especial: el grupo ha muerto y tú sigues vivo. Bubble Hearth. Es broma. (¿O no?)]==],
   GUIDE_MACROS_TITLE = [==[Las macros]==],
-  GUIDE_MACROS_INTRO = [==[Una macro es un botón que hace varias cosas a la vez. El addon puede crearlas por ti: actívalo en Opciones → Macros y arrástralas a tu barra desde la ventana de macros (escribe /macro).]==],
+  GUIDE_MACROS_INTRO = [==[Una macro es un botón que hace varias cosas a la vez. El addon puede crearlas por ti: actívalo en Opciones > Macros y arrástralas a tu barra desde la ventana de macros (escribe /macro).]==],
   GUIDE_MACRO_GOLPE = [==[|cfff2c14ePFD Golpe|r
 Lanza {JUDGEMENT} y {HOLY_STRIKE} con una sola tecla. Púlsala en cuanto se ilumine.]==],
   GUIDE_MACRO_UNSEALED = [==[|cfff2c14ePFD Unsealed|r
@@ -247,13 +247,13 @@ Curas, protecciones, bendiciones, auras, resurrección... Van al compañero que 
 |cfff2c14eBubble Hearth|r: ponerte {DIVINE_SHIELD} y usar la piedra de hogar. Patrimonio cultural del paladín.]==],
   GUIDE_FAQ_TITLE = [==[Preguntas frecuentes]==],
   GUIDE_FAQ_Q_COMBAT = [==[¿Por qué la ventanita desaparece al pelear?]==],
-  GUIDE_FAQ_A_COMBAT = [==[Su consejo es para antes de empezar. Si la quieres ver siempre: Opciones → Asesor → Cuándo se ve.]==],
+  GUIDE_FAQ_A_COMBAT = [==[Su consejo es para antes de empezar. Si la quieres ver siempre: Opciones > Asesor > Cuándo se ve.]==],
   GUIDE_FAQ_Q_AUTO = [==[¿Esto juega por mí?]==],
   GUIDE_FAQ_A_AUTO = [==[No. Ningún botón lanza nada solo y el juego no permite que un addon te diga qué pulsar en mitad de la pelea. Aquí se aprende, y luego lo haces tú.]==],
   GUIDE_FAQ_Q_SOURCE = [==[¿Me puedo fiar de los consejos?]==],
   GUIDE_FAQ_A_SOURCE = [==[Mira el cuadradito de color al pasar el ratón: azul, sale de cómo funciona el hechizo; ámbar, de lo que dicen las guías; verde, de tus propias peleas.]==],
   GUIDE_FAQ_Q_BUG = [==[Algo no funciona.]==],
-  GUIDE_FAQ_A_BUG = [==[Opciones → Avanzado → Informe de errores. Cópialo y mándaselo a quien mantiene el addon. Gracias, de verdad.]==],
+  GUIDE_FAQ_A_BUG = [==[Opciones > Avanzado > Informe de errores. Cópialo y mándaselo a quien mantiene el addon. Gracias, de verdad.]==],
   GUIDE_FAQ_JOKE = [==[|cfff2c14e¿Puedo llevar dos sellos a la vez?|r
 No. Lo intentaron muchos antes que tú.]==],
 })

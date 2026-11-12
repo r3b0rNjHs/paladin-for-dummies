@@ -13,7 +13,7 @@ ns.Locales.register("enUS", {
   HELP_DEV = "Developer mode: debug | ui | echodebug | test A|B|off | spec ret|prot|holy|auto",
   OPTIONS_AFTER_COMBAT = "You cannot open the options in combat: they will open after combat.",
   OPTIONS_UNAVAILABLE = "The options panel could not be opened. Type /pfd help for commands.",
-  DEV_ONLY = "That command needs developer mode (Options → Advanced).",
+  DEV_ONLY = "That command needs developer mode (Options > Advanced).",
 
   -- Options: general
   OPT_INTRO = "Paladin for Dummies helps you choose seals and Judgements, shows your Unsealed Wrath echoes and keeps statistics of your fights. Everything is optional.",
@@ -101,7 +101,7 @@ ns.Locales.register("enUS", {
   TIP_NO_ADVICE_FUN = "Target an enemy. Swinging at the air does not count as practice.",
   OPTIONS_AFTER_COMBAT_FUN = "Opening the options mid-fight? Bold. The game will not allow it: they will open as soon as the mob stops hitting you.",
   FIGHTS_DELETED_FUN = "Fights deleted. Nobody will ever know about that murloc.",
-  DEV_ONLY_FUN = "That command is for people in lab coats (developer mode, under Options → Advanced).",
+  DEV_ONLY_FUN = "That command is for people in lab coats (developer mode, under Options > Advanced).",
   ECHO_LOCKED_FUN = "Display locked. Steadfast, like a paladin halfway through a Bubble Hearth.",
   ECHO_RESET_FUN = "Display back home. Faster than a Bubble Hearth.",
   OPT_INTRO_FUN = "Paladin for Dummies: because nobody is born knowing which seal to use. Advice before the pull, Unsealed Wrath warnings in combat and a friendly review of your fights afterwards. Everything is optional, like the helmet.",
@@ -221,7 +221,7 @@ Some humanoids run off at low health and bring their friends. {HAMMER} stuns the
 {DIVINE_SHIELD} makes you immune for a few seconds. Use them to heal or to get out of there.]==],
   GUIDE_SIT_JOKE = [==[Special situation: the group is dead and you are still alive. Bubble Hearth. Just kidding. (Or not?)]==],
   GUIDE_MACROS_TITLE = [==[The macros]==],
-  GUIDE_MACROS_INTRO = [==[A macro is a button that does several things at once. The addon can create them for you: turn it on in Options → Macros and drag them to your bar from the macro window (type /macro).]==],
+  GUIDE_MACROS_INTRO = [==[A macro is a button that does several things at once. The addon can create them for you: turn it on in Options > Macros and drag them to your bar from the macro window (type /macro).]==],
   GUIDE_MACRO_GOLPE = [==[|cfff2c14ePFD Golpe|r
 Casts {JUDGEMENT} and {HOLY_STRIKE} with one key. Press it as soon as it lights up.]==],
   GUIDE_MACRO_UNSEALED = [==[|cfff2c14ePFD Unsealed|r
@@ -255,13 +255,13 @@ Heals, protections, blessings, auras, resurrection... They go to the teammate un
 |cfff2c14eBubble Hearth|r: casting {DIVINE_SHIELD} and using your hearthstone. Paladin cultural heritage.]==],
   GUIDE_FAQ_TITLE = [==[FAQ]==],
   GUIDE_FAQ_Q_COMBAT = [==[Why does the little window disappear when I fight?]==],
-  GUIDE_FAQ_A_COMBAT = [==[Its advice is for before you start. To always see it: Options → Advisor → When to show it.]==],
+  GUIDE_FAQ_A_COMBAT = [==[Its advice is for before you start. To always see it: Options > Advisor > When to show it.]==],
   GUIDE_FAQ_Q_AUTO = [==[Does this play for me?]==],
   GUIDE_FAQ_A_AUTO = [==[No. No button casts anything on its own, and the game does not let an addon tell you what to press mid-fight. You learn here, then you do it yourself.]==],
   GUIDE_FAQ_Q_SOURCE = [==[Can I trust the advice?]==],
   GUIDE_FAQ_A_SOURCE = [==[Look at the little colored square when you hover: blue, it comes from how the spell works; amber, from what guides say; green, from your own fights.]==],
   GUIDE_FAQ_Q_BUG = [==[Something does not work.]==],
-  GUIDE_FAQ_A_BUG = [==[Options → Advanced → Error report. Copy it and send it to whoever maintains the addon. Thank you, really.]==],
+  GUIDE_FAQ_A_BUG = [==[Options > Advanced > Error report. Copy it and send it to whoever maintains the addon. Thank you, really.]==],
   GUIDE_FAQ_JOKE = [==[|cfff2c14eCan I wear two seals at once?|r
 No. Many tried before you.]==],
 })

@@ -81,3 +81,20 @@ describe("Rule reasons", function()
     end
   end)
 end)
+
+describe("Locale characters", function()
+  -- La fuente del juego (Friz Quadrata) solo tiene los caracteres latinos
+  -- básicos: "→" o "●" salen como un cuadrado vacío (visto en el juego, 12 nov).
+  -- En UTF-8, lo que no es Latin-1 empieza por un byte de 0xC4 o más.
+  it("uses only characters the game font can draw", function()
+    for _, lang in ipairs({ "enUS", "esES" }) do
+      local ns = Addon.load({ "Locales/Locales.lua", "Locales/" .. lang .. ".lua" })
+      for key, text in pairs(ns.Locales.tables[lang]) do
+        for i = 1, #text do
+          local b = text:byte(i)
+          assert.is_true(b < 0xC4, ("%s (%s) usa un carácter que la fuente no tiene, en la posición %d"):format(key, lang, i))
+        end
+      end
+    end
+  end)
+end)
