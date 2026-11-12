@@ -71,6 +71,9 @@ function Recorder.finish(db)
   if not current then return nil end
   local record = Fight.finish(current, { t = GetTime(), time = time() })
   current = nil
+  -- Daño por hechizo del medidor de Blizzard (ya fuera de combate, sin secrets).
+  local damage, reason = FightReader.readDamage(_G)
+  if damage then record.damage = damage else record.damageStatus = reason end
   db.fights = db.fights or {}
   table.insert(db.fights, record)
   while #db.fights > MAX_FIGHTS do table.remove(db.fights, 1) end

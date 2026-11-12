@@ -317,6 +317,10 @@ describe("PaladinForDummies.toc", function()
     env_now = 1006; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-3", 20424)
     env_now = 1012; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-4", 20424)
     env_now = 1020
+    env.UnitGUID = function() return "Player-1" end
+    env.C_DamageMeter = { GetCombatSessionSourceFromType = function()
+      return { totalAmount = 900, combatSpells = { { spellID = 20424, totalAmount = 400 } } }
+    end }
     fire(w, "PLAYER_REGEN_ENABLED")
     env.SlashCmdList.PALADINFORDUMMIES("stats")
     env.SlashCmdList.PALADINFORDUMMIES("test off")
@@ -333,6 +337,7 @@ describe("PaladinForDummies.toc", function()
     assert.are.equal(20, f.duration)
     assert.are.equal("command", f.openingSeal)
     assert.are.same({ command = 3 }, f.openingEchoes)
+    assert.are.same({ total = 900, spells = { [20424] = 400 } }, f.damage) -- medidor de Blizzard
     assert.are.same({ judgement = 1, holyStrike = 1, commandProc = 2, sealCast = 0 }, f.counts)
     assert.are.same({ command = 20 }, f.sealSeconds)
     assert.is_true(math.abs(f.context.weaponBaseSpeed - 2.4) < 0.001)

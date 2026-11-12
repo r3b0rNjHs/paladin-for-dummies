@@ -56,3 +56,37 @@ function FightReader.readOpening(api, catalog)
   end
   return opening
 end
+
+-- Daño de la pelea por hechizo, del medidor de daño de Blizzard (C_DamageMeter,
+-- Mainline 12.0). Se llama al salir de combate (PLAYER_REGEN_ENABLED): en combate
+-- los datos son secret (SecretWhenInCombat) y no se tocan. Sesión actual (1),
+-- daño hecho (0), solo tus golpes.
+-- Devuelve { total, spells = { [spellID] = daño } }, o nil y el motivo:
+-- missing (no existe), error, empty (sin datos) o secret.
+local SESSION_CURRENT, METER_DAMAGE_DONE = 1, 0
+
+function FightReader.readDamage(api)
+  local meter = api.C_DamageMeter
+  local getSource = meter and meter.GetCombatSessionSourceFromType
+  if type(getSource) ~= "function" then return nil, "missing" end
+
+  local okGuid, guid = pcall(api.UnitGUID, "player")
+  guid = okGuid and readable(api, guid) or nil
+  local ok, source = pcall(getSource, SESSION_CURRENT, METER_DAMAGE_DONE, guid)
+  if not ok then return nil, "error" end
+  if source == nil then return nil, "empty" end
+  if readable(api, source) == nil then return nil, "secret" end
+
+  local total = auraField(api, source, "totalAmount")
+  local list = auraField(api, source, "combatSpells")
+  if type(total) ~= "number" and type(list) ~= "table" then return nil, "secret" end
+
+  local damage = { total = type(total) == "number" and total or nil, spells = {} }
+  if type(list) == "table" then
+    for _, spell in ipairs(list) do
+      local id, amount = auraField(api, spell, "spellID"), auraField(api, spell, "totalAmount")
+      if type(id) == "number" and type(amount) == "number" then damage.spells[id] = amount end
+    end
+  end
+  return damage
+end
