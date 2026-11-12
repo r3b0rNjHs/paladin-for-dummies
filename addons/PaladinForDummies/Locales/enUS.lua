@@ -11,6 +11,7 @@ ns.Locales.register("enUS", {
   HELP_STATS = "|cffffd100/pfd stats|r: your fight statistics",
   HELP_REPORT = "|cffffd100/pfd report|r: copyable report to attach to a bug report",
   HELP_DEV = "Developer mode: debug | ui | echodebug | test A|B|off | spec ret|prot|holy|auto",
+  OPTIONS_AFTER_COMBAT = "You cannot open the options in combat: they will open after combat.",
   OPTIONS_UNAVAILABLE = "The options panel could not be opened. Type /pfd help for commands.",
   DEV_ONLY = "That command needs developer mode (Options → Advanced).",
 

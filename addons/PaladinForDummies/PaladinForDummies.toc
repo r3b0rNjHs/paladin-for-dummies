@@ -4,7 +4,7 @@
 ## Notes-esES: Asesor de sellos y Sentencias, indicador de Unsealed Wrath, macros de paladín y repaso de peleas.
 ## Notes-esMX: Asesor de sellos y Sentencias, indicador de Unsealed Wrath, macros de paladín y repaso de peleas.
 ## Author: r3b0rNjHs
-## Version: 0.9.5
+## Version: 0.9.6
 ## SavedVariables: PaladinForDummiesDB
 ## IconTexture: Interface\Icons\Ability_Warrior_InnerRage
 ## Category: Combat

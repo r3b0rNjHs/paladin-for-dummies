@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.9.5). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.9.6). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -44,6 +44,7 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 - **Enfriamiento de Judgement: 8 s. Enfriamiento de Holy Strike: 10 s** (intervalos mínimos entre lanzamientos).
 - **Seal of Command: unas 3,7 activaciones por minuto con el sello puesto** (102 en 1669 s; 3 por minuto en peleas largas). Muy por debajo de las 7 que asumen las guías, aunque el tiempo incluye ratos sin golpear y golpes fallados.
 - `UnitAttackSpeed` incluye el +40% de Crusader si está puesto: desde la v0.7.1 se guarda `weaponBaseSpeed`.
+- **Peleas 2 (12 nov, `docs/probe-results/2026-11-12-peleas-2.md`):** Command 3,73 por minuto (confirmado). **Al gastar las copias de Echo of Command con Righteousness no llega ningún 20424**: el efecto de Unsealed Wrath no se mide con los lanzamientos. Ritmo de Jorge: unos 11 s con Command y unos 4 s con Righteousness.
 - **Cada rango de un hechizo tiene su propio spellID.** Hasta la v0.7.1 solo se conocía el rango 1 de Righteousness (21084), así que los lanzamientos del rango 5 no se registraban: las peleas de antes no tienen datos del cambio de sellos. Desde la v0.7.2 el adaptador **descubre los rangos en el grimorio** por el nombre del ID conocido (nombre del cliente, vale en cualquier idioma) y `Data.LearnRanks` los añade y rehace el catálogo. Los IDs descubiertos quedan en `snapshot.diagnostics.discoveredRanks`.
 
 - **La ventana funciona (v0.1.2):** se ve con fondo, los tooltips muestran el hechizo, el porqué y la confianza, y la posición se guarda entre `/reload`. Sin fondo (v0.1.0/0.1.1) no se distinguía.
@@ -74,7 +75,7 @@ Tests: `busted` desde la raíz del repo (Lua 5.1; en Ubuntu, `apt install lua5.1
 - `adapters/`: la única capa que toca la API de WoW. Lee el contexto (jugador, objetivo, grupo, instancia) y lo convierte en un objeto `Situation` plano, que es lo que recibe el core. Recibe la API como parámetro (`_G` en el juego, una falsa en los tests). `Situation.target` solo se rellena con objetivos atacables.
 - `ui/`: icono de recomendación, tooltips ampliados y panel de opciones (`ui/Options.lua`, Settings API con opciones "proxy" que llaman a funciones de `Main.lua`; se abre con `/pfd` y desde el menú de addons del minimapa vía `AddonCompartmentFunc` en el `.toc`).
 - **Base pública (v0.9.0, auditoría en `docs/quality-audit.md`):** librerías **Ace3** en `Libs/` (cargadas por `embeds.xml`; Ace3 declara `16001`): AceDB (`PaladinForDummiesDB`: ajustes en `profile`, perfil "Default" compartido; peleas, errores, diagnósticos y `welcomed` en `char`), AceConfig + AceDBOptions (`ui/Options.lua`, pestañas y Perfiles), AceGUI (`ui/ReportWindow.lua`). Idiomas propios en `Locales/` (`ns.L`, inglés por defecto, español; opción Idioma en Avanzado; no AceLocale porque solo sigue el idioma del cliente). `core/Migrations.lua` migra el formato plano antiguo. Solo se activa con paladines. Comandos de usuario: `/pfd`, `/pfd help`, `/pfd stats`, `/pfd report` (`core/Report.lua`, texto en inglés para quien mantiene el addon); los de diagnóstico, con el modo desarrollador. Errores: `char.errors` + `geterrorhandler()` una vez por sesión; en el chat solo en modo desarrollador. Se registran `ADDON_ACTION_BLOCKED`/`FORBIDDEN` con la función. Valores por defecto poco intrusivos (sin resumen en el chat, macros apagadas). **Autor: r3b0rNjHs.** Los textos antiguos (rec., chat de peleas, macros) siguen en español: los traduce el paso de idiomas.
-- **Aviso "blocked from an action only available to the Blizzard UI" al entrar en una mazmorra (12 nov, v0.8.0):** causa sin identificar. **Diagnosticar antes de cambiar nada** (decisión de Jorge): `ADDON_ACTION_BLOCKED` queda en el informe y `/console taintLog 1` da la traza.
+- **Aviso "blocked from an action only available to the Blizzard UI" (12 nov):** **diagnosticado** con el registro de `ADDON_ACTION_BLOCKED` (`docs/probe-results/2026-11-12-peleas-2.md`): era **`OpenSettingsPanel()` en combate** (abrir las opciones con `/pfd` o el minimapa). Desde la v0.9.6 se abre al terminar la pelea. Falta confirmar si el aviso de la v0.8.0 al entrar en la mazmorra era lo mismo. Regla: **diagnosticar antes de cambiar nada** (decisión de Jorge).
 - **Presentación (decisión de Jorge, 12 nov):** fase 1 opciones (v0.8.0) → idiomas (inglés por defecto + español; **se publicará más adelante**) → fase 2 estilo visual unificado → fase 3 Modo edición con LibEditMode. Probar cada fase en el juego antes de la siguiente. Investigación en `docs/research.md`.
 - `data/`: reglas declarativas en tablas Lua, versionadas por build del juego. Cada regla lleva el porqué y su confianza (`mechanic` = sale de la mecánica, `consensus` = consenso de guías, `measured` = confirmada con datos propios).
 
@@ -127,7 +128,7 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - Grimorio de Fury, Justice y Wisdom, y rangos 2-6 de Righteousness (no estaban entrenados).
 - ¿El arma y el poder con hechizos siguen legibles dentro de mazmorras? (La wiki los marca `SecretWhenUnitStatsRestricted`.)
 - ¿Judgement de Command quita la Sentencia de Crusader?
-- Efecto real de Unsealed Wrath: aún no hay peleas con Righteousness.
+- Efecto real de Unsealed Wrath: hay 35 peleas con cambio de sellos, pero gastar las copias no genera 20424. ¿El medidor de daño de Blizzard lo desglosa?
 
 ## Herramientas
 - VS Code con la extensión `ketho.wow-api` (anotaciones de la API para el Lua Language Server).

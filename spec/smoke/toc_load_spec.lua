@@ -260,6 +260,21 @@ describe("PaladinForDummies.toc", function()
     assert.are.same({ 42, 42 }, w.opened)
   end)
 
+  it("waits until the end of combat to open the options (the game blocks it in combat)", function()
+    local env, w = wowEnv()
+    start(env, w)
+    env.InCombatLockdown = function() return true end
+
+    env.SlashCmdList.PALADINFORDUMMIES("")
+    env.PaladinForDummies_OnAddonCompartmentClick()
+    assert.are.same({}, w.opened)
+    assert.truthy(output(w):find("after combat", 1, true))
+
+    env.InCombatLockdown = function() return false end
+    fire(w, "PLAYER_REGEN_ENABLED")
+    assert.are.same({ 42 }, w.opened) -- una sola vez aunque se pidiera dos
+  end)
+
   it("records a fight, keeps diagnostic commands behind developer mode", function()
     local env, w = wowEnv()
     local ns, _, profile, char = start(env, w)

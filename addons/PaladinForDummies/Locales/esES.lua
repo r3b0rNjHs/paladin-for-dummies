@@ -10,6 +10,7 @@ ns.Locales.register("esES", {
   HELP_STATS = "|cffffd100/pfd stats|r: estadísticas de tus peleas",
   HELP_REPORT = "|cffffd100/pfd report|r: informe para copiar y adjuntar al avisar de un error",
   HELP_DEV = "Modo desarrollador: debug | ui | echodebug | test A|B|off | spec ret|prot|holy|auto",
+  OPTIONS_AFTER_COMBAT = "No se pueden abrir las opciones en combate: se abrirán al terminar la pelea.",
   OPTIONS_UNAVAILABLE = "No se pudo abrir el panel de opciones. Escribe /pfd help para ver los comandos.",
   DEV_ONLY = "Ese comando necesita el modo desarrollador (Opciones → Avanzado).",
 

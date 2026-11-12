@@ -422,7 +422,22 @@ local optionHandlers = {
   resetSettings = function() db:ResetProfile() end,
 }
 
+-- El juego no deja abrir el panel de opciones en combate (OpenSettingsPanel
+-- queda bloqueado, visto en Forever el 12 nov): se abre al terminar la pelea.
+local optionsPending = false
+
+local function inCombat()
+  local ok, value = pcall(InCombatLockdown)
+  return ok and value == true
+end
+
 local function openOptions()
+  if inCombat() then
+    if not optionsPending then p(L.OPTIONS_AFTER_COMBAT) end
+    optionsPending = true
+    return
+  end
+  optionsPending = false
   if not ns.UI.Options.open() then p(L.OPTIONS_UNAVAILABLE) end
 end
 
@@ -521,6 +536,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
       if record and profile.review.chatSummary then p(ns.Recorder.describe(record)) end
     end)
     setFrozen(false)
+    if optionsPending then openOptions() end
   else
     scheduleRefresh()
   end
