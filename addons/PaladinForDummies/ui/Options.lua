@@ -128,14 +128,20 @@ function Options.buildGuide(h)
   for i, chapter in ipairs(ns.Data.Guide) do
     local args = {}
     for j, block in ipairs(chapter.blocks) do
-      local entry = { type = "description", order = j, fontSize = "medium" }
-      if block.numbers then
-        entry.name = function() return h.guideNumbers() end
+      local entry
+      if block.header then
+        entry = { type = "header", order = j, name = L["GUIDE_" .. block.header] }
       else
-        local key = "GUIDE_" .. block.text
-        entry.name = function() return L[key] .. "\n" end
-        local icon = spellIcon(block.spell)
-        if icon then entry.image, entry.imageWidth, entry.imageHeight = icon, 32, 32 end
+        entry = { type = "description", order = j, fontSize = "medium" }
+        if block.numbers then
+          entry.name = function() return h.guideNumbers() end
+        else
+          local key = "GUIDE_" .. block.text
+          -- Una línea en blanco detrás para que los bloques respiren.
+          entry.name = function() return L[key] .. "\n" end
+        end
+        local icon = block.icon or spellIcon(block.spell)
+        if icon then entry.image, entry.imageWidth, entry.imageHeight = icon, 40, 40 end
         if block.fun then
           entry.hidden = function() return ns.Locales.tone ~= "fun" end
           entry.fontSize = "small"

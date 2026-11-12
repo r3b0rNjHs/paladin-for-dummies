@@ -445,12 +445,13 @@ local optionHandlers = {
     local fights = char.fights or {}
     if #fights == 0 then return L.GUIDE_NUMBERS_EMPTY end
     local s = ns.Core.FightStats.summarize(fights, ns.Core.FightStyle.classify)
-    local lines = { L.GUIDE_NUMBERS_FIGHTS:format(s.fights) }
-    if s.command then lines[#lines + 1] = L.GUIDE_NUMBERS_COMMAND:format(tostring(s.command.perMinute)) end
+    local gold = ns.UI.Style.color
+    local lines = { L.GUIDE_NUMBERS_FIGHTS:format(gold("gold", s.fights)) }
+    if s.command then lines[#lines + 1] = L.GUIDE_NUMBERS_COMMAND:format(gold("gold", s.command.perMinute)) end
     local twist = s.byStyle and s.byStyle.twist
-    if twist then lines[#lines + 1] = L.GUIDE_NUMBERS_TWIST:format(twist.fights) end
+    if twist then lines[#lines + 1] = L.GUIDE_NUMBERS_TWIST:format(gold("gold", twist.fights)) end
     lines[#lines + 1] = "\n" .. L.GUIDE_NUMBERS_NOTE
-    return table.concat(lines, "\n")
+    return table.concat(lines, "\n\n")
   end,
   getTone = function() return profile.tone end,
   setTone = function(value)
