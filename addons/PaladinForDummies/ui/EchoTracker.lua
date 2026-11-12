@@ -29,18 +29,28 @@ EchoTracker.ECHOES = {
 -- Construye el contenido de un botón de aura. Todo tiene que ser hijo del botón
 -- (el contenedor lo exige). onError recibe los errores, porque el juego llama a
 -- esta función en un entorno protegido y si no se perderían.
+-- Qué pasos de la construcción se completaron, por copia (para /pfd echo debug).
+EchoTracker.progress = {}
+
 function EchoTracker.initializer(echo, onError)
   return function(button)
+    local progress = {}
+    EchoTracker.progress[echo.key] = progress
+    EchoTracker.buttons = EchoTracker.buttons or {}
+    EchoTracker.buttons[echo.key] = button
     local ok, err = pcall(function()
       button:SetSize(SIZE, SIZE)
 
       local icon = button:CreateTexture(nil, "ARTWORK")
       icon:SetAllPoints(button)
       button:SetIcon(icon)
+      progress.icon = true
 
       local count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalHuge")
       count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -2, 2)
       button:SetApplicationCount(count, {})
+      progress.count = true
+      button.pfdCount = count
 
       -- Barra invisible que el juego solo muestra con `ready` copias o más:
       -- sirve de interruptor para el brillo y el texto que lleva dentro.
@@ -62,7 +72,11 @@ function EchoTracker.initializer(echo, onError)
       text:SetText(echo.label)
 
       button:SetApplicationBar(bar, { minApplications = echo.ready, maxApplications = echo.ready })
+      progress.bar = true
+      button.pfdBar = bar
+      button.pfdText = text
     end)
+    progress.error = (not ok) and tostring(err) or nil
     if not ok and onError then onError(echo.key, err) end
   end
 end
@@ -118,6 +132,38 @@ local function createAnchor(db, width, height)
   anchor:ApplyPosition()
   anchor:SetUnlocked(false)
   return anchor
+end
+
+-- Diagnóstico para /pfd echo debug: qué partes existen y cuáles se ven.
+-- Fuera de combate estos datos no son secret; en combate pueden serlo.
+local function describeValue(fn)
+  local ok, v = pcall(fn)
+  if not ok then return "error" end
+  if issecretvalue and issecretvalue(v) then return "<secret>" end
+  return tostring(v)
+end
+
+function EchoTracker.describe()
+  local lines = {}
+  for _, echo in ipairs(EchoTracker.ECHOES) do
+    local p = EchoTracker.progress[echo.key]
+    local b = EchoTracker.buttons and EchoTracker.buttons[echo.key]
+    if not p then
+      lines[#lines + 1] = echo.key .. ": el juego no ha construido el botón todavía"
+    else
+      lines[#lines + 1] = ("%s: icono %s, número %s, aviso %s%s"):format(echo.key,
+        tostring(p.icon == true), tostring(p.count == true), tostring(p.bar == true),
+        p.error and (" | error: " .. p.error) or "")
+      if b then
+        lines[#lines + 1] = ("   botón visible %s | número '%s' visible %s | aviso visible %s"):format(
+          describeValue(function() return b:IsVisible() end),
+          describeValue(function() return b.pfdCount and b.pfdCount:GetText() end),
+          describeValue(function() return b.pfdCount and b.pfdCount:IsVisible() end),
+          describeValue(function() return b.pfdBar and b.pfdBar:IsVisible() end))
+      end
+    end
+  end
+  return lines
 end
 
 -- Crea el widget: el ancla y el contenedor con un hueco por cada copia.

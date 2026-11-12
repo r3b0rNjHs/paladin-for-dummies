@@ -153,6 +153,8 @@ describe("PaladinForDummies.toc", function()
     env.SlashCmdList.PALADINFORDUMMIES("echo move")
     env.SlashCmdList.PALADINFORDUMMIES("echo move")
     env.SlashCmdList.PALADINFORDUMMIES("echo reset")
+    env.SlashCmdList.PALADINFORDUMMIES("echo debug")
+    assert.is_table(env.PaladinForDummiesDB.echoDebug)
     local slotErrors = {}
     for _, echo in ipairs(ns.UI.EchoTracker.ECHOES) do
       ns.UI.EchoTracker.initializer(echo, function(key, err) slotErrors[#slotErrors + 1] = key .. ": " .. tostring(err) end)(mock())

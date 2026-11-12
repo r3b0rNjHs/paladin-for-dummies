@@ -307,6 +307,10 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     echoes:SetUnlocked(not echoes.unlocked)
     p(echoes.unlocked and "Widget desbloqueado: arrástralo y escribe /pfd echo move para fijarlo."
       or "Widget fijado en su sitio.")
+  elseif cmd == "echo" and arg == "debug" then
+    if not echoes then p("Activa primero el widget con /pfd echo.") return end
+    for _, line in ipairs(ns.UI.EchoTracker.describe()) do p(line) end
+    db.echoDebug = ns.UI.EchoTracker.describe()
   elseif cmd == "echo" and arg == "reset" then
     db.echoPosition = nil
     if echoes then echoes:ApplyPosition() end
@@ -353,6 +357,6 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     ui:ResetPosition()
     p("Posición restablecida.")
   else
-    p("Comandos: /pfd debug | ui | echo [move|reset] | macros [off] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd debug | ui | echo [move|reset|debug] | macros [off] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
   end
 end
