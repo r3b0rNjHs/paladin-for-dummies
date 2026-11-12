@@ -111,6 +111,7 @@ function Options.build(h)
         type = "group", order = 4, name = L.OPT_REVIEW,
         args = {
           description = description(0, L.OPT_REVIEW_DESC),
+          trainer = toggle(0.5, L.OPT_TRAINER, L.OPT_TRAINER_DESC, h.getTrainer, h.setTrainer, "full"),
           chat = toggle(1, L.OPT_REVIEW_CHAT, nil, h.getChatSummary, h.setChatSummary, "full"),
           stats = button(2, L.OPT_REVIEW_STATS, nil, h.printStats),
           reset = button(3, L.OPT_REVIEW_RESET, nil, h.resetFights, L.OPT_REVIEW_RESET_CONFIRM),
@@ -229,7 +230,8 @@ function Options.register(h, db)
   Options.categoryID = id
 
   registry:RegisterOptionsTable(APP .. "_Guide", Options.buildGuide(h))
-  dialog:AddToBlizOptions(APP .. "_Guide", L.OPT_GUIDE, "Paladin for Dummies")
+  local _, guideID = dialog:AddToBlizOptions(APP .. "_Guide", L.OPT_GUIDE, "Paladin for Dummies")
+  Options.guideCategoryID = guideID
 
   local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
   registry:RegisterOptionsTable(APP .. "_Profiles", profiles)
@@ -237,9 +239,11 @@ function Options.register(h, db)
   return id
 end
 
-function Options.open()
-  if not (Options.categoryID and Settings and Settings.OpenToCategory) then return false end
-  Settings.OpenToCategory(Options.categoryID)
+-- which = "guide" abre la Guía; si no, la página principal.
+function Options.open(which)
+  local id = (which == "guide" and Options.guideCategoryID) or Options.categoryID
+  if not (id and Settings and Settings.OpenToCategory) then return false end
+  Settings.OpenToCategory(id)
   return true
 end
 

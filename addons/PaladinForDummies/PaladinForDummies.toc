@@ -4,7 +4,7 @@
 ## Notes-esES: Asesor de sellos y Sentencias, indicador de Unsealed Wrath, macros de paladín y repaso de peleas.
 ## Notes-esMX: Asesor de sellos y Sentencias, indicador de Unsealed Wrath, macros de paladín y repaso de peleas.
 ## Author: r3b0rNjHs
-## Version: 0.13.0
+## Version: 0.14.0
 ## SavedVariables: PaladinForDummiesDB
 ## IconTexture: Interface\Icons\Ability_Warrior_InnerRage
 ## Category: Combat
@@ -29,6 +29,7 @@ core\Migrations.lua
 core\Report.lua
 core\Prepull.lua
 core\Guide.lua
+core\Coach.lua
 data\Seals.lua
 data\Rules.lua
 data\MacroSpells.lua
@@ -39,6 +40,7 @@ adapters\MacroWriter.lua
 ui\Style.lua
 ui\PrepullAlert.lua
 ui\EchoTracker.lua
+ui\Toast.lua
 ui\ReportWindow.lua
 ui\Options.lua
 Recorder.lua

@@ -25,6 +25,12 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.14.0: modo entrenador
+**Archivos nuevos: cierra el juego y vuelve a abrirlo.**
+- `/pfd entrenador` (o Repaso del combate > Modo entrenador): sale "Modo entrenador activado".
+- Pelea dejando Judgement sin usar: al terminar, un aviso arriba con el consejo; un clic abre la Guía. Si peleas bien, no sale nada. Como mucho un aviso cada 3 minutos.
+- `/pfd entrenador` otra vez: el resumen de la sesión en el chat (de cada 10, y la diferencia con la sesión anterior).
+
 ## Pruebas de la v0.13.0: aviso antes del pull
 **Archivos nuevos y quitados: cierra el juego y vuelve a abrirlo.**
 - Selecciona un enemigo **sin sello puesto**: debe salir el icono del sello en rojo con "!" latiendo. Pasa el ratón: qué hacer, pasos y porqué.

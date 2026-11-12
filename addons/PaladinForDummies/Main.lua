@@ -23,7 +23,7 @@ local DEFAULTS = {
     review = { chatSummary = false },
     reduceMotion = false,
   },
-  char = { fights = {}, errors = {}, welcomed = false },
+  char = { fights = {}, errors = {}, welcomed = false, trainer = { active = false } },
 }
 local MAX_ERRORS = 50
 
@@ -414,6 +414,56 @@ guideName = function(token)
 end
 
 ---------------------------------------------------------------------------
+-- Modo entrenador (core/Coach.lua): lo activa el jugador cuando quiere practicar
+---------------------------------------------------------------------------
+
+local toast                -- ui/Toast.lua
+local lastToastAt = 0
+local TOAST_GAP = 180      -- como mucho un consejo cada 3 minutos
+
+local function coachFill(text) return ns.Core.Guide.fill(text, guideName) end
+
+local function changeText(value)
+  if not value or value == 0 then return "" end
+  return L.TRAINER_CHANGE:format(value > 0 and ("+" .. value) or tostring(value))
+end
+
+local function setTrainer(value)
+  local t = char.trainer
+  if value and not t.active then
+    t.active, t.startedAt, lastToastAt = true, time(), 0
+    p(L.TRAINER_ON)
+  elseif not value and t.active then
+    t.active = false
+    local session = {}
+    for _, fight in ipairs(char.fights or {}) do
+      if (fight.time or 0) >= (t.startedAt or 0) then session[#session + 1] = fight end
+    end
+    local s = ns.Core.Coach.session(session, t.previous)
+    if not s then p(L.TRAINER_OFF_EMPTY) return end
+    p(L.TRAINER_SUMMARY:format(s.fights))
+    if s.judgement then p(coachFill(L.TRAINER_SUMMARY_JUDGE):format(s.judgement, changeText(s.judgementChange))) end
+    if s.holyStrike and guidePlan().known.holyStrike then
+      p(coachFill(L.TRAINER_SUMMARY_STRIKE):format(s.holyStrike, changeText(s.holyStrikeChange)))
+    end
+    t.previous = { judgement = s.judgement, holyStrike = s.holyStrike }
+  end
+  if ns.UI.Options.refresh then ns.UI.Options.refresh() end
+end
+
+-- Tras una pelea con el modo activado: el consejo más importante, si lo hay.
+local function coachAfterFight(record)
+  local t = char.trainer
+  if not (t and t.active and record and toast) then return end
+  local tip = ns.Core.Coach.fightTip(record, { holyStrike = guidePlan().known.holyStrike })
+  if not tip then return end
+  local now = GetTime()
+  if lastToastAt > 0 and now - lastToastAt < TOAST_GAP then return end
+  lastToastAt = now
+  toast:Present(L.TRAINER_TIP_TITLE, coachFill(L["TRAINER_TIP_" .. tip.key]):format(tip.value), L.TRAINER_TIP_HINT)
+end
+
+---------------------------------------------------------------------------
 -- Opciones (ui/Options.lua)
 ---------------------------------------------------------------------------
 
@@ -504,6 +554,8 @@ local optionHandlers = {
     if twist then lines[#lines + 1] = L.GUIDE_FIGHTS_TWIST:format(gold("gold", twist.fights)) end
     return table.concat(lines, "\n\n")
   end,
+  getTrainer = function() return char.trainer.active end,
+  setTrainer = setTrainer,
   getTone = function() return profile.tone end,
   setTone = function(value)
     profile.tone = value
@@ -524,14 +576,14 @@ local function inCombat()
   return ok and value == true
 end
 
-local function openOptions()
+local function openOptions(which)
   if inCombat() then
     if not optionsPending then p(L.OPTIONS_AFTER_COMBAT) end
     optionsPending = true
     return
   end
   optionsPending = false
-  if not ns.UI.Options.open() then p(L.OPTIONS_UNAVAILABLE) end
+  if not ns.UI.Options.open(which) then p(L.OPTIONS_UNAVAILABLE) end
 end
 
 -- Entrada del menú de addons del minimapa (AddonCompartmentFunc en el .toc).
@@ -587,6 +639,7 @@ local function enable()
   ui:SetScale(profile.advisor.scale)
   ui:SetTest(char.test)
   if profile.echo.shown then echoes = createEchoes() end
+  toast = ns.UI.Toast.create(function() openOptions("guide") end)
 
   safely("el panel de opciones", ns.UI.Options.register, optionHandlers, db)
 
@@ -629,6 +682,7 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
     safely("el final de la pelea", function()
       local record = ns.Recorder.finish(char)
       if record and profile.review.chatSummary then p(ns.Recorder.describe(record)) end
+      coachAfterFight(record)
     end)
     setFrozen(false)
     if optionsPending then openOptions() end
@@ -653,6 +707,7 @@ local function help()
   p(L.HELP_OPTIONS)
   p(L.HELP_STATS)
   p(L.HELP_REPORT)
+  p(L.HELP_TRAINER)
   if profile.devMode then p(L.HELP_DEV) end
 end
 
@@ -716,6 +771,8 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     printStats()
   elseif cmd == "report" or cmd == "informe" then
     showReport()
+  elseif cmd == "trainer" or cmd == "entrenador" then
+    setTrainer(not char.trainer.active)
   elseif DEV_COMMANDS[cmd] then
     if profile.devMode then DEV_COMMANDS[cmd](arg) else p(L.DEV_ONLY) end
   else

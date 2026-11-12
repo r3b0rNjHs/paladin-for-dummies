@@ -314,6 +314,36 @@ describe("PaladinForDummies.toc", function()
     assert.is_false(alert:HasAlerts())
   end)
 
+  it("trainer mode: a tip after a fight with something to improve, and a session summary", function()
+    local env, w = wowEnv()
+    local _, _, _, char = start(env, w)
+    local toast
+    for _, f in ipairs(w.frames) do if rawget(f, "Present") then toast = f end end
+    local presented = {}
+    local present = toast.Present
+    toast.Present = function(self, title, body, hint) presented[#presented + 1] = body; present(self, title, body, hint) end
+
+    env.SlashCmdList.PALADINFORDUMMIES("trainer")
+    assert.is_true(char.trainer.active)
+    assert.truthy(output(w):find("Trainer mode on", 1, true))
+
+    -- 40 s de pelea con Command y una sola Sentencia (podías 6).
+    env_now = 2000
+    fire(w, "PLAYER_REGEN_DISABLED")
+    env_now = 2001; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-1", 20918)
+    env_now = 2002; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-2", 20271)
+    env_now = 2025; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-3", 20918) -- el sello dura 30 s
+    env_now = 2041
+    fire(w, "PLAYER_REGEN_ENABLED")
+    assert.are.equal(1, #presented)
+    assert.truthy(presented[1]:find("Judgement", 1, true))
+
+    env.SlashCmdList.PALADINFORDUMMIES("trainer")
+    assert.is_false(char.trainer.active)
+    assert.truthy(output(w):find("Session summary: 1 fights.", 1, true))
+    assert.is_number(char.trainer.previous.judgement)
+  end)
+
   it("waits until the end of combat to open the options (the game blocks it in combat)", function()
     local env, w = wowEnv()
     start(env, w)
