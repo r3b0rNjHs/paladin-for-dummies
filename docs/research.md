@@ -166,3 +166,24 @@ Fuentes: Warcraft Wiki (Macro conditionals, Making a macro, notas de API de 12.x
 | Tanque y Sagrado | Seal of Fury, Swift Judgement, Templar's Bulwark, Holy Shock, Light's Vigil, Divine Favor | wowf.io | no son de tu spec |
 
 Sin probar en el cliente final de Forever: todas las fuentes lo avisan. Por eso el addon solo genera las de hechizos que tienes (por spellID) y guarda el resultado en `db.macroStatus`.
+
+## Estilo, opciones y presentación del addon (investigación del 12 nov 2026)
+
+Fuentes: Warcraft Wiki (Settings API, Addon compartment, TOC format, Edit Mode), [LibEditMode](https://www.curseforge.com/wow/addons/libeditmode) ([WoWInterface](https://wowinterface.com/downloads/info26456-LibEditMode.html)), guías de addons de Midnight 2026 ([Conquest Capped](https://conquestcapped.com/guides/wow/midnight-best-addons/), [rpgstash](https://www.rpgstash.com/blog/wow-the-war-within-essential-addons-guide), [epiccarry](https://epiccarry.com/blogs/wow-addons/), [dtgre](https://www.dtgre.com/2026/03/wow-midnight-2026-ui-guide-replace-addons.html)) y guías de addons de Forever ([leprestore](https://leprestore.com/guides/world-of-warcraft-forever/wow-forever-best-addons/), [expcarry](https://expcarry.com/wow-forever-best-addons)).
+
+### Lo que hacen los addons actuales
+- **Opciones en el panel oficial** (*Opciones → AddOns*) con la **Settings API** de Blizzard (10.0+, cambiada en 11.0.2): `Settings.RegisterVerticalLayoutCategory`, `RegisterAddOnSetting` (lee y escribe directamente en SavedVariables), casillas, deslizadores y desplegables con el aspecto de la interfaz. `Settings.OpenToCategory` abre el panel desde un comando.
+- **Acceso desde el minimapa sin botón propio:** el *addon compartment* (desde 10.0.7) es el menú desplegable del minimapa. Se registra solo con campos del `.toc` (`AddonCompartmentFunc`, `IconTexture`/`IconAtlas`), sin librerías. Sustituye a los botones de minimapa (LibDBIcon).
+- **El `.toc` también da** icono y categoría en la lista de addons (`IconTexture`, `Category`, `Group`).
+- **Mover marcos con el Modo edición de Blizzard**, no con modos propios: [LibEditMode](https://www.curseforge.com/wow/addons/libeditmode) (p3lim) integra marcos de addons en el Modo edición, con su propio diálogo de ajustes (escala, etc.). Lo usan addons de 12.0.x; Forever tiene Modo edición, pero la librería no está probada ahí. Alternativas: LibEQOL, EditModeExpanded.
+- **Tendencia en Midnight:** apoyarse en la interfaz de Blizzard (Modo edición, Cooldown Manager) y que cada addon haga una sola cosa y encaje visualmente; ocultar o atenuar lo que no hace falta fuera de combate.
+- **Estilo visual habitual:** iconos cuadrados con el borde recortado (`SetTexCoord(0.08, 0.92, 0.08, 0.92)`), un borde fino oscuro, fuentes de Blizzard, sin fondos grandes. Opcionalmente, compatibilidad con Masque (pieles de botones) y LibSharedMedia (fuentes y texturas compartidas).
+- **Idiomas:** los addons públicos llevan el inglés por defecto y traducciones (tabla de textos por idioma). Hoy todo el texto del addon está en español fijo.
+
+### Lo que le falta a Paladin for Dummies
+- Panel de opciones (hoy todo son comandos `/pfd`).
+- Entrada en el menú del minimapa e icono en la lista de addons.
+- Mover las ventanas con el Modo edición (hoy `/pfd echo move` y arrastrar la ventana).
+- Un estilo común para la ventana del asesor y el widget (hoy cada uno tiene uno distinto).
+- Opción de elegir qué macros crear (hay un límite de 18 por personaje).
+- Textos traducibles (inglés y español), si se va a publicar.
