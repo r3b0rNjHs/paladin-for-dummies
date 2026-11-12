@@ -51,10 +51,10 @@ describe("Macros.build", function()
     assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/startattack\n/run UIErrorsFrame:Clear()", macros["PFD Golpe"])
   end)
 
-  it("builds the Unsealed Wrath toggle, starting with Command and restarting on a new target, and the shift macro", function()
+  it("builds the Unsealed Wrath toggle, starting with Command, restarting only after combat (seals are self buffs), and the shift macro", function()
     local macros = byName(Macros.build(input()))
 
-    assert.are.equal("#showtooltip\n/castsequence reset=target/combat Seal of Command, Seal of Righteousness",
+    assert.are.equal("#showtooltip\n/castsequence reset=combat Seal of Command, Seal of Righteousness",
       macros["PFD Unsealed"])
     assert.are.equal("#showtooltip\n/cast [mod:shift] Seal of Righteousness; Seal of Command",
       macros["PFD Sello"])

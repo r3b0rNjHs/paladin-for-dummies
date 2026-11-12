@@ -160,7 +160,7 @@ function Macros.build(input)
     names, missing = namesOf(input.nameOf, { righteousness, command })
     if not names then reason = missingName(missing) end
   end
-  add("PFD Unsealed", names and (HEADER .. "/castsequence reset=target/combat " .. names[2] .. ", " .. names[1]), reason)
+  add("PFD Unsealed", names and (HEADER .. "/castsequence reset=combat " .. names[2] .. ", " .. names[1]), reason)
   add("PFD Sello", names and (HEADER .. "/cast [mod:shift] " .. names[1] .. "; " .. names[2]), reason)
 
   if input.macroSpells then
