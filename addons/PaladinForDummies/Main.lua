@@ -108,7 +108,9 @@ end
 local function refresh()
   if frozen or not ui then return end
   local ok, err = pcall(function()
-    local situation, diagnostics = SituationReader.read(_G, ns.Data.TrackedSpells, { specOverride = db.specOverride })
+    -- TrackedSpells viene de data/MacroSpells.lua; si falta (archivo nuevo sin
+    -- reiniciar el juego), al menos se leen los sellos.
+    local situation, diagnostics = SituationReader.read(_G, ns.Data.TrackedSpells or Seals, { specOverride = db.specOverride })
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
     ui:ShowRecommendation(recommendation)

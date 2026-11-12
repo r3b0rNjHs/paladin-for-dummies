@@ -6,7 +6,7 @@
    `New-Item -ItemType Junction -Path "D:\World of Warcraft\_forever_\Interface\AddOns\PaladinForDummies" -Target "C:\dev\paladin-for-dummies\addons\PaladinForDummies"`
 3. En la pantalla de personajes, botón AddOns: activa **Paladin for Dummies**. PalaProbe puede seguir activo.
 
-Cada vez que haya cambios: `git pull` y `/reload`.
+Cada vez que haya cambios: `git pull` y `/reload`. **Si la versión añade archivos nuevos** (aparecen como nuevos en el `git pull`), **cierra el juego y vuelve a abrirlo**: WoW solo lee la lista de archivos de un addon al arrancar, y `/reload` no ve los nuevos. Para ver qué versión está cargada: `/dump C_AddOns.GetAddOnMetadata("PaladinForDummies", "Version")`.
 
 ## Comandos
 - `/pfd macros`: crea o actualiza las macros PFD Apertura, PFD Unsealed y PFD Sello (de personaje), y mantiene PFD Apertura al día con la recomendación. `/pfd macros off` deja de actualizarlas.

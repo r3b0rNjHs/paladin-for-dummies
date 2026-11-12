@@ -127,6 +127,7 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - Tests: busted (Lua 5.1) para `core/`.
 
 ## Forma de trabajar
+- **Si una versión añade archivos al `.toc`, hay que reiniciar el juego** (no basta `/reload`): WoW lee la lista de archivos al arrancar. Avisar a Jorge cada vez.
 - Iteraciones cortas: Claude escribe → Jorge prueba en el juego → **manda el archivo de SavedVariables** (`PaladinForDummies.lua`) → se ajusta. El archivo lleva todo: `snapshot` (lo mismo que `/pfd debug`, con versiones del addon y del cliente), `errors` (los errores capturados) y `fights`. Un addon solo puede escribir ese archivo, y el juego lo escribe al hacer `/reload` o al salir.
 - Antes de usar una API, comprobar en la Warcraft Wiki que existe en Mainline 12.1.5 y anotar si devuelve secrets.
 - Responder a Jorge en español; el código y los identificadores en inglés.
