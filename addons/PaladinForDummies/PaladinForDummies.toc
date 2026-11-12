@@ -2,8 +2,13 @@
 ## Title: Paladin for Dummies
 ## Notes: Qué sello y qué Sentencia usar según la situación (en desarrollo)
 ## Author: Jorge Hernandez
-## Version: 0.7.2
+## Version: 0.8.0
 ## SavedVariables: PaladinForDummiesDB
+## IconTexture: Interface\Icons\Ability_Warrior_InnerRage
+## Category: Combat
+## Category-esES: Combate
+## Category-esMX: Combate
+## AddonCompartmentFunc: PaladinForDummies_OnAddonCompartmentClick
 
 core/Conditions.lua
 core/RuleEngine.lua
@@ -20,5 +25,6 @@ adapters/FightReader.lua
 adapters/MacroWriter.lua
 ui/RecommendationFrame.lua
 ui/EchoTracker.lua
+ui/Options.lua
 Recorder.lua
 Main.lua

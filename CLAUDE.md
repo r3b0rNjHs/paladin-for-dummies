@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.7.2). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.8.0). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -72,7 +72,8 @@ Tests: `busted` desde la raíz del repo (Lua 5.1; en Ubuntu, `apt install lua5.1
 
 - `core/`: Lua puro, **sin dependencias de WoW**: motor de reglas, dominio (Situación → Recomendación) y estadísticas de peleas. Se prueba con **busted** fuera del juego (TDD).
 - `adapters/`: la única capa que toca la API de WoW. Lee el contexto (jugador, objetivo, grupo, instancia) y lo convierte en un objeto `Situation` plano, que es lo que recibe el core. Recibe la API como parámetro (`_G` en el juego, una falsa en los tests). `Situation.target` solo se rellena con objetivos atacables.
-- `ui/`: icono de recomendación, tooltips ampliados y panel de opciones (Settings API).
+- `ui/`: icono de recomendación, tooltips ampliados y panel de opciones (`ui/Options.lua`, Settings API con opciones "proxy" que llaman a funciones de `Main.lua`; se abre con `/pfd` y desde el menú de addons del minimapa vía `AddonCompartmentFunc` en el `.toc`).
+- **Presentación (decisión de Jorge, 12 nov):** fase 1 opciones (v0.8.0) → idiomas (inglés por defecto + español; **se publicará más adelante**) → fase 2 estilo visual unificado → fase 3 Modo edición con LibEditMode. Probar cada fase en el juego antes de la siguiente. Investigación en `docs/research.md`.
 - `data/`: reglas declarativas en tablas Lua, versionadas por build del juego. Cada regla lleva el porqué y su confianza (`mechanic` = sale de la mecánica, `consensus` = consenso de guías, `measured` = confirmada con datos propios).
 
 ## Producto: capas planeadas

@@ -25,6 +25,13 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.8.0: panel de opciones (fase 1)
+**Archivo nuevo (`ui/Options.lua`): cierra el juego y vuelve a abrirlo** tras el `git pull`.
+1. `/pfd` a secas abre el panel. También desde *Opciones → AddOns → Paladin for Dummies* y desde el menú de addons del minimapa.
+2. En la lista de addons (pantalla de personajes) debe salir con su icono, en la categoría *Combate*.
+3. Prueba cada opción: mostrar/ocultar y tamaño del asesor y del widget, bloquear el asesor, mover y restablecer el widget, activar o desactivar macros concretas, el resumen tras cada pelea, ver y borrar estadísticas (pide confirmación).
+4. `/reload`: las opciones se mantienen.
+
 ## Pruebas de la v0.7.0: macros de utilidad
 `git pull`, `/reload` y `/pfd macros`: el chat dice cuáles crea y, si alguna no, por qué (por ejemplo, un hechizo sin entrenar o que no queda hueco: máximo 18 macros de personaje).
 

@@ -101,6 +101,84 @@ describe("PaladinForDummies.toc", function()
     end
   end
 
+  -- Settings API simulada: guarda cada opción para poder leerla y cambiarla.
+  local function settingsMock(env)
+    local registered, buttons, opened = {}, {}, {}
+    env.Settings = {
+      RegisterVerticalLayoutCategory = function(name)
+        return { name = name, GetID = function() return 42 end }, mock()
+      end,
+      RegisterProxySetting = function(_, variable, _, _, default, get, set)
+        registered[variable] = { get = get, set = set, default = default }
+        return mock()
+      end,
+      CreateCheckbox = function() return mock() end,
+      CreateSlider = function() return mock() end,
+      CreateSliderOptions = function() return mock() end,
+      RegisterAddOnCategory = function() end,
+      OpenToCategory = function(id) opened[#opened + 1] = id end,
+    }
+    env.CreateSettingsListSectionHeaderInitializer = function() return mock() end
+    env.CreateSettingsButtonInitializer = function(name, text, onClick)
+      buttons[name .. " / " .. text] = onClick
+      return mock()
+    end
+    env.StaticPopupDialogs = {}
+    env.StaticPopup_Show = function(which) opened[#opened + 1] = which end
+    return registered, buttons, opened
+  end
+
+  it("registers the options panel and applies changes right away", function()
+    local env, frames = wowEnv()
+    local registered, buttons, opened = settingsMock(env)
+    local ns = {}
+    for _, file in ipairs(tocFiles()) do
+      local chunk = assert(loadfile(ROOT .. file))
+      setfenv(chunk, env)
+      chunk("PaladinForDummies", ns)
+    end
+    fire(frames, "ADDON_LOADED", "PaladinForDummies")
+    fire(frames, "PLAYER_ENTERING_WORLD")
+
+    local db = env.PaladinForDummiesDB
+    assert.is_nil(db.errors)
+
+    -- Asesor
+    assert.is_true(registered.PaladinForDummies_advisorShown.get())
+    registered.PaladinForDummies_advisorShown.set(false)
+    assert.is_true(db.hidden)
+    registered.PaladinForDummies_advisorScale.set(1.5)
+    assert.are.equal(1.5, db.advisorScale)
+    registered.PaladinForDummies_advisorLocked.set(true)
+    assert.is_true(db.advisorLocked)
+
+    -- Widget
+    registered.PaladinForDummies_echoShown.set(true)
+    assert.is_true(db.echo)
+    registered.PaladinForDummies_echoScale.set(0.8)
+    assert.are.equal(0.8, db.echoScale)
+
+    -- Macros: una por cada macro posible, y desactivarla la excluye
+    assert.is_table(registered["PaladinForDummies_macro_PFD_Golpe"])
+    assert.is_table(registered["PaladinForDummies_macro_PFD_Exorcismo"])
+    registered["PaladinForDummies_macro_PFD_Golpe"].set(false)
+    assert.is_true(db.macroDisabled["PFD Golpe"])
+    buttons["Macros / Crear o actualizar ahora"]()
+    assert.is_nil(env.createdMacros["PFD Golpe"])
+
+    -- Repaso
+    registered.PaladinForDummies_fightSummary.set(false)
+    assert.is_true(db.quiet)
+    buttons["Peleas guardadas / Borrar"]()
+    assert.are.equal("PALADINFORDUMMIES_RESET_STATS", opened[#opened])
+
+    -- Abrir el panel: /pfd sin nada y el menú del minimapa
+    env.SlashCmdList.PALADINFORDUMMIES("")
+    env.PaladinForDummies_OnAddonCompartmentClick()
+    assert.are.equal(42, opened[#opened])
+    assert.are.equal(42, opened[#opened - 1])
+  end)
+
   it("saves errors in SavedVariables, not only in the chat", function()
     local env, frames = wowEnv()
     env.UnitLevel = function() error("boom") end

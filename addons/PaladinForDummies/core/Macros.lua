@@ -115,6 +115,10 @@ local PACK = {
   end },
 }
 
+-- Todas las macros que puede crear el addon, en orden (para el panel de opciones).
+Macros.ALL_NAMES = { "PFD Golpe", "PFD Unsealed", "PFD Sello" }
+for _, def in ipairs(PACK) do Macros.ALL_NAMES[#Macros.ALL_NAMES + 1] = def.name end
+
 -- Nombres de los hechizos de macroSpells que conoces (rango más alto).
 local function knownNames(input)
   local n = {}

@@ -81,7 +81,7 @@ local function createSlot(parent, label, onEnter)
 
   slot:EnableMouse(true)
   slot:RegisterForDrag("LeftButton")
-  slot:SetScript("OnDragStart", function() parent:StartMoving() end)
+  slot:SetScript("OnDragStart", function() if not parent.locked then parent:StartMoving() end end)
   slot:SetScript("OnDragStop", function() parent:StopMovingOrSizing(); parent:SavePosition() end)
   slot:SetScript("OnEnter", onEnter)
   slot:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -113,7 +113,7 @@ function RecommendationFrame.create(db)
   frame:SetClampedToScreen(true)
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
-  frame:SetScript("OnDragStart", function(self) self:StartMoving() end)
+  frame:SetScript("OnDragStart", function(self) if not self.locked then self:StartMoving() end end)
   frame:SetScript("OnDragStop", function(self) self:StopMovingOrSizing(); self:SavePosition() end)
 
   -- Fondo oscuro con borde para que la ventana se vea siempre.
@@ -205,6 +205,11 @@ function RecommendationFrame.create(db)
       ("icono sello: %s | icono Sentencia: %s"):format(
         tostring(self.seal.icon:GetTexture()), tostring(self.judgement.icon:GetTexture())),
     }
+  end
+
+  -- Bloqueada: no se arrastra, pero los tooltips siguen funcionando.
+  function frame:SetLocked(locked)
+    self.locked = locked and true or nil
   end
 
   function frame:ResetPosition()

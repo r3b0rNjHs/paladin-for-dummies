@@ -84,6 +84,12 @@ local function syncMacros(verbose)
     holyStrikeSpellId = ns.Data.Spells.holyStrike,
     nameOf = spellNameOf,
   })
+  -- Las macros desactivadas en el panel de opciones no se crean ni se tocan.
+  local enabled = {}
+  for _, m in ipairs(macros) do
+    if not (db.macroDisabled and db.macroDisabled[m.name]) then enabled[#enabled + 1] = m end
+  end
+  macros = enabled
   local results, reason = ns.Adapters.MacroWriter.write(_G, macros)
   -- Queda en el archivo de SavedVariables para poder revisarlo.
   db.macroStatus = { time = time(), results = results, skipped = skipped, reason = reason }
@@ -134,6 +140,7 @@ local function createEchoes()
     reportError("el widget de Echo", err)
     return nil
   end
+  container:SetScale(db.echoScale or 1)
   return container
 end
 
@@ -195,6 +202,119 @@ local function debug()
 end
 
 ---------------------------------------------------------------------------
+-- Ajustes: lo que usan el panel de opciones (ui/Options.lua) y los comandos
+---------------------------------------------------------------------------
+
+local function setEchoShown(value)
+  if value then
+    echoes = echoes or createEchoes()
+    if echoes then
+      echoes:Show()
+      db.echo = true
+    end
+  else
+    if echoes then echoes:Hide() end
+    db.echo = nil
+  end
+end
+
+local function toggleEchoMove()
+  setEchoShown(true)
+  if not echoes then return end
+  echoes:SetUnlocked(not echoes.unlocked)
+  p(echoes.unlocked and "Widget desbloqueado: arrástralo y vuelve a pulsar para fijarlo."
+    or "Widget fijado en su sitio.")
+end
+
+local function resetEchoPosition()
+  db.echoPosition = nil
+  if echoes then echoes:ApplyPosition() end
+  p("Widget de vuelta a su sitio inicial.")
+end
+
+local function printStats()
+  for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
+end
+
+StaticPopupDialogs = StaticPopupDialogs or {}
+StaticPopupDialogs.PALADINFORDUMMIES_RESET_STATS = {
+  text = "Paladin for Dummies: ¿borrar todas las peleas guardadas?",
+  button1 = YES or "Sí",
+  button2 = NO or "No",
+  OnAccept = function()
+    db.fights = {}
+    p("Peleas guardadas borradas.")
+  end,
+  timeout = 0,
+  whileDead = true,
+  hideOnEscape = true,
+}
+
+local function syncMacrosNow()
+  db.macros = true
+  refresh()
+  syncMacros(true)
+end
+
+local optionHandlers = {
+  getAdvisorShown = function() return not db.hidden end,
+  setAdvisorShown = function(value)
+    db.hidden = (not value) or nil
+    ui:SetShown(value)
+  end,
+  getAdvisorLocked = function() return db.advisorLocked == true end,
+  setAdvisorLocked = function(value)
+    db.advisorLocked = value or nil
+    ui:SetLocked(value)
+  end,
+  getAdvisorScale = function() return db.advisorScale or 1 end,
+  setAdvisorScale = function(value)
+    db.advisorScale = value
+    ui:SetScale(value)
+  end,
+  resetAdvisorPosition = function() ui:ResetPosition() end,
+
+  getEchoShown = function() return db.echo == true end,
+  setEchoShown = setEchoShown,
+  getEchoScale = function() return db.echoScale or 1 end,
+  setEchoScale = function(value)
+    db.echoScale = value
+    if echoes then echoes:SetScale(value) end
+  end,
+  toggleEchoMove = toggleEchoMove,
+  resetEchoPosition = resetEchoPosition,
+
+  getMacrosAuto = function() return db.macros == true end,
+  setMacrosAuto = function(value)
+    db.macros = value or nil
+    if value then syncMacros(true) end
+  end,
+  macroNames = ns.Core.Macros.ALL_NAMES,
+  getMacroEnabled = function(name) return not (db.macroDisabled and db.macroDisabled[name]) end,
+  setMacroEnabled = function(name, value)
+    db.macroDisabled = db.macroDisabled or {}
+    db.macroDisabled[name] = (not value) or nil
+  end,
+  syncMacrosNow = syncMacrosNow,
+
+  getFightSummary = function() return not db.quiet end,
+  setFightSummary = function(value) db.quiet = (not value) or nil end,
+  printStats = printStats,
+  resetStats = function() StaticPopup_Show("PALADINFORDUMMIES_RESET_STATS") end,
+}
+
+local function openOptions()
+  if not ns.UI.Options.open() then
+    p("No se pudo abrir el panel de opciones. Comandos: /pfd help")
+  end
+end
+
+-- Entrada del menú de addons del minimapa (AddonCompartmentFunc en el .toc).
+function PaladinForDummies_OnAddonCompartmentClick()
+  openOptions()
+end
+
+---------------------------------------------------------------------------
 -- Eventos
 ---------------------------------------------------------------------------
 
@@ -224,7 +344,11 @@ events:SetScript("OnEvent", function(_, event, arg1, _, arg3)
     db = PaladinForDummiesDB
     ui = ns.UI.RecommendationFrame.create(db)
     if db.hidden then ui:Hide() end
+    ui:SetScale(db.advisorScale or 1)
+    ui:SetLocked(db.advisorLocked)
     ui:SetTest(db.test)
+    local okOptions, optionsErr = pcall(ns.UI.Options.register, optionHandlers)
+    if not okOptions then reportError("el panel de opciones", optionsErr) end
     if db.echo then echoes = createEchoes() end
     setFrozen(InCombatLockdown() and true or false)
   elseif event == "PLAYER_REGEN_DISABLED" then
@@ -309,19 +433,13 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     end
     ui:SetTest(db.test)
   elseif cmd == "echo" and arg == "move" then
-    if not echoes then p("Activa primero el widget con /pfd echo.") return end
-    echoes:Show()
-    echoes:SetUnlocked(not echoes.unlocked)
-    p(echoes.unlocked and "Widget desbloqueado: arrástralo y escribe /pfd echo move para fijarlo."
-      or "Widget fijado en su sitio.")
+    toggleEchoMove()
   elseif cmd == "echo" and arg == "debug" then
     if not echoes then p("Activa primero el widget con /pfd echo.") return end
     for _, line in ipairs(ns.UI.EchoTracker.describe()) do p(line) end
     db.echoDebug = ns.UI.EchoTracker.describe()
   elseif cmd == "echo" and arg == "reset" then
-    db.echoPosition = nil
-    if echoes then echoes:ApplyPosition() end
-    p("Widget de vuelta a su sitio inicial.")
+    resetEchoPosition()
   elseif cmd == "echo" then
     if not echoes then
       echoes = createEchoes()
@@ -344,12 +462,10 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
       p("Las macros ya no se actualizan solas. Siguen en tu lista de macros; puedes borrarlas desde /macro.")
       return
     end
-    db.macros = true
-    refresh()
-    syncMacros(true)
+    syncMacrosNow()
     p("Ábrelas con /macro, pestaña de tu personaje, y arrástralas a tu barra. Se actualizan solas si aprendes rangos nuevos. /pfd macros off para dejar de actualizarlas.")
   elseif cmd == "stats" then
-    for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
+    printStats()
   elseif cmd == "last" then
     local fights = db.fights or {}
     if #fights == 0 then p("Todavía no hay peleas guardadas.") return end
@@ -363,7 +479,9 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
   elseif cmd == "reset" then
     ui:ResetPosition()
     p("Posición restablecida.")
+  elseif cmd == "" or cmd == "options" or cmd == "opciones" then
+    openOptions()
   else
-    p("Comandos: /pfd debug | ui | echo [move|reset|debug] | macros [off] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd (opciones) | debug | ui | echo [move|reset|debug] | macros [off] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
   end
 end
