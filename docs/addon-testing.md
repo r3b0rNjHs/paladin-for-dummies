@@ -25,6 +25,12 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.11.0: la guía
+**Archivo nuevo (`data/Guide.lua`): cierra el juego y vuelve a abrirlo.**
+- Opciones → AddOns → Paladin for Dummies → **Guía**: árbol de capítulos a la izquierda, texto con iconos de los sellos a la derecha.
+- "Tus números" muestra tus peleas guardadas y Command por minuto.
+- Tono Serio (Avanzado) oculta los chistes; Idioma cambia todo tras `/reload`.
+
 ## Pruebas de la v0.10.0: estilo nuevo y humor
 **Archivos nuevos (`ui/Style.lua`, `core/HudState.lua`): cierra el juego y vuelve a abrirlo** tras el `git pull`.
 - **Asesor:** ya sin fondo ni título; dos iconos con "Sello" y "Sentencia" debajo, anillo de oro en el sello. Sin objetivo se ve atenuado; con un enemigo seleccionado, entero; en combate desaparece. Opción "Cuándo se ve" en Asesor.

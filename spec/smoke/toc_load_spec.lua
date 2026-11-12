@@ -219,7 +219,7 @@ describe("PaladinForDummies.toc", function()
 
   it("builds the options panel and applies changes right away", function()
     local env, w = wowEnv()
-    local _, seen, profile, char = start(env, w)
+    local ns, seen, profile, char = start(env, w)
     local o = seen.options.PaladinForDummies.args
 
     o.advisor.args.shown.set(nil, false)
@@ -254,6 +254,19 @@ describe("PaladinForDummies.toc", function()
     assert.truthy(seen.windowText:find("Paladin for Dummies 0.9.0", 1, true))
 
     assert.is_table(seen.options.PaladinForDummies_Profiles)
+
+    -- La guía: capítulos en árbol, chistes solo con humor y tus números.
+    local guide = seen.options.PaladinForDummies_Guide
+    assert.are.equal("tree", guide.childGroups)
+    assert.truthy(guide.args.start.args.b1.name():find("coach", 1, true))
+    assert.is_false(guide.args.start.args.b3.hidden()) -- chiste con el tono por defecto
+    ns.Locales.setTone("plain")
+    assert.is_true(guide.args.start.args.b3.hidden())
+    ns.Locales.setTone("fun")
+    assert.truthy(guide.args.numbers.args.b1.name():find("No fights saved", 1, true))
+    char.fights[1] = { duration = 60, openingSeal = "command", sealSeconds = { command = 60 },
+      counts = { judgement = 7, holyStrike = 5, commandProc = 4, sealCast = 1 }, context = {} }
+    assert.truthy(guide.args.numbers.args.b1.name():find("Fights saved: 1", 1, true))
 
     -- Abrir el panel: /pfd sin nada y el menú del minimapa
     env.SlashCmdList.PALADINFORDUMMIES("")

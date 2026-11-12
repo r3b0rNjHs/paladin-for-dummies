@@ -50,6 +50,7 @@ function Options.build(h)
     childGroups = "tab",
     args = {
       intro = description(0, L.OPT_INTRO),
+      guideHint = description(0.5, L.OPT_GUIDE_HINT),
       advisor = {
         type = "group", order = 1, name = L.OPT_ADVISOR,
         args = {
@@ -114,6 +115,41 @@ function Options.build(h)
   }
 end
 
+-- La guía (data/Guide.lua): un capítulo por grupo, en árbol. Los chistes solo
+-- se ven con el tono con humor; los números los calcula Main.lua (h.guideNumbers).
+local function spellIcon(spellId)
+  if not (spellId and C_Spell and C_Spell.GetSpellTexture) then return nil end
+  local ok, icon = pcall(C_Spell.GetSpellTexture, spellId)
+  return ok and icon or nil
+end
+
+function Options.buildGuide(h)
+  local chapters = {}
+  for i, chapter in ipairs(ns.Data.Guide) do
+    local args = {}
+    for j, block in ipairs(chapter.blocks) do
+      local entry = { type = "description", order = j, fontSize = "medium" }
+      if block.numbers then
+        entry.name = function() return h.guideNumbers() end
+      else
+        local key = "GUIDE_" .. block.text
+        entry.name = function() return L[key] .. "\n" end
+        local icon = spellIcon(block.spell)
+        if icon then entry.image, entry.imageWidth, entry.imageHeight = icon, 32, 32 end
+        if block.fun then
+          entry.hidden = function() return ns.Locales.tone ~= "fun" end
+          entry.fontSize = "small"
+        end
+      end
+      args["b" .. j] = entry
+    end
+    chapters[chapter.id:lower()] = {
+      type = "group", order = i, name = L["GUIDE_" .. chapter.id .. "_TITLE"], args = args,
+    }
+  end
+  return { type = "group", name = L.OPT_GUIDE, childGroups = "tree", args = chapters }
+end
+
 -- Registra el panel y el subapartado de perfiles. Devuelve el ID de categoría.
 function Options.register(h, db)
   local registry = LibStub("AceConfigRegistry-3.0")
@@ -121,6 +157,9 @@ function Options.register(h, db)
   registry:RegisterOptionsTable(APP, Options.build(h))
   local _, id = dialog:AddToBlizOptions(APP, "Paladin for Dummies")
   Options.categoryID = id
+
+  registry:RegisterOptionsTable(APP .. "_Guide", Options.buildGuide(h))
+  dialog:AddToBlizOptions(APP .. "_Guide", L.OPT_GUIDE, "Paladin for Dummies")
 
   local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
   registry:RegisterOptionsTable(APP .. "_Profiles", profiles)
