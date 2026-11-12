@@ -42,7 +42,7 @@ describe("MacroWriter.write", function()
 
     local results = MacroWriter.write(api, wanted)
 
-    assert.are.same({ { name = "PFD Apertura", action = "created" }, { name = "PFD Sello", action = "created" } }, results)
+    assert.are.same({ { name = "PFD Apertura", action = "created", index = 121 }, { name = "PFD Sello", action = "created", index = 122 } }, results)
     assert.are.same({ "create", "PFD Apertura", 134400, "#showtooltip\n/cast A", true }, calls[1])
     assert.are.equal(2, #macros)
   end)
@@ -67,6 +67,21 @@ describe("MacroWriter.write", function()
     assert.is_nil(results)
     assert.are.equal("combat", reason)
     assert.are.same({}, calls)
+  end)
+
+  it("says when the game did not return the new macro (diagnosis: created but not there)", function()
+    local api = fakeApi()
+    api.CreateMacro = function() return nil end
+
+    local results = MacroWriter.write(api, { wanted[1] })
+
+    assert.are.same({ { name = "PFD Apertura", action = "notCreated" } }, results)
+  end)
+
+  it("tells how many macros the game says there are, to diagnose odd results", function()
+    local api = fakeApi({ ["PFD Sello"] = "x" })
+    local _, _, counts = MacroWriter.write(api, wanted)
+    assert.are.same({ global = 0, character = 1 }, counts)
   end)
 
   it("reports when there is no free character macro slot", function()

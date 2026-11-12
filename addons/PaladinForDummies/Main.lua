@@ -104,6 +104,7 @@ local MACRO_ACTION_TEXT = {
   updated = "actualizada",
   unchanged = "sin cambios",
   full = "no hay hueco libre en tus macros de personaje",
+  notCreated = "el juego no la creó (avísame con /pfd report)",
 }
 
 -- Crea o actualiza las macros marcadas (core/Macros.lua). Solo fuera de
@@ -131,8 +132,8 @@ local function syncMacros(verbose)
   local signature = table.concat(parts, "\002")
   if not verbose and not macrosPending and signature == lastMacroSignature then return end
 
-  local results, reason = ns.Adapters.MacroWriter.write(_G, macros)
-  char.macroStatus = { time = time(), results = results, skipped = skipped, reason = reason }
+  local results, reason, counts = ns.Adapters.MacroWriter.write(_G, macros)
+  char.macroStatus = { time = time(), results = results, skipped = skipped, reason = reason, counts = counts }
 
   if verbose then
     for _, s in ipairs(skipped) do
@@ -151,7 +152,7 @@ local function syncMacros(verbose)
   for _, r in ipairs(results) do
     if r.action == "error" then
       reportError("la macro " .. r.name, r.error)
-    elseif verbose or r.action == "created" or r.action == "full" then
+    elseif verbose or r.action == "created" or r.action == "full" or r.action == "notCreated" then
       p(("Macro %s: %s."):format(r.name, MACRO_ACTION_TEXT[r.action] or r.action))
     end
   end
