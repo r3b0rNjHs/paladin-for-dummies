@@ -18,6 +18,7 @@ ns.Data.Seals = {
 -- Otros hechizos que usa el addon.
 ns.Data.Spells = {
   judgement = 20271, -- libera el sello activo sin consumirlo (sondeo 1)
+  holyStrike = 679,  -- rango 1; /cast con el nombre usa el rango más alto (sondeo 1)
 }
 
 -- Catálogo para registrar peleas (core/Fight.lua): qué es cada spellID.

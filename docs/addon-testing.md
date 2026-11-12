@@ -25,6 +25,14 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.5.0: apertura sin secuencia y PFD Golpe
+`git pull` y `/reload`: el addon reescribe las macros solo (fuera de combate). Arrastra **PFD Golpe** a tu barra.
+
+**Antes de cada pelea:** PFD Apertura (fuera de combate: Crusader) → PFD Golpe (Judgement: atrae al enemigo) → PFD Apertura (ya en combate: Command).
+**Durante la pelea:** PFD Golpe a menudo (Judgement o Holy Strike, lo que esté listo); PFD Unsealed con "¡CAMBIA!" y "¡VUELVE!".
+
+Comprueba: que PFD Apertura no se queda nunca a medias; que PFD Golpe no deja el aviso rojo de "no está listo"; que al encadenar enemigos en combate PFD Apertura da Command.
+
 ## Pruebas de la v0.4.0: macros
 1. `git pull`, `/reload` y escribe `/pfd macros`. Debe decir qué macros ha creado.
 2. Abre `/macro`, pestaña de tu personaje: deben estar **PFD Apertura**, **PFD Unsealed** y **PFD Sello**. Arrástralas a tu barra.

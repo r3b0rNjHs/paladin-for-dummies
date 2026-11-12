@@ -80,6 +80,7 @@ local function syncMacros(verbose)
     seals = Seals,
     knownSpells = last.situation.player.knownSpells,
     judgementSpellId = ns.Data.Spells.judgement,
+    holyStrikeSpellId = ns.Data.Spells.holyStrike,
     nameOf = spellNameOf,
   })
   local results, reason = ns.Adapters.MacroWriter.write(_G, macros)

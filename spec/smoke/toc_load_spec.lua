@@ -58,7 +58,7 @@ describe("PaladinForDummies.toc", function()
         GetSpellTexture = function() return 135000 end,
         GetSpellName = function(id)
           return ({ [20918] = "Seal of Command", [20375] = "Seal of Command", [20306] = "Seal of the Crusader",
-            [21084] = "Seal of Righteousness", [20271] = "Judgement" })[id]
+            [21084] = "Seal of Righteousness", [20271] = "Judgement", [679] = "Holy Strike" })[id]
         end,
       },
       MAX_CHARACTER_MACROS = 18,
@@ -160,10 +160,12 @@ describe("PaladinForDummies.toc", function()
       ns.UI.EchoTracker.initializer(echo, function(key, err) slotErrors[#slotErrors + 1] = key .. ": " .. tostring(err) end)(mock())
     end
     assert.are.same({}, slotErrors)
-    -- Macros: con Command y Crusader conocidos, se crea la de apertura.
+    -- Macros: con Command y Crusader conocidos, se crean la de apertura y la de golpe.
     env.SlashCmdList.PALADINFORDUMMIES("macros")
-    assert.are.equal("#showtooltip\n/castsequence reset=6/target/combat Seal of the Crusader, Judgement, Seal of Command",
+    assert.are.equal("#showtooltip\n/cast [nocombat] Seal of the Crusader; Seal of Command",
       env.createdMacros["PFD Apertura"])
+    assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/run UIErrorsFrame:Clear()",
+      env.createdMacros["PFD Golpe"])
     assert.is_true(env.PaladinForDummiesDB.macros)
 
     -- Una pelea de 20 s con Command: Sentencia, Holy Strike y dos activaciones.
