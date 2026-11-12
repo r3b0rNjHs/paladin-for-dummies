@@ -91,14 +91,7 @@ function Options.build(h)
         args = {
           description = description(0, L.OPT_ADVISOR_DESC),
           shown = toggle(1, L.OPT_SHOW, L.OPT_ADVISOR_SHOW_DESC, h.getAdvisorShown, h.setAdvisorShown),
-          visibility = {
-            type = "select", order = 2, name = L.OPT_VISIBILITY, desc = L.OPT_VISIBILITY_DESC,
-            values = { fade = L.OPT_VIS_FADE, hide = L.OPT_VIS_HIDE, always = L.OPT_VIS_ALWAYS },
-            sorting = { "fade", "hide", "always" },
-            get = function() return h.getAdvisorVisibility() end,
-            set = function(_, value) h.setAdvisorVisibility(value) end,
-          },
-          locked = toggle(3, L.OPT_LOCK, L.OPT_LOCK_DESC, h.getAdvisorLocked, h.setAdvisorLocked),
+          move = button(2, L.OPT_ECHO_MOVE, L.OPT_ALERT_MOVE_DESC, h.toggleAdvisorMove),
           scale = scale(4, h.getAdvisorScale, h.setAdvisorScale),
           reset = button(5, L.OPT_RESET_POSITION, nil, h.resetAdvisorPosition),
         },

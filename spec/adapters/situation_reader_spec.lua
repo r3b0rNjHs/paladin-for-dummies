@@ -255,4 +255,38 @@ describe("SituationReader.read", function()
       assert.are.equal(1501, diagnostics.unknownSpecId)
     end)
   end)
+
+  describe("the player's buffs (for the before-pull alert)", function()
+    local function withAuras(auras, inCombat)
+      return fakeApi({
+        InCombatLockdown = function() return inCombat or false end,
+        C_UnitAuras = { GetAuraDataByIndex = function(_, i) return auras[i] end },
+      })
+    end
+
+    it("reads the buffs you have out of combat, by spellID", function()
+      local situation = SituationReader.read(withAuras({ { spellId = 20918 }, { spellId = 465 } }), seals)
+      assert.are.same({ [20918] = true, [465] = true }, situation.player.buffs)
+    end)
+
+    it("does not read them in combat (auras are secret there)", function()
+      local situation = SituationReader.read(withAuras({ { spellId = 20918 } }, true), seals)
+      assert.is_nil(situation.player.buffs)
+    end)
+
+    it("skips secret spellIDs", function()
+      local situation = SituationReader.read(withAuras({ { spellId = SECRET }, { spellId = 465 } }), seals)
+      assert.are.same({ [465] = true }, situation.player.buffs)
+    end)
+
+    it("reads the role from the specialization (TANK, DAMAGER, HEALER)", function()
+      local api = withAuras({})
+      api.C_SpecializationInfo = {
+        GetSpecialization = function() return 1 end,
+        GetSpecializationInfo = function() return 1486, "Retribution", "", 0, "TANK" end,
+      }
+      local situation = SituationReader.read(api, seals)
+      assert.are.equal("TANK", situation.player.role)
+    end)
+  end)
 end)

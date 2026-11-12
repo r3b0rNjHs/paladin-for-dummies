@@ -97,6 +97,12 @@ Viabilidad: ✅ se puede con lo que sabemos · 🔍 hay que sondearlo en Forever
 - Dirección visual de las maquetas aprobada.
 - **Tono con humor y satírico** (nos llamamos *for Dummies*): chistes en bienvenida, mensajes vacíos, tarjeta tras la pelea y códice; nunca en los avisos que hay que atender. Opción para ponerlo serio.
 
+## Cambios de Jorge (12 nov, tarde)
+- **El asesor se fusiona con el centinela** en un **aviso antes del pull** que solo aparece cuando hay que hacer algo: sin sello o con uno que no toca, sin aura, sin bendición, sin Righteous Fury (tanque) o un caso especial del objetivo (no-muerto o demonio: Exorcism). Si todo está bien, no se ve nada.
+- **La tarjeta tras la pelea pasa a ser un modo entrenador** que activa el jugador: avisos solo cuando hay algo que contar (como mucho uno cada pocos minutos) y un resumen de la sesión al desactivarlo.
+- **Comida (nuevo):** aviso de "no estás bien alimentado" en el aviso antes del pull y un capítulo "Comida" en la guía según tu nivel y tu nivel de Cocina (investigación en `docs/research.md`, "Comida para Retribución").
+- Orden: aviso antes del pull → modo entrenador → ventana principal → comida.
+
 ## 6. Plan propuesto
 
 1. **Sistema de diseño y HUD nuevo**: rehacer el asesor y Unsealed Wrath con el estilo común, los estados (atenuado, con objetivo, en combate) y la tarjeta tras la pelea. Probar en el juego.

@@ -3,7 +3,7 @@ local _, ns = ...
 
 ns.Locales.register("enUS", {
   -- Welcome and help
-  WELCOME_1 = "Welcome! The small window shows the seal and the Judgement that suit your target before you pull. Hover the icons to see why.",
+  WELCOME_1 = [==[Welcome! Before each fight, if you are missing something (the right seal, your aura, your blessing...), an alert with its icon will appear. Hover it to see what to do. And open the Guide in /pfd: start with Your plan.]==],
   WELCOME_2 = "Type |cffffd100/pfd|r for options (or use the addon menu on the minimap).",
   NOT_A_PALADIN = "This addon is only for paladins; it stays inactive on this character.",
   HELP_HEADER = "Commands:",
@@ -18,15 +18,13 @@ ns.Locales.register("enUS", {
   -- Options: general
   OPT_INTRO = "Paladin for Dummies helps you choose seals and Judgements, shows your Unsealed Wrath echoes and keeps statistics of your fights. Everything is optional.",
   OPT_SHOW = "Show",
-  OPT_LOCK = "Lock position",
-  OPT_LOCK_DESC = "Stops it from being dragged by accident. Tooltips keep working.",
   OPT_SCALE = "Size",
   OPT_RESET_POSITION = "Reset position",
 
   -- Options: advisor
-  OPT_ADVISOR = "Advisor",
-  OPT_ADVISOR_DESC = "Before each pull, a small window shows which seal to fight with and which seal to judge. It freezes during combat.",
-  OPT_ADVISOR_SHOW_DESC = "The window with the recommended seal and Judgement.",
+  OPT_ADVISOR = [==[Before-pull alert]==],
+  OPT_ADVISOR_DESC = [==[With an enemy targeted and out of combat, it only speaks up if you are missing something: the right seal, your aura, your blessing, Righteous Fury if you tank, or a tip for that enemy. If all is well, you see nothing.]==],
+  OPT_ADVISOR_SHOW_DESC = [==[The icons that appear when you are missing something before a fight.]==],
 
   -- Options: Unsealed Wrath
   OPT_ECHO = "Unsealed Wrath",
@@ -88,15 +86,10 @@ ns.Locales.register("enUS", {
   TIP_NO_ADVICE = "No advice yet: target an enemy.",
   ECHO_SWITCH = "SWITCH!",
   ECHO_BACK = "BACK!",
-  OPT_VISIBILITY = "When to show it",
-  OPT_VISIBILITY_DESC = "The advice is for before the pull: with an enemy targeted it is fully visible, and in combat it steps aside.",
-  OPT_VIS_FADE = "Faded without a target",
-  OPT_VIS_HIDE = "Only with an enemy targeted",
-  OPT_VIS_ALWAYS = "Always, also in combat",
   OPT_REDUCE_MOTION = "Reduce animations",
   OPT_REDUCE_MOTION_DESC = "No pulsing on warnings. Applies after /reload.",
 
-  WELCOME_1_FUN = "Welcome, paladin! Yes, you: the one with three seals on the bar and no idea which to press. This little window tells you before every pull. Hover the icons for the why. No judging (that is what Judgement is for).",
+  WELCOME_1_FUN = [==[Welcome, paladin! Yes, you: the one with three seals on the bar and no idea which to press. Before each fight I will tell you if you forgot something, like a good squire. And /pfd has the Guide: start with Your plan. No judging (that is what Judgement is for).]==],
   NOT_A_PALADIN_FUN = "This one is for paladins only. Lovely character, but there are no seals to watch here. I will keep quiet.",
   TIP_NO_ADVICE_FUN = "Target an enemy. Swinging at the air does not count as practice.",
   OPTIONS_AFTER_COMBAT_FUN = "Opening the options mid-fight? Bold. The game will not allow it: they will open as soon as the mob stops hitting you.",
@@ -138,7 +131,7 @@ ns.Locales.register("enUS", {
   GUIDE_PLAN_NEXT_COMMAND = [==[If you go down the Retribution tree, at level 20 the {COMMAND} talent becomes your damage seal.]==],
   GUIDE_HELP_TITLE = [==[How the addon helps]==],
   GUIDE_HELP_BEFORE = [==[|cfff2c14eBefore the fight|r
-A little window with two icons: the seal to fight with and the one to use with {JUDGEMENT} before you start. Hover them to see the steps.]==],
+With an enemy targeted, if you are missing something its icon appears: the right seal, your aura, your blessing or a tip for that enemy. Hover it to see what to do. If all is well, nothing appears.]==],
   GUIDE_HELP_DURING = [==[|cfff2c14eDuring the fight|r
 If you have Unsealed Wrath, an icon tells you when to switch seals: SWITCH! and BACK!.]==],
   GUIDE_HELP_AFTER = [==[|cfff2c14eAfterwards|r
@@ -147,7 +140,7 @@ It keeps your fights. The Your fights chapter shows how you are doing.]==],
   GUIDE_HELP_COLORS = [==[|cfff2c14eGold ring|r: what I recommend.
 |cffe5484dRed border and "!"|r: something is missing.
 |cfff5a524Amber|r: about to run out.]==],
-  GUIDE_HELP_SOURCES = [==[In the box that appears when you hover, a little square tells you where the advice comes from:
+  GUIDE_HELP_SOURCES = [==[When you hover an alert, a little square tells you where the advice comes from:
 |TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:156:195:240|t how the spell works
 |TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:245:165:36|t what the guides recommend
 |TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:70:167:88|t your own fights]==],
@@ -254,8 +247,8 @@ Heals, protections, blessings, auras, resurrection... They go to the teammate un
 
 |cfff2c14eBubble Hearth|r: casting {DIVINE_SHIELD} and using your hearthstone. Paladin cultural heritage.]==],
   GUIDE_FAQ_TITLE = [==[FAQ]==],
-  GUIDE_FAQ_Q_COMBAT = [==[Why does the little window disappear when I fight?]==],
-  GUIDE_FAQ_A_COMBAT = [==[Its advice is for before you start. To always see it: Options > Advisor > When to show it.]==],
+  GUIDE_FAQ_Q_COMBAT = [==[Why do I hardly ever see the alert?]==],
+  GUIDE_FAQ_A_COMBAT = [==[Good sign! It only appears when, with an enemy targeted, you are missing something before a fight. In combat it steps aside. To move it: Options > Before-pull alert > Move.]==],
   GUIDE_FAQ_Q_AUTO = [==[Does this play for me?]==],
   GUIDE_FAQ_A_AUTO = [==[No. No button casts anything on its own, and the game does not let an addon tell you what to press mid-fight. You learn here, then you do it yourself.]==],
   GUIDE_FAQ_Q_SOURCE = [==[Can I trust the advice?]==],
@@ -286,4 +279,19 @@ No. Many tried before you.]==],
   MACRO_DESC_ARREPENTIR = [==[{REPENTANCE} on the enemy: takes it out of the fight for a while.]==],
   MACRO_DESC_BENDICION = [==[{MIGHT} on the teammate under the mouse (or your target). With |cfff2c14eCtrl|r: {KINGS}.]==],
   MACRO_DESC_AURAS = [==[{DEVOTION}. With |cfff2c14eCtrl|r: {RETRIBUTION_AURA}.]==],
+  ALERT_SEAL_MISSING = [==[You have no seal. Put on %s: without a seal you hit much softer.]==],
+  ALERT_SEAL_WRONG = [==[For this fight you want %s.]==],
+  ALERT_AURA = [==[You have no aura. Put on %s: it stays on and helps the whole group.]==],
+  ALERT_BLESSING = [==[You have no blessing. Put on %s: it lasts several minutes.]==],
+  ALERT_FURY = [==[You are the tank and you are not wearing %s: without it, enemies will go for your teammates.]==],
+  ALERT_EXORCISM = [==[It is undead or a demon: %s hits them really hard. Open with it.]==],
+  ALERT_LABEL_AURA = [==[Aura]==],
+  ALERT_LABEL_BLESSING = [==[Blessing]==],
+  ALERT_LABEL_FURY = [==[Fury]==],
+  ALERT_LABEL_TIP = [==[Tip]==],
+  ALERT_DRAG_HINT = [==[Drag to move · right-click or press Move again to lock]==],
+  ALERT_UNLOCKED = [==[Alert unlocked: drag it, then right-click it or press Move again to lock it.]==],
+  ALERT_LOCKED = [==[Alert locked. It only shows up when you are missing something before a fight.]==],
+  OPT_ALERT_MOVE_DESC = [==[Shows a box so you can place it where you like. Press again to lock it.]==],
+  OPT_ADVISOR_DESC_FUN = [==[Like a good squire: it only speaks up when you forget something before a fight (your seal, aura, blessing, Righteous Fury if you tank, or a tip for that enemy). If all is well, not a peep.]==],
 })

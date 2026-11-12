@@ -25,6 +25,15 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.13.0: aviso antes del pull
+**Archivos nuevos y quitados: cierra el juego y vuelve a abrirlo.**
+- Selecciona un enemigo **sin sello puesto**: debe salir el icono del sello en rojo con "!" latiendo. Pasa el ratón: qué hacer, pasos y porqué.
+- Ponte el sello correcto: el aviso desaparece. Ponte otro sello: sale el correcto con anillo dorado.
+- Quítate el aura o la bendición (clic derecho en el buff): sale su aviso.
+- Contra un no-muerto o demonio en mundo abierto: consejo de Exorcism.
+- En combate no se ve nada. Opciones > Aviso antes del pull > Mover para colocarlo.
+- Manda el archivo de SavedVariables: `snapshot.alerts` dice qué avisos calculó.
+
 ## Pruebas de la v0.12.0: la guía pensada para quien empieza
 **Archivo nuevo (`core/Guide.lua`): cierra el juego y vuelve a abrirlo.**
 - Guía → **Tu plan**: pasos según lo que sabes ahora (con tu nivel), con iconos y "Lo próximo".

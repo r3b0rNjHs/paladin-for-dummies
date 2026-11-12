@@ -1,7 +1,8 @@
 -- Adaptador: la única capa que toca la API de WoW.
 -- Lee el estado del juego y lo convierte en una Situation plana para el core:
 --   player  = { level, spec, knownSpells = { [spellID] = true },
---               weapon = { speed, minDamage, maxDamage }, spellPower }
+--               weapon = { speed, minDamage, maxDamage }, spellPower,
+--               buffs = { [spellID] = true } (solo fuera de combate), role }
 --             (el arma y el poder con hechizos pueden ser secret: SecretWhenUnitStatsRestricted)
 --   content = "solo" | "group" | "dungeon" | "raid" | "pvp"
 --   target  = { exists = false } o { exists = true, creatureType, classification, level }
@@ -118,6 +119,7 @@ local function readSpecFromSpecialization(api, call, diagnostics)
   local index = call(getIndex)
   if type(index) ~= "number" then return nil end
   local id, _, _, _, role = call(getInfo, index)
+  diagnostics.role = role -- TANK, DAMAGER o HEALER (token sin traducir)
   if type(id) ~= "number" then return nil end
   if SPEC_BY_ID[id] then return SPEC_BY_ID[id], "specialization" end
   diagnostics.unknownSpecId = id
@@ -185,6 +187,23 @@ local function readTarget(call, tagged, api)
 end
 
 local HOLY_SCHOOL = 2 -- GetSpellBonusDamage(2) = Sagrado
+local MAX_AURAS = 40
+
+-- Tus buffs, por spellID, para el aviso antes del pull. Solo fuera de combate:
+-- en combate las auras son secret (sondeo 1) y se devuelve nil.
+local function readBuffs(call, api)
+  if call(api.InCombatLockdown) then return nil end
+  local getAura = field(api.C_UnitAuras, "GetAuraDataByIndex")
+  if type(getAura) ~= "function" then return nil end
+  local buffs = {}
+  for i = 1, MAX_AURAS do
+    local aura = call(getAura, "player", i, "HELPFUL")
+    if type(aura) ~= "table" then break end
+    local spellId = call(function() return aura.spellId end)
+    if type(spellId) == "number" then buffs[spellId] = true end
+  end
+  return buffs
+end
 
 local function readWeapon(tagged, api)
   local speed = tagged("weaponSpeed", api.UnitAttackSpeed, "player")
@@ -209,9 +228,11 @@ function SituationReader.read(api, seals, options)
       knownSpells = knownSpells,
       weapon = readWeapon(tagged, api),
       spellPower = tagged("spellPower", api.GetSpellBonusDamage, HOLY_SCHOOL),
+      buffs = readBuffs(call, api),
     },
     content = readContent(call, api),
     target = readTarget(call, tagged, api),
   }
+  situation.player.role = diagnostics.role
   return situation, diagnostics
 end

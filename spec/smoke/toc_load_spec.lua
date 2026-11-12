@@ -226,8 +226,9 @@ describe("PaladinForDummies.toc", function()
     assert.is_false(profile.advisor.shown)
     o.advisor.args.scale.set(nil, 1.5)
     assert.are.equal(1.5, profile.advisor.scale)
-    o.advisor.args.locked.set(nil, true)
-    assert.is_true(profile.advisor.locked)
+    o.advisor.args.move.func()
+    assert.truthy(output(w):find("Alert unlocked", 1, true))
+    o.advisor.args.move.func()
 
     o.echo.args.scale.set(nil, 0.8)
     assert.are.equal(0.8, profile.echo.scale)
@@ -270,7 +271,7 @@ describe("PaladinForDummies.toc", function()
     assert.is_false(plan.plan2.hidden())
     assert.is_true(plan.plan16.hidden())
     local help = guide.args.help.args
-    assert.truthy(help.b1.name():find("|cfff2c14eJudgement|r", 1, true)) -- nombre del cliente
+    assert.truthy(guide.args.basics.args.b4.name():find("|cfff2c14eJudgement|r", 1, true)) -- nombre del cliente
     assert.are.equal(135000, (help.b1.image()))                         -- icono del hechizo
     local joke = help.b7
     assert.is_false(joke.hidden()) -- chiste con el tono por defecto
@@ -288,6 +289,29 @@ describe("PaladinForDummies.toc", function()
     env.SlashCmdList.PALADINFORDUMMIES("")
     env.PaladinForDummies_OnAddonCompartmentClick()
     assert.are.same({ 42, 42 }, w.opened)
+  end)
+
+  it("shows the before-pull alert only when something is missing", function()
+    local env, w = wowEnv()
+    local auras = {}
+    env.InCombatLockdown = function() return false end
+    env.C_UnitAuras = { GetAuraDataByIndex = function(_, i) return auras[i] end }
+    local _, _, _, char = start(env, w)
+    char.specOverride = "retribution"
+    local alert
+    for _, f in ipairs(w.frames) do if rawget(f, "ShowAlerts") then alert = f end end
+
+    -- Enemigo seleccionado y sin sello: aparece el aviso del sello.
+    fire(w, "PLAYER_TARGET_CHANGED")
+    assert.are.equal("seal:missing", alert.alerts[1].kind .. ":" .. alert.alerts[1].state)
+    assert.is_true(alert:HasAlerts())
+    alert.slots[1].scripts.OnEnter(alert.slots[1]) -- el tooltip no falla
+
+    -- Con Seal of Command puesto, no hay nada que decir.
+    auras[1] = { spellId = 20918 }
+    fire(w, "PLAYER_TARGET_CHANGED")
+    assert.are.same({}, alert.alerts)
+    assert.is_false(alert:HasAlerts())
   end)
 
   it("waits until the end of combat to open the options (the game blocks it in combat)", function()
@@ -326,7 +350,8 @@ describe("PaladinForDummies.toc", function()
     for _, f in ipairs(w.frames) do
       if f.scripts.OnEnter then f.scripts.OnEnter(f); hovered = hovered + 1 end
     end
-    assert.are.equal(2, hovered)
+    assert.are.equal(5, hovered) -- los cinco huecos del aviso antes del pull
+    assert.is_table(char.snapshot.alerts)
 
     -- Indicador de Unsealed Wrath: se crea por defecto y su inicialización no falla
     assert.is_true(char.echoStatus.created)

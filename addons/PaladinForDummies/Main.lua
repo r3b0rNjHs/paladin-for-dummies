@@ -17,7 +17,7 @@ local DEFAULTS = {
     language = "auto",
     tone = "fun", -- Locales: chistes en algunos mensajes (nunca en los avisos)
     devMode = false,
-    advisor = { shown = true, locked = false, scale = 1, visibility = "fade" }, -- core/HudState.lua
+    advisor = { shown = true, scale = 1 }, -- el aviso antes del pull (core/Prepull.lua)
     echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
     macros = { auto = false, disabled = {} },
     review = { chatSummary = false },
@@ -31,7 +31,7 @@ local guidePlan, guideName -- la guía (más abajo)
 local db              -- objeto AceDB
 local profile, char   -- db.profile y db.char
 local enabled = false -- solo con paladines
-local ui              -- ventana del asesor (ui/RecommendationFrame.lua)
+local ui              -- el aviso antes del pull (ui/PrepullAlert.lua)
 local echoes          -- indicador de Unsealed Wrath (ui/EchoTracker.lua)
 local frozen = false
 local last = {}       -- última situación calculada
@@ -173,19 +173,22 @@ local function saveSnapshot()
     situation = last.situation,
     diagnostics = last.diagnostics,
     recommendation = last.recommendation,
+    alerts = last.alerts,
   }
 end
 
--- Cuándo se ve el asesor: la opción "Mostrar" y core/HudState.lua.
+-- El aviso solo se ve con avisos, fuera de combate, con la opción "Mostrar".
 local function updateAdvisorVisibility()
   if not ui then return end
-  local target = last.situation and last.situation.target
-  local alpha = ns.Core.HudState.advisorAlpha({
-    mode = profile.advisor.visibility,
-    inCombat = frozen and true or false,
-    hasTarget = target and target.exists and true or false,
-  })
-  ui:ApplyVisibility(profile.advisor.shown, alpha)
+  ui:ApplyVisibility(profile.advisor.shown)
+end
+
+-- Qué mira el aviso antes del pull: los sellos que reconoce el catálogo (con
+-- los rangos descubiertos) y las auras y bendiciones de data/MacroSpells.lua.
+local function prepullSpells()
+  local spells = { sealBySpellId = ns.Data.Catalog.sealBySpellId }
+  for key, value in pairs(ns.Data.PrepullSpells) do spells[key] = value end
+  return spells
 end
 
 local function refresh()
@@ -196,8 +199,9 @@ local function refresh()
     -- peleas los reconozcan (cada rango tiene su propio spellID).
     ns.Data.LearnRanks(diagnostics.discoveredRanks)
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
-    last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
-    ui:ShowRecommendation(recommendation)
+    local alerts = ns.Core.Prepull.alerts(situation, recommendation, prepullSpells())
+    last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation, alerts = alerts }
+    ui:ShowAlerts(alerts, recommendation)
     updateAdvisorVisibility()
     saveSnapshot()
     syncMacros(false)
@@ -270,7 +274,6 @@ local function applyProfile()
   ui:UseStore(profile.advisor)
   updateAdvisorVisibility()
   ui:SetScale(profile.advisor.scale)
-  ui:SetLocked(profile.advisor.locked)
   if echoes then
     echoes:UseStore(profile.echo)
     echoes:SetScale(profile.echo.scale)
@@ -420,17 +423,11 @@ local optionHandlers = {
     profile.advisor.shown = value
     updateAdvisorVisibility()
   end,
-  getAdvisorVisibility = function() return profile.advisor.visibility end,
-  setAdvisorVisibility = function(value)
-    profile.advisor.visibility = value
-    updateAdvisorVisibility()
-  end,
   getReduceMotion = function() return profile.reduceMotion end,
   setReduceMotion = function(value) profile.reduceMotion = value and true or false end,
-  getAdvisorLocked = function() return profile.advisor.locked end,
-  setAdvisorLocked = function(value)
-    profile.advisor.locked = value
-    ui:SetLocked(value)
+  toggleAdvisorMove = function()
+    ui:SetUnlocked(not ui.unlocked)
+    p(ui.unlocked and L.ALERT_UNLOCKED or L.ALERT_LOCKED)
   end,
   getAdvisorScale = function() return profile.advisor.scale end,
   setAdvisorScale = function(value)
@@ -584,10 +581,10 @@ local function enable()
   ns.Locales.setTone(profile.tone)
 
   ns.UI.Style.reduceMotion = profile.reduceMotion
-  ui = ns.UI.RecommendationFrame.create(profile.advisor)
+  ui = ns.UI.PrepullAlert.create(profile.advisor)
+  ui.onVisibilityChange = updateAdvisorVisibility
   updateAdvisorVisibility()
   ui:SetScale(profile.advisor.scale)
-  ui:SetLocked(profile.advisor.locked)
   ui:SetTest(char.test)
   if profile.echo.shown then echoes = createEchoes() end
 

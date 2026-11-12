@@ -2,7 +2,7 @@
 local _, ns = ...
 
 ns.Locales.register("esES", {
-  WELCOME_1 = "¡Bienvenido! La ventanita muestra el sello y la Sentencia que convienen contra tu objetivo antes del pull. Pasa el ratón por los iconos para ver por qué.",
+  WELCOME_1 = [==[¡Bienvenido! Antes de cada pelea, si te falta algo (el sello que toca, tu aura, tu bendición...), aparecerá un aviso con su icono. Pasa el ratón por encima para ver qué hacer. Y abre la Guía en /pfd: empieza por Tu plan.]==],
   WELCOME_2 = "Escribe |cffffd100/pfd|r para las opciones (o usa el menú de addons del minimapa).",
   NOT_A_PALADIN = "Este addon es solo para paladines; en este personaje se queda inactivo.",
   HELP_HEADER = "Comandos:",
@@ -16,14 +16,12 @@ ns.Locales.register("esES", {
 
   OPT_INTRO = "Paladin for Dummies te ayuda a elegir sellos y Sentencias, muestra las copias de Unsealed Wrath y guarda estadísticas de tus peleas. Todo es opcional.",
   OPT_SHOW = "Mostrar",
-  OPT_LOCK = "Bloquear posición",
-  OPT_LOCK_DESC = "Evita arrastrarla sin querer. Los tooltips siguen funcionando.",
   OPT_SCALE = "Tamaño",
   OPT_RESET_POSITION = "Restablecer posición",
 
-  OPT_ADVISOR = "Asesor",
-  OPT_ADVISOR_DESC = "Antes de cada pull, una ventanita muestra con qué sello pelear y qué sello juzgar. Se congela durante el combate.",
-  OPT_ADVISOR_SHOW_DESC = "La ventana con el sello y la Sentencia recomendados.",
+  OPT_ADVISOR = [==[Aviso antes del pull]==],
+  OPT_ADVISOR_DESC = [==[Con un enemigo seleccionado y fuera de combate, te avisa solo si te falta algo: el sello que toca, tu aura, tu bendición, Righteous Fury si tanqueas, o un consejo para ese enemigo. Si todo está bien, no ves nada.]==],
+  OPT_ADVISOR_SHOW_DESC = [==[Los iconos que aparecen cuando te falta algo antes de pelear.]==],
 
   OPT_ECHO = "Unsealed Wrath",
   OPT_ECHO_DESC = "Con el talento Unsealed Wrath, tus golpes guardan copias de tu sello. Este indicador las muestra y se ilumina cuando toca cambiar de sello. Solo aparece mientras tienes copias.",
@@ -80,15 +78,10 @@ ns.Locales.register("esES", {
   TIP_NO_ADVICE = "Aún no hay consejo: selecciona un enemigo.",
   ECHO_SWITCH = "¡CAMBIA!",
   ECHO_BACK = "¡VUELVE!",
-  OPT_VISIBILITY = "Cuándo se ve",
-  OPT_VISIBILITY_DESC = "El consejo es para antes del pull: con un enemigo seleccionado se ve entero y en combate se aparta.",
-  OPT_VIS_FADE = "Atenuado sin objetivo",
-  OPT_VIS_HIDE = "Solo con un enemigo seleccionado",
-  OPT_VIS_ALWAYS = "Siempre, también en combate",
   OPT_REDUCE_MOTION = "Reducir animaciones",
   OPT_REDUCE_MOTION_DESC = "Sin latidos en los avisos. Se aplica tras /reload.",
 
-  WELCOME_1_FUN = "¡Bienvenido, paladín! Sí, tú: el que lleva tres sellos en la barra y no sabe cuál pulsar. Esta ventanita te lo dice antes de cada pull. Pasa el ratón por los iconos para ver el porqué. Sin juzgarte (para eso está Judgement).",
+  WELCOME_1_FUN = [==[¡Bienvenido, paladín! Sí, tú: el que lleva tres sellos en la barra y no sabe cuál pulsar. Antes de cada pelea te avisaré si se te olvida algo, como un buen escudero. Y en /pfd tienes la Guía: empieza por Tu plan. Sin juzgarte (para eso está Judgement).]==],
   NOT_A_PALADIN_FUN = "Esto es solo para paladines. Bonito personaje, pero aquí no hay sellos que vigilar. Me quedo calladito.",
   TIP_NO_ADVICE_FUN = "Selecciona a un enemigo. Pegarle al aire no cuenta como entrenar.",
   OPTIONS_AFTER_COMBAT_FUN = "¿Abrir las opciones en mitad de la pelea? Valiente. El juego no te deja: te las abro en cuanto el bicho deje de pegarte.",
@@ -130,7 +123,7 @@ ns.Locales.register("esES", {
   GUIDE_PLAN_NEXT_COMMAND = [==[Si vas por la rama de Retribución, a nivel 20 el talento {COMMAND} será tu sello para pegar.]==],
   GUIDE_HELP_TITLE = [==[Cómo te ayuda el addon]==],
   GUIDE_HELP_BEFORE = [==[|cfff2c14eAntes de pelear|r
-Una ventanita con dos iconos: el sello con el que pelear y el que conviene lanzar con {JUDGEMENT} antes de empezar. Pasa el ratón por encima para ver los pasos.]==],
+Con un enemigo seleccionado, si te falta algo aparece su icono: el sello que toca, tu aura, tu bendición o un consejo para ese enemigo. Pasa el ratón por encima para ver qué hacer. Si todo está bien, no aparece nada.]==],
   GUIDE_HELP_DURING = [==[|cfff2c14eDurante la pelea|r
 Si tienes Unsealed Wrath, un icono te dice cuándo cambiar de sello: ¡CAMBIA! y ¡VUELVE!.]==],
   GUIDE_HELP_AFTER = [==[|cfff2c14eDespués|r
@@ -139,7 +132,7 @@ Guarda tus peleas. En el capítulo Tus peleas ves qué tal lo haces.]==],
   GUIDE_HELP_COLORS = [==[|cfff2c14eAnillo dorado|r: lo que te recomiendo.
 |cffe5484dBorde rojo y "!"|r: te falta algo.
 |cfff5a524Ámbar|r: está a punto de acabarse.]==],
-  GUIDE_HELP_SOURCES = [==[En la ventanita que sale al pasar el ratón, un cuadradito dice de dónde sale el consejo:
+  GUIDE_HELP_SOURCES = [==[Al pasar el ratón por un aviso, un cuadradito dice de dónde sale el consejo:
 |TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:156:195:240|t de cómo funciona el hechizo
 |TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:245:165:36|t de lo que recomiendan las guías
 |TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:70:167:88|t de tus propias peleas]==],
@@ -246,8 +239,8 @@ Curas, protecciones, bendiciones, auras, resurrección... Van al compañero que 
 
 |cfff2c14eBubble Hearth|r: ponerte {DIVINE_SHIELD} y usar la piedra de hogar. Patrimonio cultural del paladín.]==],
   GUIDE_FAQ_TITLE = [==[Preguntas frecuentes]==],
-  GUIDE_FAQ_Q_COMBAT = [==[¿Por qué la ventanita desaparece al pelear?]==],
-  GUIDE_FAQ_A_COMBAT = [==[Su consejo es para antes de empezar. Si la quieres ver siempre: Opciones > Asesor > Cuándo se ve.]==],
+  GUIDE_FAQ_Q_COMBAT = [==[¿Por qué casi nunca veo el aviso?]==],
+  GUIDE_FAQ_A_COMBAT = [==[¡Buena señal! Solo aparece cuando, con un enemigo seleccionado, te falta algo antes de pelear. En combate se aparta. Si quieres cambiarlo de sitio: Opciones > Aviso antes del pull > Mover.]==],
   GUIDE_FAQ_Q_AUTO = [==[¿Esto juega por mí?]==],
   GUIDE_FAQ_A_AUTO = [==[No. Ningún botón lanza nada solo y el juego no permite que un addon te diga qué pulsar en mitad de la pelea. Aquí se aprende, y luego lo haces tú.]==],
   GUIDE_FAQ_Q_SOURCE = [==[¿Me puedo fiar de los consejos?]==],
@@ -278,4 +271,19 @@ No. Lo intentaron muchos antes que tú.]==],
   MACRO_DESC_ARREPENTIR = [==[{REPENTANCE} al enemigo: lo deja fuera de combate un rato.]==],
   MACRO_DESC_BENDICION = [==[{MIGHT} al compañero bajo el ratón (o a tu objetivo). Con |cfff2c14eCtrl|r: {KINGS}.]==],
   MACRO_DESC_AURAS = [==[{DEVOTION}. Con |cfff2c14eCtrl|r: {RETRIBUTION_AURA}.]==],
+  ALERT_SEAL_MISSING = [==[No llevas sello. Ponte %s: sin sello pegas mucho menos.]==],
+  ALERT_SEAL_WRONG = [==[Para esta pelea toca %s.]==],
+  ALERT_AURA = [==[No llevas ninguna aura. Ponte %s: se queda puesta y ayuda a todo el grupo.]==],
+  ALERT_BLESSING = [==[No llevas ninguna bendición. Ponte %s: dura varios minutos.]==],
+  ALERT_FURY = [==[Eres el tanque y no llevas %s: sin ella, los enemigos irán a por tus compañeros.]==],
+  ALERT_EXORCISM = [==[Es un no-muerto o un demonio: %s les hace muchísimo daño. Empieza con él.]==],
+  ALERT_LABEL_AURA = [==[Aura]==],
+  ALERT_LABEL_BLESSING = [==[Bendición]==],
+  ALERT_LABEL_FURY = [==[Furia]==],
+  ALERT_LABEL_TIP = [==[Consejo]==],
+  ALERT_DRAG_HINT = [==[Arrastra para moverlo · clic derecho o pulsa Mover otra vez para fijarlo]==],
+  ALERT_UNLOCKED = [==[Aviso desbloqueado: arrástralo y fíjalo con clic derecho o pulsando Mover otra vez.]==],
+  ALERT_LOCKED = [==[Aviso fijado. Solo aparecerá cuando te falte algo antes de pelear.]==],
+  OPT_ALERT_MOVE_DESC = [==[Muestra un recuadro para colocarlo donde quieras. Pulsa otra vez para fijarlo.]==],
+  OPT_ADVISOR_DESC_FUN = [==[Como un buen escudero: solo abre la boca cuando se te olvida algo antes de pelear (el sello, el aura, la bendición, Righteous Fury si tanqueas, o un consejo para ese enemigo). Si todo está bien, calladito.]==],
 })

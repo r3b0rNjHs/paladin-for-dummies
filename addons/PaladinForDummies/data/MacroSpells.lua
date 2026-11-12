@@ -24,6 +24,7 @@ ns.Data.MacroSpells = {
   retributionAura      = { spellIds = { 7294, 10298, 10299, 10300, 10301 } },               -- salvo 10299: classic
   redemption           = { spellIds = { 7328, 10322, 10324, 20772, 20773 } },               -- 10322+: classic
   exorcism             = { spellIds = { 879, 5614, 5615, 10312, 10313, 10314 } },           -- 10312+: classic
+  righteousFury        = { spellIds = { 25780 } },                                          -- classic (aviso de tanque)
 }
 
 -- Todo lo que el adaptador busca en el grimorio: sellos, hechizos de macros y
@@ -74,4 +75,27 @@ ns.Data.MacroInfo = {
   { name = "PFD Arrepentir", group = "CONTROL", icon = "REPENTANCE", key = "ARREPENTIR" },
   { name = "PFD Bendicion", group = "BUFFS", icon = "MIGHT", key = "BENDICION" },
   { name = "PFD Auras", group = "BUFFS", icon = "DEVOTION", key = "AURAS" },
+}
+
+-- Lo que mira el aviso antes del pull (core/Prepull.lua). Las listas "other"
+-- solo sirven para reconocer auras y bendiciones que ya llevas (también de otro
+-- paladín): IDs de Classic sin verificar en Forever.
+local M = ns.Data.MacroSpells
+ns.Data.PrepullSpells = {
+  auras = {
+    devotion = M.devotionAura.spellIds,
+    retribution = M.retributionAura.spellIds,
+    other = { 19746, 19876, 19895, 19896, 19888, 19897, 19898, 19891, 19899, 19900, 20218 }, -- Concentration, resistencias, Sanctity
+  },
+  blessings = {
+    might = M.blessingOfMight.spellIds,
+    kings = M.blessingOfKings.spellIds,
+    other = {
+      19742, 19850, 19852, 19853, 19854, 25290, -- Wisdom
+      1038, 19977, 19978, 19979, 20911, 20912, 20913, 20914, -- Salvation, Light, Sanctuary
+      25782, 25916, 25894, 25918, 25898, 25895, 25890, 25899, -- Greater Blessings
+    },
+  },
+  righteousFury = M.righteousFury.spellIds,
+  exorcism = M.exorcism.spellIds,
 }
