@@ -102,3 +102,30 @@ La pestaña se llama "Endgame Twist of Light" pero el contenido ya usa Unsealed 
 - Unsealed Wrath es una decisión golpe a golpe: va a la capa didáctica, no al asesor (regla 1). Lo que sí puede decidir el asesor antes del pull es el *patrón* (arma lenta o rápida) que enseñará la capa didáctica.
 - Consecration y Wisdom dependen del perfil (subir de nivel solo frente a banda).
 - El repaso tras el combate puede medir lo que nadie ha medido: activaciones de Command por minuto según la velocidad del arma y el efecto de Unsealed Wrath. Cada activación llega como lanzamiento (20424).
+
+## Mostrar auras en combate: Echo of Command (investigación del 12 nov 2026)
+
+Objetivo: ver en grande las copias de Echo of Command (1311703) y Echo of Righteousness (1311704) y que destaque al llegar a 3, para saber cuándo cambiar de sello con Unsealed Wrath.
+
+Fuentes: Warcraft Wiki (Secret Values, notas de API de 12.0.x y 12.1.0, páginas de API) y el **código fuente de la interfaz de Blizzard** (`Gethe/wow-ui-source`, rama live, `Blizzard_AuraContainer`). Blizzard confirmó el 15 sep que los AuraContainer de 12.1.0 también están en Forever.
+
+### Lo que el juego no deja hacer (límite técnico, no de normas)
+- Desde 12.1.0, en combate **todas** las funciones de auras devuelven datos secret o nada, y `UNIT_AURA` llega con datos secret. El addon no puede saber cuántas copias tienes.
+- `C_UnitAuras.GetPlayerAuraBySpellID` requiere que la aura no sea secret: si lo es, devuelve nada (sin error).
+- Excepción: las auras que Blizzard marca como **"nunca secret"** se leen siempre. Se comprueba con `C_Secrets.GetSpellAuraSecrecy(1311703)`.
+
+### Lo que sí se puede: AuraContainer (pensado justo para esto)
+- El addon crea el contenedor y decide el aspecto (tamaño, posición, texturas, texto); **el juego lo rellena y lo actualiza él mismo**, también en combate. El addon nunca toca los datos.
+- `container:AddAuraSlot(clave, "HELPFUL", { candidateFilters = { includeSpellIDs = { [1311703] = true } }, initializeFrame = ... })`: un hueco fijo para una sola aura. Comentario de Blizzard en el código: sirve para *"indicators for specific spells by ID"*.
+- **Filtrar por ID está permitido** para buffs del propio jugador (`CanApplyIdentityCandidateFilters`: *"Filtering helpful spells on the active player… is always allowed"*). Solo se restringe filtrar debuffs de jefes (para evitar avisos tipo "¡muévete!").
+- El botón admite: icono, **número de acumulaciones** (`SetApplicationCount`), **barra de acumulaciones** (`SetApplicationBar(statusBar, { minApplications, maxApplications })`), duración (texto, barra o espiral), animaciones al aparecer la aura y tooltip.
+- **El aviso al llegar a 3:** en `ApplyApplicationBar` el juego hace `statusBar:SetShown(applications >= minApplications)`. Con `minApplications = 3`, la barra (y lo que pongamos dentro: un brillo, un texto "¡CAMBIA!") **solo aparece con 3 copias**. Lo compara el código seguro del juego, no el nuestro.
+- **Sonido:** `C_UnitAuras.AddAuraSound(trigger, { unitToken = "player", spellID = 1311703, soundFileID = ... })` con los disparadores `Added`, `ApplicationsIncreased` o `Removed`. No hay disparador "al llegar a N": sonaría en cada copia o al gastarlas.
+
+### Para probar sin pelear
+- `/console addonCombatRestrictionsForced 1` simula las restricciones de combate fuera de combate (`0` las quita; no se guarda al reiniciar).
+- `/dump C_Secrets.GetSpellAuraSecrecy(1311703)`: si dice "never secret", todo es más fácil.
+
+### Sin confirmar en Forever
+- Que el contenedor de la rama live de Midnight (12.1.5) sea igual en Forever: Blizzard fue cambiando la API semana a semana durante las pruebas de 12.1.0.
+- Las opciones válidas de la barra de acumulaciones, más allá de `minApplications`, `maxApplications` e `interpolation`, las valida una función interna (`C_AuraContainerUtil.ProcessCustomAuraButtonApplicationBarOptions`).
