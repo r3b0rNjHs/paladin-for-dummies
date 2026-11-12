@@ -273,7 +273,7 @@ describe("PaladinForDummies.toc", function()
     local help = guide.args.help.args
     assert.truthy(guide.args.basics.args.b4.name():find("|cfff2c14eJudgement|r", 1, true)) -- nombre del cliente
     assert.are.equal(135000, (help.b1.image()))                         -- icono del hechizo
-    local joke = help.b7
+    local joke = help.b8
     assert.is_false(joke.hidden()) -- chiste con el tono por defecto
     ns.Locales.setTone("plain")
     assert.is_true(joke.hidden())
@@ -347,16 +347,35 @@ describe("PaladinForDummies.toc", function()
     assert.is_number(char.trainer.previous.judgement)
   end)
 
-  it("notes when you drink after a fight, and fills the Food chapter", function()
+  it("health and mana: the game's own result goes straight to the icon's alpha", function()
     local env, w = wowEnv()
-    local auras = {}
-    env.C_UnitAuras = { GetAuraDataByIndex = function(_, i) return auras[i] end }
-    local _, seen, _, char = start(env, w)
-    env_now = 3000; fire(w, "PLAYER_REGEN_DISABLED")
-    env_now = 3020; fire(w, "PLAYER_REGEN_ENABLED")
-    auras[1] = { spellId = 777, name = "Drink" }
-    fire(w, "UNIT_AURA", "player")
-    assert.is_true(char.fights[#char.fights].drankAfter)
+    local points = {}
+    env.C_CurveUtil = { CreateCurve = function()
+      return { SetType = function() end, AddPoint = function(_, x, y) points[#points + 1] = { x, y } end }
+    end }
+    local HEALTH, MANA = setmetatable({}, {}), setmetatable({}, {}) -- valores secret simulados
+    env.UnitHealthPercent = function(_, _, curve) return HEALTH end
+    env.UnitPowerPercent = function(_, _, _, curve) return MANA end
+    env.issecretvalue = function(v) return v == HEALTH or v == MANA end
+    local _, _, _, char = start(env, w)
+
+    local sustain
+    for _, f in ipairs(w.frames) do if rawget(f, "SetThresholds") then sustain = f end end
+    sustain:SetKnown({ light = true, wisdom = true, lightSpellId = 20165, wisdomSpellId = 20166 })
+    local got = {}
+    for kind, slot in pairs(sustain.slots) do rawset(slot, "SetAlpha", function(_, a) got[kind] = a end) end
+    sustain.scripts.OnUpdate(sustain, 1)
+
+    assert.are.equal(HEALTH, got.light)  -- sin compararlo ni operar con él
+    assert.are.equal(MANA, got.wisdom)
+    assert.are.equal("ok", char.sustainStatus.health)
+    assert.is_true(char.sustainStatus.healthSecret)
+    assert.are.same({ 0, 1 }, points[1])
+  end)
+
+  it("fills the Food chapter", function()
+    local env, w = wowEnv()
+    local _, seen = start(env, w)
 
     local food = seen.options.PaladinForDummies_Guide.args.food.args
     assert.truthy(food.b2.name():find("Best for you now", 1, true))

@@ -107,6 +107,19 @@ function Options.build(h)
           reset = button(4, L.OPT_RESET_POSITION, nil, h.resetEchoPosition),
         },
       },
+      sustain = {
+        type = "group", order = 2.5, name = L.OPT_SUSTAIN,
+        args = {
+          description = description(0, L.OPT_SUSTAIN_DESC),
+          shown = toggle(1, L.OPT_SHOW, L.OPT_SUSTAIN_SHOW_DESC, h.getSustainShown, h.setSustainShown),
+          health = { type = "range", order = 2, name = L.OPT_SUSTAIN_HEALTH, min = 0.1, max = 0.8, step = 0.05, isPercent = true,
+            get = function() return h.getSustainHealth() end, set = function(_, v) h.setSustainHealth(v) end },
+          mana = { type = "range", order = 3, name = L.OPT_SUSTAIN_MANA, min = 0.1, max = 0.8, step = 0.05, isPercent = true,
+            get = function() return h.getSustainMana() end, set = function(_, v) h.setSustainMana(v) end },
+          move = button(4, L.OPT_ECHO_MOVE, L.OPT_ALERT_MOVE_DESC, h.toggleSustainMove),
+          reset = button(5, L.OPT_RESET_POSITION, nil, h.resetSustainPosition),
+        },
+      },
       macros = { type = "group", order = 3, name = L.OPT_MACROS, args = macroToggles },
       review = {
         type = "group", order = 4, name = L.OPT_REVIEW,

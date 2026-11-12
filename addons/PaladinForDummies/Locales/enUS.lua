@@ -381,10 +381,16 @@ The best recipes from Cooking 275 need this camp oven. The blueprint drops in du
   FOOD_SRC_GIKKIX = [==[recipe from Gikkix (Tanaris), 2 g]==],
   FOOD_SRC_TRAINER = [==[ask your Cooking trainer]==],
   FOOD_SRC_UNKNOWN = [==[source not known yet]==],
-  GUIDE_SIT_SUSTAIN = [==[|cfff2c14eIf you run out of mana with Unsealed Wrath|r
-The {COMMAND} copies are also released when you switch to {WISDOM}, not only to {RIGHTEOUSNESS}. That might give you mana back without losing that damage (still to be tested).]==],
-  SUSTAIN_WISDOM = [==[You drank after %s of your last %s fights: mana is holding you back. Try fighting with {WISDOM}: you get mana back when you hit and drink less.]==],
-  SUSTAIN_LIGHT = [==[You ate to heal after %s of your last %s fights. Try fighting with {LIGHT}: you heal when you hit.]==],
-  SUSTAIN_BOTH = [==[You rested after %s of your last %s fights. If it is mana, try {WISDOM}; if it is health, {LIGHT}.]==],
-  SUSTAIN_NOTE = [==[(It is a hint: the game does not let addons see your mana or health, only whether you drink or eat.)]==],
+  OPT_SUSTAIN = [==[Health and mana]==],
+  OPT_SUSTAIN_DESC = [==[When your health is low, the Seal of Light icon appears with "SWITCH!", and with low mana, Seal of Wisdom. Also in combat. The addon does not read your health or mana: it hands the game a curve and the game lights up the icon.]==],
+  OPT_SUSTAIN_SHOW_DESC = [==[The Light and Wisdom icons (only the seals you know).]==],
+  OPT_SUSTAIN_HEALTH = [==[Warn with health below]==],
+  OPT_SUSTAIN_MANA = [==[Warn with mana below]==],
+  SUSTAIN_SWITCH = [==[SWITCH!]==],
+  SUSTAIN_UNLOCKED = [==[Health and mana display unlocked: drag it, then right-click it or press Move again to lock it.]==],
+  SUSTAIN_LOCKED = [==[Health and mana display locked. It only shows up when you are low on health or mana.]==],
+  GUIDE_HELP_SUSTAIN = [==[|cfff2c14eLow on health or mana|r
+{LIGHT} or {WISDOM} appears with SWITCH!: with that seal you heal or get mana back when you hit. Also in combat.]==],
+  GUIDE_SIT_SUSTAIN = [==[|cfff2c14eIf you run low on health or mana|r
+When you see {LIGHT} or {WISDOM} with SWITCH!, put that seal on instead of your damage seal until you recover. With Unsealed Wrath, the {COMMAND} copies are also released when you switch to either of them.]==],
 })

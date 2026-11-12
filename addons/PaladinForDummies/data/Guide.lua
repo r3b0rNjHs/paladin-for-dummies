@@ -59,6 +59,7 @@ ns.Data.Guide = {
   { id = "HELP", blocks = {
     { text = "HELP_BEFORE", icon = "CRUSADER" },
     { text = "HELP_DURING", icon = "ECHO" },
+    { text = "HELP_SUSTAIN", icon = "LIGHT" },
     { text = "HELP_AFTER", icon = BOOK },
     { header = "HELP_H_ICONS" },
     { text = "HELP_COLORS" },

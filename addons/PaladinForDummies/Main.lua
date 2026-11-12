@@ -22,19 +22,22 @@ local DEFAULTS = {
     echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
     macros = { auto = false, disabled = {} },
     review = { chatSummary = false },
+    sustain = { shown = true, health = 0.35, mana = 0.30, scale = 1 }, -- ui/SustainAlert.lua
     reduceMotion = false,
   },
-  char = { fights = {}, errors = {}, welcomed = false, trainer = { active = false } },
+  char = { fights = {}, errors = {}, welcomed = false, trainer = { active = false }, sustainStatus = {} },
 }
 local MAX_ERRORS = 50
 
 local guidePlan, guideName -- la guía (más abajo)
-local foodSuggestion, watchRest -- comida y descanso (más abajo)
+local foodSuggestion -- comida (más abajo)
+local sustainKnown   -- Light y Wisdom (más abajo)
 local windowHandlers        -- la ventana principal (más abajo)
 local db              -- objeto AceDB
 local profile, char   -- db.profile y db.char
 local enabled = false -- solo con paladines
 local ui              -- el aviso antes del pull (ui/PrepullAlert.lua)
+local sustain         -- poca vida o poco maná (ui/SustainAlert.lua)
 local echoes          -- indicador de Unsealed Wrath (ui/EchoTracker.lua)
 local frozen = false
 local last = {}       -- última situación calculada
@@ -180,6 +183,17 @@ local function saveSnapshot()
   }
 end
 
+-- Qué sellos de Light y Wisdom conoces, con su rango más alto (para el icono).
+local function highestKnown(ids, known)
+  for i = #(ids or {}), 1, -1 do if known[ids[i]] then return ids[i] end end
+  return nil
+end
+sustainKnown = function(known)
+  local light = highestKnown(Seals.light.spellIds, known)
+  local wisdom = highestKnown(Seals.wisdom.spellIds, known)
+  return { light = light ~= nil, wisdom = wisdom ~= nil, lightSpellId = light, wisdomSpellId = wisdom }
+end
+
 -- El aviso solo se ve con avisos, fuera de combate, con la opción "Mostrar".
 local function updateAdvisorVisibility()
   if not ui then return end
@@ -206,9 +220,9 @@ local function refresh()
     for _, alert in ipairs(alerts) do
       if alert.kind == "food" then alert.detail = foodSuggestion(situation.player) end
     end
-    watchRest(situation.player)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation, alerts = alerts }
     ui:ShowAlerts(alerts, recommendation)
+    if sustain then sustain:SetKnown(sustainKnown(situation.player.knownSpells or {})) end
     updateAdvisorVisibility()
     if window then window:RefreshIfShown() end
     saveSnapshot()
@@ -282,6 +296,11 @@ local function applyProfile()
   ui:UseStore(profile.advisor)
   updateAdvisorVisibility()
   ui:SetScale(profile.advisor.scale)
+  if sustain then
+    sustain:UseStore(profile.sustain)
+    sustain:SetScale(profile.sustain.scale)
+    sustain:SetShown(profile.sustain.shown)
+  end
   if echoes then
     echoes:UseStore(profile.echo)
     echoes:SetScale(profile.echo.scale)
@@ -382,7 +401,7 @@ local function debug()
 end
 
 ---------------------------------------------------------------------------
--- Comida (core/Food.lua) y descanso (core/Sustain.lua)
+-- Comida (core/Food.lua)
 ---------------------------------------------------------------------------
 
 local function foodLine(item)
@@ -422,23 +441,6 @@ local function guideFood()
   end
   lines[#lines + 1] = "\n" .. L.FOOD_NOTE
   return table.concat(lines, "\n")
-end
-
--- Tras cada pelea, si te ve beber o comer antes de la siguiente, lo apunta en
--- esa pelea (core/Sustain.lua lo usa para sugerir Wisdom o Light).
-local restFight
-watchRest = function(player)
-  if not restFight then return end
-  if player.drinking then restFight.drankAfter = true end
-  if player.eating then restFight.ateAfter = true end
-end
-
-local function sustainText()
-  local advice = ns.Core.Sustain.advice(char.fights)
-  if not advice.key then return nil end
-  local key = advice.key == "LIGHT" and advice.ate or advice.drank
-  return ns.Core.Guide.fill(L["SUSTAIN_" .. advice.key], guideName):format(Style.color("gold", key), advice.fights)
-    .. " " .. L.SUSTAIN_NOTE
 end
 
 ---------------------------------------------------------------------------
@@ -515,8 +517,6 @@ local function setTrainer(value)
     if s.holyStrike and guidePlan().known.holyStrike then
       p(coachFill(L.TRAINER_SUMMARY_STRIKE):format(s.holyStrike, changeText(s.holyStrikeChange)))
     end
-    local sustain = sustainText()
-    if sustain then p(sustain) end
     t.previous = { judgement = s.judgement, holyStrike = s.holyStrike }
   end
   if ns.UI.Options.refresh then ns.UI.Options.refresh() end
@@ -623,8 +623,6 @@ local optionHandlers = {
     local s = ns.Core.FightStats.summarize(fights, ns.Core.FightStyle.classify)
     local twist = s.byStyle and s.byStyle.twist
     if twist then lines[#lines + 1] = L.GUIDE_FIGHTS_TWIST:format(gold("gold", twist.fights)) end
-    local sustain = sustainText()
-    if sustain then lines[#lines + 1] = sustain end
     return table.concat(lines, "\n\n")
   end,
   getTrainer = function() return char.trainer.active end,
@@ -632,6 +630,27 @@ local optionHandlers = {
   guideFood = function() return guideFood() end,
   getAdvisorFood = function() return profile.advisor.food end,
   setAdvisorFood = function(value) profile.advisor.food = value and true or false; refresh() end,
+  getSustainShown = function() return profile.sustain.shown end,
+  setSustainShown = function(value)
+    profile.sustain.shown = value and true or false
+    if sustain then sustain:SetShown(profile.sustain.shown) end
+  end,
+  getSustainHealth = function() return profile.sustain.health end,
+  setSustainHealth = function(value)
+    profile.sustain.health = value
+    if sustain then sustain:SetThresholds(profile.sustain.health, profile.sustain.mana) end
+  end,
+  getSustainMana = function() return profile.sustain.mana end,
+  setSustainMana = function(value)
+    profile.sustain.mana = value
+    if sustain then sustain:SetThresholds(profile.sustain.health, profile.sustain.mana) end
+  end,
+  toggleSustainMove = function()
+    if not sustain then return end
+    sustain:SetUnlocked(not sustain.unlocked)
+    p(sustain.unlocked and L.SUSTAIN_UNLOCKED or L.SUSTAIN_LOCKED)
+  end,
+  resetSustainPosition = function() if sustain then sustain:ResetPosition() end end,
   getTone = function() return profile.tone end,
   setTone = function(value)
     profile.tone = value
@@ -793,6 +812,10 @@ local function enable()
   ui:SetTest(char.test)
   if profile.echo.shown then echoes = createEchoes() end
   toast = ns.UI.Toast.create(function() openOptions("guide") end)
+  safely("el indicador de vida y maná", function()
+    sustain = ns.UI.SustainAlert.create(profile.sustain, char.sustainStatus)
+    sustain:SetScale(profile.sustain.scale)
+  end)
   window = ns.UI.MainWindow.create(windowHandlers)
   -- Primeros pasos: la primera vez se abre sola, con la bienvenida.
   if not char.onboarded then window:Open("today") end
@@ -841,7 +864,6 @@ events:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
       local record = ns.Recorder.finish(char)
       if record and profile.review.chatSummary then p(ns.Recorder.describe(record)) end
       coachAfterFight(record)
-      restFight = record
       if window then window:RefreshIfShown() end
     end)
     setFrozen(false)
@@ -881,6 +903,11 @@ local DEV_COMMANDS = {
     if not echoes then p("El indicador no está creado.") return end
     char.echoDebug = ns.UI.EchoTracker.describe()
     for _, line in ipairs(char.echoDebug) do p(line) end
+  end,
+  sustaindebug = function()
+    for key, value in pairs(char.sustainStatus or {}) do p(("%s: %s"):format(key, tostring(value))) end
+    p(("funciones: UnitHealthPercent %s, UnitPowerPercent %s, C_CurveUtil %s"):format(
+      type(UnitHealthPercent), type(UnitPowerPercent), type(C_CurveUtil)))
   end,
   last = function()
     local fights = char.fights

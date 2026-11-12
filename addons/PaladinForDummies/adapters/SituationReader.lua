@@ -2,8 +2,8 @@
 -- Lee el estado del juego y lo convierte en una Situation plana para el core:
 --   player  = { level, spec, knownSpells = { [spellID] = true },
 --               weapon = { speed, minDamage, maxDamage }, spellPower,
---               buffs = { [spellID] = true }, wellFed, drinking, eating (solo fuera
---               de combate), role, cooking = { skill, max } }
+--               buffs = { [spellID] = true }, wellFed (solo fuera de combate),
+--               role, cooking = { skill, max } }
 --             (el arma y el poder con hechizos pueden ser secret: SecretWhenUnitStatsRestricted)
 --   content = "solo" | "group" | "dungeon" | "raid" | "pvp"
 --   target  = { exists = false } o { exists = true, creatureType, classification, level }
@@ -190,22 +190,21 @@ end
 local HOLY_SCHOOL = 2 -- GetSpellBonusDamage(2) = Sagrado
 local MAX_AURAS = 40
 
--- Hechizos de referencia: todas las comidas dan un buff que se llama como el
--- 19705 ("Well Fed") y todas las bebidas y comidas mientras te sientas, como el
--- 430 ("Drink") y el 433 ("Food"). El nombre lo da el cliente en su idioma (como
--- al descubrir rangos): se compara con el de tus buffs.
-local WELL_FED, DRINK, FOOD = 19705, 430, 433
+-- Hechizo de referencia: todas las comidas dan un buff que se llama como el
+-- 19705 ("Well Fed"). El nombre lo da el cliente en su idioma (como al descubrir
+-- rangos): se compara con el de tus buffs.
+local WELL_FED = 19705
 
 -- Tus buffs, por spellID, para el aviso antes del pull, y si estás bien
--- alimentado, bebiendo o comiendo. Solo fuera de combate: en combate las auras
+-- alimentado. Solo fuera de combate: en combate las auras
 -- son secret (sondeo 1) y se devuelve nil.
 local function readBuffs(call, api)
   if call(api.InCombatLockdown) then return nil end
   local getAura = field(api.C_UnitAuras, "GetAuraDataByIndex")
   if type(getAura) ~= "function" then return nil end
   local getName = field(api.C_Spell, "GetSpellName")
-  local wellFedName, drinkName, foodName = call(getName, WELL_FED), call(getName, DRINK), call(getName, FOOD)
-  local buffs, rest = {}, { wellFed = false, drinking = false, eating = false }
+  local wellFedName = call(getName, WELL_FED)
+  local buffs, rest = {}, { wellFed = false }
   for i = 1, MAX_AURAS do
     local aura = call(getAura, "player", i, "HELPFUL")
     if type(aura) ~= "table" then break end
@@ -214,8 +213,6 @@ local function readBuffs(call, api)
     local name = call(function() return aura.name end)
     if type(name) == "string" then
       if wellFedName and name == wellFedName then rest.wellFed = true end
-      if drinkName and name == drinkName then rest.drinking = true end
-      if foodName and name == foodName then rest.eating = true end
     end
   end
   return buffs, rest
@@ -271,9 +268,7 @@ function SituationReader.read(api, seals, options)
   situation.player.role = diagnostics.role
   local buffs, rest = readBuffs(call, api)
   situation.player.buffs = buffs
-  if rest then
-    situation.player.wellFed, situation.player.drinking, situation.player.eating = rest.wellFed, rest.drinking, rest.eating
-  end
+  if rest then situation.player.wellFed = rest.wellFed end
   situation.player.cooking = readCooking(call, api, function(v)
     if type(api.issecretvalue) ~= "function" then return false end
     local ok, secret = pcall(api.issecretvalue, v)

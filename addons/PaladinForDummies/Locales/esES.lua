@@ -373,10 +373,16 @@ Las mejores recetas de Cocina 275 o más necesitan este horno de campamento. El 
   FOOD_SRC_GIKKIX = [==[receta de Gikkix (Tanaris), 2 o]==],
   FOOD_SRC_TRAINER = [==[pregunta a tu instructor de Cocina]==],
   FOOD_SRC_UNKNOWN = [==[aún no se sabe dónde se consigue]==],
-  GUIDE_SIT_SUSTAIN = [==[|cfff2c14eSi te quedas sin maná con Unsealed Wrath|r
-Las copias de {COMMAND} también se sueltan al cambiar a {WISDOM}, no solo a {RIGHTEOUSNESS}. Puede que así recuperes maná sin perder ese daño (aún por comprobar).]==],
-  SUSTAIN_WISDOM = [==[Has bebido después de %s de tus últimas %s peleas: el maná te frena. Prueba a pelear con {WISDOM}: recuperas maná al golpear y bebes menos.]==],
-  SUSTAIN_LIGHT = [==[Has comido para curarte después de %s de tus últimas %s peleas. Prueba a pelear con {LIGHT}: te curas al golpear.]==],
-  SUSTAIN_BOTH = [==[Has descansado después de %s de tus últimas %s peleas. Si es el maná, prueba {WISDOM}; si es la vida, {LIGHT}.]==],
-  SUSTAIN_NOTE = [==[(Es una pista: el juego no deja ver tu maná ni tu vida, solo si bebes o comes.)]==],
+  OPT_SUSTAIN = [==[Vida y maná]==],
+  OPT_SUSTAIN_DESC = [==[Cuando te queda poca vida aparece el icono de Seal of Light con "¡CAMBIA!", y con poco maná el de Seal of Wisdom. También en combate. El addon no lee tu vida ni tu maná: se lo pide al juego con una curva y es el juego quien enciende el icono.]==],
+  OPT_SUSTAIN_SHOW_DESC = [==[Los iconos de Light y Wisdom (solo los sellos que conoces).]==],
+  OPT_SUSTAIN_HEALTH = [==[Avisar con la vida por debajo de]==],
+  OPT_SUSTAIN_MANA = [==[Avisar con el maná por debajo de]==],
+  SUSTAIN_SWITCH = [==[¡CAMBIA!]==],
+  SUSTAIN_UNLOCKED = [==[Indicador de vida y maná desbloqueado: arrástralo y fíjalo con clic derecho o pulsando Mover otra vez.]==],
+  SUSTAIN_LOCKED = [==[Indicador de vida y maná fijado. Solo se ve cuando te falta vida o maná.]==],
+  GUIDE_HELP_SUSTAIN = [==[|cfff2c14eCon poca vida o poco maná|r
+Aparece {LIGHT} o {WISDOM} con ¡CAMBIA!: con ese sello te curas o recuperas maná al golpear. También en combate.]==],
+  GUIDE_SIT_SUSTAIN = [==[|cfff2c14eSi te quedas sin vida o sin maná|r
+Cuando veas {LIGHT} o {WISDOM} con ¡CAMBIA!, ponte ese sello en lugar del de daño hasta recuperarte. Con Unsealed Wrath, las copias de {COMMAND} también se sueltan al cambiar a cualquiera de los dos.]==],
 })

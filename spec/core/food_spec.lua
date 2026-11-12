@@ -41,36 +41,3 @@ describe("Food", function()
     assert.is_nil(plan.now[1].canCook)
   end)
 end)
-
-describe("Sustain", function()
-  local Sustain
-
-  before_each(function()
-    Sustain = Addon.load({ "core/Sustain.lua" }).Core.Sustain
-  end)
-
-  local function fights(drank, ate, n)
-    local out = {}
-    for i = 1, n do out[i] = { duration = 20, drankAfter = i <= drank or nil, ateAfter = i <= ate or nil } end
-    return out
-  end
-
-  it("suggests Wisdom if you drink after most fights, Light if you eat", function()
-    assert.are.equal("WISDOM", Sustain.advice(fights(6, 1, 10)).key)
-    assert.are.equal("LIGHT", Sustain.advice(fights(1, 6, 10)).key)
-    assert.are.equal("BOTH", Sustain.advice(fights(6, 6, 10)).key)
-  end)
-
-  it("stays quiet if you rarely rest, or with too few fights", function()
-    assert.is_nil(Sustain.advice(fights(2, 2, 10)).key)
-    assert.is_nil(Sustain.advice(fights(4, 4, 4)).key)
-  end)
-
-  it("only looks at the last 10 fights", function()
-    local list = fights(0, 0, 10)
-    for i = 1, 10 do table.insert(list, 1, { duration = 20, drankAfter = true }) end -- 10 antiguas bebiendo
-    local a = Sustain.advice(list)
-    assert.are.equal(0, a.drank)
-    assert.are.equal(10, a.fights)
-  end)
-end)

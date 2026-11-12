@@ -290,7 +290,7 @@ describe("SituationReader.read", function()
     end)
   end)
 
-  describe("rest and food (by the client's own name of reference spells)", function()
+  describe("food (by the client's own name of a reference spell)", function()
     local names = { [19705] = "Bien alimentado", [430] = "Beber", [433] = "Comida" }
     local function withAuras(auras)
       return fakeApi({
@@ -300,13 +300,9 @@ describe("SituationReader.read", function()
       })
     end
 
-    it("knows when you are well fed, drinking or eating, whatever the food", function()
-      local situation = SituationReader.read(withAuras({
-        { spellId = 99999, name = "Bien alimentado" }, { spellId = 88888, name = "Beber" },
-      }), seals)
+    it("knows when you are well fed, whatever the food", function()
+      local situation = SituationReader.read(withAuras({ { spellId = 99999, name = "Bien alimentado" } }), seals)
       assert.is_true(situation.player.wellFed)
-      assert.is_true(situation.player.drinking)
-      assert.is_false(situation.player.eating)
     end)
 
     it("says false when there is none, and nil in combat", function()

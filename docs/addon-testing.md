@@ -25,6 +25,13 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.17.0: poca vida o poco maná
+**Archivos nuevos: cierra el juego y vuelve a abrirlo.**
+- Opciones > **Vida y maná** > Mover: colócalo y fíjalo.
+- Pelea hasta quedarte por debajo del 35 % de vida: debe aparecer Seal of Light con "¡CAMBIA!" (también en combate). Al curarte, desaparece.
+- Gasta maná hasta bajar del 30 %: Seal of Wisdom (solo si lo tienes aprendido).
+- Si no aparece nunca o aparece siempre: activa el modo desarrollador y escribe `/pfd sustaindebug`; manda lo que salga.
+
 ## Pruebas de la v0.16.0: comida y descanso
 **Archivos nuevos: cierra el juego y vuelve a abrirlo.**
 - Sin comer, selecciona un enemigo: aviso ámbar de comida con lo mejor para tu nivel en el tooltip. Come: desaparece.
