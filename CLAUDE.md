@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.12.0). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.12.1). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -129,7 +129,7 @@ Respondidas en el sondeo 1: ver `docs/probe-results/2026-11-11-sondeo-1.md`. Sig
 - ¿Los mensajes de addon funcionan dentro de instancias?
 - ¿`C_UnitAuras.GetPlayerAuraBySpellID` también falla en combate?
 - ¿Hay alguna forma legible del % de maná o solo se puede mostrar (barras, `C_CurveUtil`)?
-- Grimorio de Fury, Justice y Wisdom, y rangos 2-6 de Righteousness (no estaban entrenados).
+- Grimorio de Fury, Justice y Wisdom (no estaban entrenados). **Desde la v0.12.1, `data/Seals.lua` lleva su rango 1 según la Warcraft Wiki: Fury 1311649 (nuevo en Forever), Justice 20164, Wisdom 20166**: la guía muestra sus iconos y nombres del cliente, y el motor podrá recomendarlos cuando los aprendas (p. ej. la regla de humanoides → Justice). Confirmar con el grimorio.
 - ¿El arma y el poder con hechizos siguen legibles dentro de mazmorras? (La wiki los marca `SecretWhenUnitStatsRestricted`.)
 - ¿Judgement de Command quita la Sentencia de Crusader?
 - Efecto real de Unsealed Wrath: hay 35 peleas con cambio de sellos, pero gastar las copias no genera 20424. El medidor de daño de Blizzard existe en Forever y desglosa por habilidad (Jorge): desde la v0.9.7 se guarda. ¿Con qué spellID sale el daño de las copias? ¿La sesión "Current" es solo la última pelea?

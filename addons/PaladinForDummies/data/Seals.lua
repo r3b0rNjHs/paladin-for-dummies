@@ -1,7 +1,7 @@
 -- Sellos del paladín en Forever, identificados por spellID (nunca por nombre).
 -- spellIds va ordenado de menor a mayor rango.
 -- Fuente: volcado del grimorio del sondeo 1 (docs/probe-results/2026-11-11-sondeo-1.md).
--- Un sello sin spellIds todavía no se ha volcado: el motor nunca lo recomienda.
+-- El motor solo recomienda sellos que el jugador conoce (están en su grimorio).
 local _, ns = ...
 ns.Data = ns.Data or {}
 
@@ -10,9 +10,11 @@ ns.Data.Seals = {
   crusader      = { spellIds = { 21082, 20162, 20305, 20306 } },
   command       = { spellIds = { 20375, 20915, 20918 } },        -- talento de Ret
   light         = { spellIds = { 20165 } },
-  fury          = { spellIds = {} },                             -- pendiente de volcar
-  justice       = { spellIds = {} },                             -- pendiente de volcar
-  wisdom        = { spellIds = {} },                             -- pendiente de volcar
+  -- Rango 1 según la Warcraft Wiki (12 nov 2026), sin volcar aún en el cliente:
+  -- los demás rangos los descubre LearnRanks cuando los aprendas.
+  fury          = { spellIds = { 1311649 } },                    -- nuevo en Forever
+  justice       = { spellIds = { 20164 } },
+  wisdom        = { spellIds = { 20166 } },
 }
 
 -- Otros hechizos que usa el addon.
