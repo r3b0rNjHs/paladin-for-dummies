@@ -29,7 +29,8 @@ ns.Locales.register("esES", {
   OPT_ECHO_SHOW_DESC = "Echo of Command y Echo of Righteousness, con el aviso de cambio.",
   OPT_ECHO_MOVE = "Mover",
   OPT_ECHO_MOVE_DESC = "Muestra un recuadro para arrastrarlo. Pulsa otra vez para fijarlo.",
-  ECHO_UNLOCKED = "Indicador desbloqueado: arrástralo y pulsa Mover otra vez para fijarlo.",
+  ECHO_UNLOCKED = "Indicador desbloqueado: arrástralo y fíjalo con clic derecho o pulsando Mover otra vez.",
+  ECHO_DRAG_HINT = "Arrastra para moverlo · clic derecho o pulsa Mover otra vez para fijarlo",
   ECHO_LOCKED = "Indicador fijado en su sitio.",
   ECHO_RESET = "Indicador de vuelta a su sitio inicial.",
 

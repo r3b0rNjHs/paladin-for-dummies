@@ -33,7 +33,8 @@ ns.Locales.register("enUS", {
   OPT_ECHO_SHOW_DESC = "Echo of Command and Echo of Righteousness, with the switch alert.",
   OPT_ECHO_MOVE = "Move",
   OPT_ECHO_MOVE_DESC = "Shows a box to drag it. Press again to lock it.",
-  ECHO_UNLOCKED = "Display unlocked: drag it and press Move again to lock it.",
+  ECHO_UNLOCKED = "Display unlocked: drag it, then right-click it or press Move again to lock it.",
+  ECHO_DRAG_HINT = "Drag to move · right-click or press Move again to lock",
   ECHO_LOCKED = "Display locked in place.",
   ECHO_RESET = "Display back to its default position.",
 

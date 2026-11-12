@@ -87,7 +87,7 @@ local DEFAULT_POSITION = { point = "CENTER", relativePoint = "CENTER", x = 0, y 
 -- contenedor de Blizzard tiene partes protegidas: no le ponemos scripts, solo lo
 -- anclamos a este marco. Con el ancla desbloqueada se ve un recuadro para arrastrar.
 local function createAnchor(db, width, height)
-  local anchor = CreateFrame("Frame", "PaladinForDummiesEchoAnchor", UIParent, "BackdropTemplate")
+  local anchor = CreateFrame("Frame", "PaladinForDummiesEchoAnchor", UIParent)
   anchor:SetSize(width, height)
   anchor:SetMovable(true)
   anchor:SetClampedToScreen(true)
@@ -98,19 +98,29 @@ local function createAnchor(db, width, height)
     local ok, point, _, relativePoint, x, y = pcall(self.GetPoint, self)
     if ok and point then db.position = { point = point, relativePoint = relativePoint, x = x, y = y } end
   end)
+  -- Clic derecho: fijarlo sin volver a las opciones.
+  anchor:SetScript("OnMouseUp", function(self, mouseButton)
+    if mouseButton == "RightButton" and self.unlocked then self:SetUnlocked(false) end
+  end)
 
-  if anchor.SetBackdrop then
-    anchor:SetBackdrop({
+  -- El recuadro azul va en un marco hijo propio que se oculta entero al fijarlo
+  -- (antes se le ponía transparencia y el borde se quedaba detrás).
+  local box = CreateFrame("Frame", nil, anchor, "BackdropTemplate")
+  box:SetAllPoints(anchor)
+  box:SetFrameStrata("DIALOG")
+  if box.SetBackdrop then
+    box:SetBackdrop({
       bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
       edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
       tile = true, tileSize = 16, edgeSize = 12,
       insets = { left = 3, right = 3, top = 3, bottom = 3 },
     })
-    anchor:SetBackdropColor(0.1, 0.4, 0.8, 0.5)
+    box:SetBackdropColor(0.1, 0.4, 0.8, 0.5)
   end
-  anchor.hint = anchor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  anchor.hint:SetPoint("BOTTOM", anchor, "TOP", 0, 4)
-  anchor.hint:SetText("Arrastra para mover · /pfd echo move para fijar")
+  box.hint = box:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  box.hint:SetPoint("BOTTOM", box, "TOP", 0, 4)
+  box.hint:SetText(ns.L.ECHO_DRAG_HINT)
+  anchor.box = box
 
   function anchor:ApplyPosition()
     local pos = db.position or DEFAULT_POSITION
@@ -118,15 +128,11 @@ local function createAnchor(db, width, height)
     self:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
   end
 
-  -- Bloqueado: sin fondo, sin texto y sin ratón (no estorba en combate).
+  -- Fijado: sin recuadro, sin texto y sin ratón (no estorba en combate).
   function anchor:SetUnlocked(unlocked)
-    self.unlocked = unlocked
-    self:EnableMouse(unlocked)
-    if self.SetBackdrop then
-      self:SetBackdropColor(0.1, 0.4, 0.8, unlocked and 0.5 or 0)
-      self:SetBackdropBorderColor(1, 1, 1, unlocked and 1 or 0)
-    end
-    self.hint:SetShown(unlocked)
+    self.unlocked = unlocked and true or false
+    self:EnableMouse(self.unlocked)
+    self.box:SetShown(self.unlocked)
   end
 
   -- Cambia la tabla donde se guarda la posición (al cambiar de perfil).
