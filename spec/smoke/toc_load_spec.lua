@@ -25,6 +25,7 @@ describe("PaladinForDummies.toc", function()
         if key == "SetScript" then
           return function(_, name, fn) scripts[name] = fn end
         end
+        if key == "GetFrameLevel" then return function() return 1 end end
         return function() return mock() end
       end,
     })
@@ -130,6 +131,16 @@ describe("PaladinForDummies.toc", function()
       if f.scripts.OnEnter then f.scripts.OnEnter(f); hovered = hovered + 1 end
     end
     assert.are.equal(2, hovered)
+
+    -- Widget experimental de Unsealed Wrath: se crea y su inicialización no falla.
+    env.SlashCmdList.PALADINFORDUMMIES("echo")
+    assert.is_true(env.PaladinForDummiesDB.echo)
+    assert.is_true(env.PaladinForDummiesDB.echoStatus.created)
+    local slotErrors = {}
+    for _, echo in ipairs(ns.UI.EchoTracker.ECHOES) do
+      ns.UI.EchoTracker.initializer(echo, function(key, err) slotErrors[#slotErrors + 1] = key .. ": " .. tostring(err) end)(mock())
+    end
+    assert.are.same({}, slotErrors)
     -- Una pelea de 20 s con Command: Sentencia, Holy Strike y dos activaciones.
     env.SlashCmdList.PALADINFORDUMMIES("test a")
     env_now = 1000

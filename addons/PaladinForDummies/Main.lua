@@ -10,6 +10,7 @@ local Seals, Rules = ns.Data.Seals, ns.Data.Rules
 
 local db
 local ui
+local echoes -- widget experimental de Unsealed Wrath (ui/EchoTracker.lua)
 local frozen = false
 local last = {} -- última situación calculada, para /pfd debug
 
@@ -65,6 +66,20 @@ local function refresh()
     saveSnapshot()
   end)
   if not ok then reportError("la recomendación", err) end
+end
+
+-- Crea el widget de copias de Unsealed Wrath y guarda en db.echoStatus si
+-- funcionó, para verlo en el archivo de SavedVariables.
+local function createEchoes()
+  local container, err = ns.UI.EchoTracker.create(function(key, slotErr)
+    reportError("el widget de Echo (" .. key .. ")", slotErr)
+  end)
+  db.echoStatus = { time = time(), created = container ~= nil, error = err and tostring(err) or nil }
+  if not container then
+    reportError("el widget de Echo", err)
+    return nil
+  end
+  return container
 end
 
 local function setFrozen(value)
@@ -152,6 +167,7 @@ events:SetScript("OnEvent", function(_, event, arg1, _, arg3)
     ui = ns.UI.RecommendationFrame.create(db)
     if db.hidden then ui:Hide() end
     ui:SetTest(db.test)
+    if db.echo then echoes = createEchoes() end
     setFrozen(InCombatLockdown() and true or false)
   elseif event == "PLAYER_REGEN_DISABLED" then
     if not db then return end
@@ -234,6 +250,22 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
       return
     end
     ui:SetTest(db.test)
+  elseif cmd == "echo" then
+    if not echoes then
+      echoes = createEchoes()
+      if echoes then
+        db.echo = true
+        p("Widget de Unsealed Wrath activado (experimental). Aparece cuando tienes Echo of Command o Echo of Righteousness. /pfd echo para ocultarlo.")
+      end
+    elseif echoes:IsShown() then
+      echoes:Hide()
+      db.echo = nil
+      p("Widget de Unsealed Wrath oculto.")
+    else
+      echoes:Show()
+      db.echo = true
+      p("Widget de Unsealed Wrath visible.")
+    end
   elseif cmd == "stats" then
     for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
   elseif cmd == "last" then
@@ -250,6 +282,6 @@ SlashCmdList.PALADINFORDUMMIES = function(msg)
     ui:ResetPosition()
     p("Posición restablecida.")
   else
-    p("Comandos: /pfd debug | ui | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
+    p("Comandos: /pfd debug | ui | echo | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
   end
 end

@@ -2,7 +2,7 @@
 ## Title: Paladin for Dummies
 ## Notes: Qué sello y qué Sentencia usar según la situación (en desarrollo)
 ## Author: Jorge Hernandez
-## Version: 0.2.3
+## Version: 0.3.0
 ## SavedVariables: PaladinForDummiesDB
 
 core/Conditions.lua
@@ -16,5 +16,6 @@ data/Rules.lua
 adapters/SituationReader.lua
 adapters/FightReader.lua
 ui/RecommendationFrame.lua
+ui/EchoTracker.lua
 Recorder.lua
 Main.lua

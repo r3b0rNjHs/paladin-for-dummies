@@ -24,6 +24,16 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.3.0: widget de Unsealed Wrath (experimental)
+1. `git pull`, `/reload` y escribe `/pfd echo`. Debe decir "Widget de Unsealed Wrath activado". Si sale un error, también queda en el archivo.
+2. Pelea con Seal of Command. Debajo del centro de la pantalla debe aparecer el icono de **Echo of Command** con su número de copias.
+3. Con **3 copias**: ¿se enciende un brillo y aparece "¡CAMBIA!"?
+4. Cambia a Righteousness y da un golpe: debe aparecer **Echo of Righteousness** con "¡VUELVE!".
+5. Lo importante es que funcione **en combate**: si solo se ve fuera de combate, dímelo.
+6. Haz capturas del widget en plena pelea, `/reload` y manda el archivo.
+
+`/pfd echo` otra vez lo oculta.
+
 ## Plan de pruebas de rotación (v0.2.3)
 Qué queremos saber: (1) cuántas veces por minuto se activa Command en Forever, (2) Command o Righteousness con tu arma de 3,0 s, (3) si el cambio de sellos con Unsealed Wrath compensa.
 

@@ -6,7 +6,7 @@ Addon para **World of Warcraft: Forever** (Classic+, salió el 4 nov 2026) que a
 Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Clean Architecture). Nuevo en el desarrollo de addons de WoW. Juega a Forever y tiene el cliente instalado: **todo lo que dependa del juego lo prueba él**. Claude escribe el código y le dice exactamente qué probar.
 
 ## Fase actual
-**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.2.3). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
+**Fase 1: primer addon jugable** (`addons/PaladinForDummies`, v0.3.0). Asesor antes del pull (probado en el juego) y, desde la v0.2.0, **repaso tras el combate** (`Recorder.lua`, `core/Fight.lua`, `core/FightStats.lua`, `/pfd stats`), pendiente de probar en el juego. Cómo probarlo: `docs/addon-testing.md`.
 
 **Fase 0: sondeo.** El addon `addons/PalaProbe` comprueba en el cliente real qué es secret, qué está protegido y vuelca el grimorio. El protocolo está en `docs/probe-protocol.md`. **Primer sondeo hecho el 11 nov 2026**: resultados en `docs/probe-results/2026-11-11-sondeo-1.md`. Quedan pruebas pendientes (ver Preguntas abiertas).
 
@@ -39,6 +39,7 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 - La detección automática funciona: `retribution (fuente: specialization)` (v0.1.1).
 - **Dentro de las mazmorras el tipo de criatura del objetivo es secret** (3 élites de nivel 37 a 39, v0.1.1). La clasificación y el nivel sí se leen. Las reglas por tipo de criatura solo funcionan en mundo abierto.
 - **El arma y el poder con hechizos se leen fuera de combate** (v0.2.0, nivel 41): `UnitAttackSpeed` 3.0, `UnitDamage` 207-252, `GetSpellBonusDamage(2)` 68. Ninguno secret. Vienen como floats (3.0000001907349): redondear al mostrar.
+- `C_Secrets.GetSpellAuraSecrecy(1311703)` = **2 (ContextuallySecret)**: Echo of Command es secret en combate, no está en la lista de "nunca secret". Para mostrarlo en combate hay que usar AuraContainer.
 - **La ventana funciona (v0.1.2):** se ve con fondo, los tooltips muestran el hechizo, el porqué y la confianza, y la posición se guarda entre `/reload`. Sin fondo (v0.1.0/0.1.1) no se distinguía.
 
 Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar como hipótesis hasta que el sondeo lo confirme.
@@ -54,6 +55,8 @@ Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar
 ## Arquitectura
 Todo vive en `addons/PaladinForDummies/` (WoW solo carga lo que está dentro de la carpeta del addon). Orden de carga en el `.toc`.
 Tests: `busted` desde la raíz del repo (Lua 5.1; en Ubuntu, `apt install lua5.1 lua-busted`). `spec/support/addon.lua` carga los archivos como WoW, pasando `(addonName, ns)`; `spec/smoke/` carga el `.toc` entero con un WoW simulado.
+
+- **Widget de Unsealed Wrath** (`ui/EchoTracker.lua`, `/pfd echo`, experimental desde la v0.3.0): AuraContainer de Blizzard con un hueco por copia (Echo of Command 1311703, Echo of Righteousness 1311704) filtrado por ID; el juego pinta el número de copias y una barra con `minApplications` que solo se muestra al llegar a 3 (o a 1 para volver). Resultado de la creación en `db.echoStatus`. Detalle en `docs/research.md`.
 
 - La Sentencia (Judgement, 20271) es **un solo hechizo** que libera el sello puesto. La recomendación de "Sentencia" es el sello que hay que llevar al juzgar; `core/Plan.lua` la convierte en pasos (ponte X, lanza Judgement, cambia a Y) y la interfaz muestra el icono de Judgement con el sello en la esquina.
 
