@@ -44,11 +44,12 @@ Dueño: Jorge (arquitecto de software, experto en TypeScript, practica TDD y Cle
 Fuentes no verificadas (guías de la comunidad, muchas generadas con IA): tratar como hipótesis hasta que el sondeo lo confirme.
 
 ## Reglas de diseño (no negociables)
-1. **En combate no se calcula nada, solo se muestra** lo decidido antes. Así el addon sobrevive a futuros recortes de Blizzard.
+1. **En combate se prueba todo lo que el juego permita** (decisión de Jorge, 12 nov 2026): mostrar auras y acumulaciones con las herramientas de Blizzard (AuraContainer, Cooldown Manager, curvas, duraciones), avisos, etc. La recomendación antes del pull sigue congelándose al entrar en combate. Lo que no se hace es **sortear** las restricciones técnicas (leer datos secret por vías no previstas, exploits).
 2. Nunca comparar, operar ni indexar un valor sin comprobar antes `issecretvalue`. Usar `pcall` en el límite con la API de WoW.
 3. **Nunca identificar hechizos por su nombre**: el cliente puede estar en español (esES). Siempre por `spellID`.
 4. Nunca guardar valores secret en SavedVariables.
 5. Política de addons: gratis, código legible, sin publicidad ni donaciones dentro del juego.
+6. **Ante la duda de si algo está permitido, se pregunta antes de descartarlo.** Distinguir siempre entre límite técnico (el juego no lo deja: no hay nada que preguntar) y duda de normas (se pregunta). Dónde: WoWUIDev Discord, canal #author-wishlist (lo leen los desarrolladores de Blizzard), o un ticket de soporte para dudas de normas.
 
 ## Arquitectura
 Todo vive en `addons/PaladinForDummies/` (WoW solo carga lo que está dentro de la carpeta del addon). Orden de carga en el `.toc`.
