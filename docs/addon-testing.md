@@ -25,6 +25,12 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.12.0: la guía pensada para quien empieza
+**Archivo nuevo (`core/Guide.lua`): cierra el juego y vuelve a abrirlo.**
+- Guía → **Tu plan**: pasos según lo que sabes ahora (con tu nivel), con iconos y "Lo próximo".
+- Los nombres de hechizo salen como en tu juego (en español si tu cliente está en español).
+- **Tus peleas**: "usas Judgement X de cada 10 veces que podrías" y un consejo.
+
 ## Pruebas de la v0.11.0: la guía
 **Archivo nuevo (`data/Guide.lua`): cierra el juego y vuelve a abrirlo.**
 - Opciones → AddOns → Paladin for Dummies → **Guía**: árbol de capítulos a la izquierda, texto con iconos de los sellos a la derecha.

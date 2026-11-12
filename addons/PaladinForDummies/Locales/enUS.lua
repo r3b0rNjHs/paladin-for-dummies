@@ -117,147 +117,151 @@ ns.Locales.register("enUS", {
 
   OPT_GUIDE_HINT = "New to paladins? Open |cfff2c14eGuide|r, just below in the list: seals, Judgement, Unsealed Wrath, what to do in each situation and your own numbers.",
   OPT_GUIDE = [==[Guide]==],
-  GUIDE_START_TITLE = [==[Start here]==],
-  GUIDE_START_H_WHAT = [==[What it does for you]==],
-  GUIDE_START_BEFORE = [==[|cfff2c14eBefore the pull|r
-It tells you which seal to fight with and which seal to judge. You see it in the little two-icon window, "Seal" and "Judgement".]==],
-  GUIDE_START_DURING = [==[|cfff2c14eIn combat|r
-If you have the Unsealed Wrath talent, it tells you when to switch seals: |cfff2c14eSWITCH!|r and |cfff2c14eBACK!|r.]==],
-  GUIDE_START_AFTER = [==[|cfff2c14eAfter the fight|r
-It keeps every fight so you can see how you are doing. Your numbers are in this very guide.]==],
-  GUIDE_START_H_ICONS = [==[How to read the icons]==],
-  GUIDE_START_COLORS = [==[|cfff2c14eGold ring|r: what I recommend.
+  SPELL_WISDOM = [==[Seal of Wisdom]==],
+  SPELL_JUSTICE = [==[Seal of Justice]==],
+  SPELL_FURY = [==[Seal of Fury]==],
+  GUIDE_PLAN_TITLE = [==[Your plan]==],
+  GUIDE_PLAN_INTRO = [==[This is what to do with what you know right now (level %s). It updates itself when you learn new spells.]==],
+  GUIDE_PLAN_H_BEFORE = [==[Before the fight]==],
+  GUIDE_PLAN_SEAL_ONLY = [==[Put on {RIGHTEOUSNESS}. It is your seal: it makes every hit stronger.]==],
+  GUIDE_PLAN_PREPULL_1 = [==[|cfff2c14e1.|r Put on {CRUSADER}.]==],
+  GUIDE_PLAN_PREPULL_2 = [==[|cfff2c14e2.|r Target the enemy and cast {JUDGEMENT} on it. For 40 s it takes more Holy damage.]==],
+  GUIDE_PLAN_PREPULL_3 = [==[|cfff2c14e3.|r Put on {DAMAGE_SEAL} and go. It is your seal for the fight.]==],
+  GUIDE_PLAN_H_DURING = [==[During the fight]==],
+  GUIDE_PLAN_JUDGE = [==[Cast {JUDGEMENT} every time it is ready (every 8 s). It does not take your seal away: use it freely.]==],
+  GUIDE_PLAN_STRIKE = [==[Same with {HOLY_STRIKE} (every 10 s). Tip: the PFD Golpe macro casts both with one key.]==],
+  GUIDE_PLAN_UNSEALED = [==[Do you have the Unsealed Wrath talent? Watch the display: on SWITCH! put on {RIGHTEOUSNESS} and land a hit; on BACK!, {COMMAND} again. The Unsealed Wrath chapter explains it.]==],
+  GUIDE_PLAN_REFRESH = [==[The seal lasts 30 s. If it runs out, put {DAMAGE_SEAL} on again: without a seal you hit much softer.]==],
+  GUIDE_PLAN_H_NEXT = [==[Coming up]==],
+  GUIDE_PLAN_NEXT_CRUSADER = [==[At level 6 you learn {CRUSADER}. Your plan will gain a step before each fight.]==],
+  GUIDE_PLAN_NEXT_STRIKE = [==[Soon you will learn {HOLY_STRIKE}: an extra hit you can use every 10 s.]==],
+  GUIDE_PLAN_NEXT_COMMAND = [==[If you go down the Retribution tree, at level 20 the {COMMAND} talent becomes your damage seal.]==],
+  GUIDE_HELP_TITLE = [==[How the addon helps]==],
+  GUIDE_HELP_BEFORE = [==[|cfff2c14eBefore the fight|r
+A little window with two icons: the seal to fight with and the one to use with {JUDGEMENT} before you start. Hover them to see the steps.]==],
+  GUIDE_HELP_DURING = [==[|cfff2c14eDuring the fight|r
+If you have Unsealed Wrath, an icon tells you when to switch seals: SWITCH! and BACK!.]==],
+  GUIDE_HELP_AFTER = [==[|cfff2c14eAfterwards|r
+It keeps your fights. The Your fights chapter shows how you are doing.]==],
+  GUIDE_HELP_H_ICONS = [==[What the colors mean]==],
+  GUIDE_HELP_COLORS = [==[|cfff2c14eGold ring|r: what I recommend.
 |cffe5484dRed border and "!"|r: something is missing.
-|cfff5a524Amber|r: about to expire, or not what was planned.
-
-Hover an icon for the why.]==],
-  GUIDE_START_SOURCES = [==[In every tooltip, a little square tells you where the advice comes from:
-|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:156:195:240|t the spell's own mechanics
-|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:245:165:36|t community guides (not measured yet)
-|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:70:167:88|t measured with your own fights]==],
-  GUIDE_START_JOKE = [==[Nobody is born knowing which seal to use. Well, maybe Uther. Relax.]==],
+|cfff5a524Amber|r: about to run out.]==],
+  GUIDE_HELP_SOURCES = [==[In the box that appears when you hover, a little square tells you where the advice comes from:
+|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:156:195:240|t how the spell works
+|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:245:165:36|t what the guides recommend
+|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:70:167:88|t your own fights]==],
+  GUIDE_HELP_JOKE = [==[Nobody is born knowing which seal to use. Well, maybe Uther. Relax.]==],
   GUIDE_BASICS_TITLE = [==[Seals and Judgement]==],
-  GUIDE_BASICS_H_SEAL = [==[The seal]==],
-  GUIDE_BASICS_SEAL = [==[A buff you put on yourself. It lasts |cfff2c14e30 s|r and adds something to every hit: Holy damage, healing, mana...
+  GUIDE_BASICS_H_SEAL = [==[What is a seal?]==],
+  GUIDE_BASICS_SEAL = [==[A spell you put on yourself. It lasts 30 s and improves your hits: more damage, healing yourself, getting mana back...
 
-You wear |cfff2c14eone at a time|r: putting on another replaces it.]==],
-  GUIDE_BASICS_H_JUDGEMENT = [==[Judgement]==],
-  GUIDE_BASICS_JUDGEMENT = [==[A single spell that |cfff2c14eunleashes your current seal|r on the enemy. What it does depends on the seal: a damage hit, a 40 s effect...
+You can only wear one at a time. Putting on another removes the previous one.]==],
+  GUIDE_BASICS_H_JUDGEMENT = [==[And Judgement?]==],
+  GUIDE_BASICS_JUDGEMENT = [==[{JUDGEMENT} is a spell you cast on the enemy. What it does depends on the seal you are wearing at that moment: a damage hit, an effect that lasts 40 s...
 
-In Forever it |cfff2c14edoes not use up the seal|r: you keep it. Measured cooldown: 8 s.]==],
-  GUIDE_BASICS_H_RULES = [==[Three golden rules]==],
-  GUIDE_BASICS_RULE_ONE = [==[|cfff2c14e1. One Judgement per paladin.|r
-Judging another seal replaces the previous one.]==],
-  GUIDE_BASICS_RULE_PREPULL = [==[|cfff2c14e2. Judge before you fight.|r
-Put on Crusader, cast Judgement on the enemy (it takes more Holy damage for 40 s) and switch to your damage seal.]==],
-  GUIDE_BASICS_RULE_STRIKE = [==[|cfff2c14e3. Holy Strike goes with Judgement.|r
-Measured cooldown: 10 s. The PFD Golpe macro casts both with one key.]==],
+It does not take your seal away: you keep wearing it.]==],
+  GUIDE_BASICS_H_RULES = [==[Three things worth knowing]==],
+  GUIDE_BASICS_RULE_ONE = [==[|cfff2c14eOnly your last Judgement counts.|r
+If you cast {JUDGEMENT} with another seal, the previous one disappears from the enemy.]==],
+  GUIDE_BASICS_RULE_PREPULL = [==[|cfff2c14eThe classic trick:|r put on {CRUSADER}, cast {JUDGEMENT} on the enemy, then switch to the seal you will fight with.]==],
+  GUIDE_BASICS_RULE_STRIKE = [==[|cfff2c14eUse them as soon as they are ready.|r
+{JUDGEMENT} every 8 s and {HOLY_STRIKE} every 10 s. Leaving them waiting loses damage.]==],
   GUIDE_BASICS_JOKE = [==[Yes, judging a murloc is allowed. He started it.]==],
   GUIDE_SEALS_TITLE = [==[The seals, one by one]==],
   GUIDE_SEALS_H_DAMAGE = [==[For damage]==],
-  GUIDE_SEAL_RIGHTEOUSNESS = [==[|cfff2c14eSeal of Righteousness|r · level 1
-While on: extra Holy damage on every hit (more with slow weapons).
-Its Judgement: a Holy damage hit.
-When: your damage seal until you get Command, and half of the Unsealed Wrath switch.]==],
-  GUIDE_SEAL_COMMAND = [==[|cfff2c14eSeal of Command|r · level 20 · Retribution talent
-While on: sometimes an extra Holy hit for 74% of your weapon damage. Measured: about 3.7 times per minute (guides promise 7).
-Its Judgement: Holy damage, doubled if the enemy is stunned.
-When: the Retribution damage seal, best with a slow weapon.]==],
-  GUIDE_SEALS_H_PREPULL = [==[For before the pull]==],
-  GUIDE_SEAL_CRUSADER = [==[|cfff2c14eSeal of the Crusader|r · level 6
-While on: more attack power and 40% faster attacks, but weaker ones.
-Its Judgement: for 40 s the target takes more Holy damage; your hits refresh it.
-When: to judge it before the pull.]==],
+  GUIDE_SEAL_RIGHTEOUSNESS = [==[{RIGHTEOUSNESS} · from level 1
+Every hit does extra Holy damage. Even more with slow weapons.
+When: your damage seal until you get {COMMAND}.]==],
+  GUIDE_SEAL_COMMAND = [==[{COMMAND} · level 20, Retribution talent
+Every now and then, a very strong extra hit (about 3 or 4 times a minute).
+When: your damage seal if you play Retribution. Best with a slow weapon.]==],
+  GUIDE_SEALS_H_PREPULL = [==[For before the fight]==],
+  GUIDE_SEAL_CRUSADER = [==[{CRUSADER} · level 6
+You attack faster, but each hit is weaker.
+Its Judgement: for 40 s the enemy takes more Holy damage.
+When: cast {JUDGEMENT} with it on before the fight, then switch.]==],
   GUIDE_SEALS_H_SUSTAIN = [==[For staying alive]==],
-  GUIDE_SEAL_LIGHT = [==[|cfff2c14eSeal of Light|r · level 30
-While on: a chance to heal you when you hit.
-Its Judgement: for 40 s, whoever hits the target may be healed.
-When: if the group takes a lot of damage, or solo when your health is tight.]==],
-  GUIDE_SEAL_WISDOM = [==[|cfff2c14eSeal of Wisdom|r · level 38 · not checked in game
-While on: a chance to restore mana when you hit.
-Its Judgement: whoever hits the target restores mana.
-When: long fights or when your mana is tight.]==],
+  GUIDE_SEAL_LIGHT = [==[{LIGHT} · level 30
+Sometimes you heal yourself when you hit.
+When: if your health is tight.]==],
+  GUIDE_SEAL_WISDOM = [==[{WISDOM} · level 38
+Sometimes you get mana back when you hit.
+When: if you run out of mana in long fights.]==],
   GUIDE_SEALS_H_SPECIAL = [==[For specific cases]==],
-  GUIDE_SEAL_JUSTICE = [==[|cfff2c14eSeal of Justice|r · level 22 · not checked in game
-While on: a chance to stun for 2 s.
-Its Judgement: the target cannot run away at full speed.
-When: against humanoids that flee at low health.]==],
-  GUIDE_SEAL_FURY = [==[|cfff2c14eSeal of Fury|r · level 10 · new in Forever · not checked
-While on: fixed Holy damage per hit and a shield worth 50% of it.
-Its Judgement: extra damage and taunts enemies within 10 yd for 3 s.
-When: if you tank.]==],
+  GUIDE_SEAL_JUSTICE = [==[{JUSTICE} · level 22
+Sometimes stuns the enemy for 2 s, and its Judgement stops it from running away.
+When: against humanoids that flee when low on health.]==],
+  GUIDE_SEAL_FURY = [==[{FURY} · level 10, new (to be confirmed)
+Holy damage on every hit and a small shield. Its Judgement makes nearby enemies attack you.
+When: if you are the group's tank.]==],
   GUIDE_SEALS_JOKE = [==[Seven seals and only one hand to press them. That is what we are here for.]==],
   GUIDE_UNSEALED_TITLE = [==[Unsealed Wrath]==],
-  GUIDE_UNSEALED_H_WHAT = [==[What it is]==],
-  GUIDE_UNSEALED_WHAT = [==[A Retribution talent (requires Repentance). Every hit stores |cfff2c14ea copy|r of your current seal for 15 s, up to 3.
+  GUIDE_UNSEALED_WHAT = [==[A Retribution talent. With it, every hit stores a copy of your seal (up to 3). When you hit with a different seal, all those copies are released at once on that hit.
 
-When you hit with |cfff2c14eanother|r seal, they are all spent at once and that hit adds their effects.]==],
-  GUIDE_UNSEALED_H_HOW = [==[How to play it, in three steps]==],
-  GUIDE_UNSEALED_STEP_1 = [==[|cfff2c14e1. Build up.|r Fight with Command until you have 3 copies. The display says |cfff2c14eSWITCH!|r and shows the Righteousness icon: that is where you are going.]==],
-  GUIDE_UNSEALED_STEP_2 = [==[|cfff2c14e2. Switch and hit.|r Put on Righteousness and land a hit: the Command copies are spent.]==],
-  GUIDE_UNSEALED_STEP_3 = [==[|cfff2c14e3. Go back.|r With 1 copy of Righteousness the display says |cfff2c14eBACK!|r: Command again, and start over.]==],
-  GUIDE_UNSEALED_SHORTCUT = [==[Shortcut: the |cfff2c14ePFD Unsealed|r macro switches between both seals with a single key.]==],
-  GUIDE_UNSEALED_H_MEASURED = [==[Measured so far]==],
-  GUIDE_UNSEALED_MEASURED = [==[A good cycle: about 11 s with Command (3 hits with a 3.4 s weapon) and about 4 s with Righteousness.
-
-How much damage it adds is being measured with the damage meter. Other seals also spend the copies: switching to Wisdom to restore mana is still to be tested.]==],
+In short: switching seals at the right moment does a lot more damage.]==],
+  GUIDE_UNSEALED_H_HOW = [==[How to do it, in three steps]==],
+  GUIDE_UNSEALED_STEP_1 = [==[|cfff2c14e1. Build up.|r Fight with {COMMAND}. When the display says |cfff2c14eSWITCH!|r, you have 3 copies.]==],
+  GUIDE_UNSEALED_STEP_2 = [==[|cfff2c14e2. Switch and hit.|r Put on {RIGHTEOUSNESS} and land a hit. That releases the copies.]==],
+  GUIDE_UNSEALED_STEP_3 = [==[|cfff2c14e3. Go back.|r When it says |cfff2c14eBACK!|r, put {COMMAND} on again and repeat.]==],
+  GUIDE_UNSEALED_SHORTCUT = [==[Shortcut: the PFD Unsealed macro does the switch with one key. Press it when you see SWITCH! and when you see BACK!.]==],
   GUIDE_UNSEALED_JOKE = [==[It is juggling, but with holy seals and a murloc watching.]==],
-  GUIDE_SITUATIONS_TITLE = [==[What to do in each situation]==],
-  GUIDE_SIT_SOLO = [==[|cfff2c14eLeveling solo|r
-Judge Crusader before the pull and fight with Command (or Righteousness if you do not have it yet). In long fights, if mana or health is tight: Wisdom or Light.]==],
-  GUIDE_SIT_DUNGEON = [==[|cfff2c14eDungeons, as Retribution|r
-Crusader before the pull, Command and seal switching with Unsealed Wrath. Press PFD Golpe whenever Judgement or Holy Strike is ready.]==],
-  GUIDE_SIT_BOSS = [==[|cfff2c14eBosses, with another paladin|r
-Agree beforehand: one keeps up the Judgement of Wisdom (if the group spends a lot of mana) or of Light (if it takes a lot of damage). Guides agree.]==],
-  GUIDE_SIT_FLEE = [==[|cfff2c14eHumanoids that run away|r
-Justice: it stuns them and its Judgement stops them from fleeing at full speed. Or Hammer of Justice at the right moment.]==],
+  GUIDE_SITUATIONS_TITLE = [==[What to do when]==],
+  GUIDE_SIT_SOLO = [==[|cfff2c14eLeveling on your own|r
+Follow Your plan. If you always run out of mana, try fighting with {WISDOM}; if out of health, with {LIGHT}.]==],
+  GUIDE_SIT_DUNGEON = [==[|cfff2c14eIn a dungeon|r
+Your usual plan. Cast {JUDGEMENT} and {HOLY_STRIKE} as soon as they are ready and, if you have Unsealed Wrath, follow the display.]==],
+  GUIDE_SIT_GROUP = [==[|cfff2c14eWith another paladin in the group|r
+Talk before you start: if the group spends a lot of mana, one of you judges with {WISDOM}; if it takes a lot of damage, with {LIGHT}.]==],
+  GUIDE_SIT_FLEE = [==[|cfff2c14eEnemies that run away|r
+Some humanoids run off at low health and bring their friends. {HAMMER} stuns them; {JUSTICE} helps too.]==],
   GUIDE_SIT_UNDEAD = [==[|cfff2c14eUndead and demons|r
-Exorcism hits them hard (in Classic it only worked on them; still to be confirmed in Forever). PFD Exorcismo macro.]==],
-  GUIDE_SIT_TANK = [==[|cfff2c14eIf you tank|r
-Seal of Fury: its Judgement taunts nearby enemies for 3 s. Full help for tanks and healers will come later.]==],
+{EXORCISM} hits them really hard. Use it whenever it is ready.]==],
+  GUIDE_SIT_DANGER = [==[|cfff2c14eIf you are about to die|r
+{DIVINE_SHIELD} makes you immune for a few seconds. Use them to heal or to get out of there.]==],
   GUIDE_SIT_JOKE = [==[Special situation: the group is dead and you are still alive. Bubble Hearth. Just kidding. (Or not?)]==],
   GUIDE_MACROS_TITLE = [==[The macros]==],
-  GUIDE_MACROS_INTRO = [==[The addon can create character macros for you (Options → Macros) with your client's spell names. They update themselves when you learn new ranks. None of them casts anything on its own: you press the key.]==],
+  GUIDE_MACROS_INTRO = [==[A macro is a button that does several things at once. The addon can create them for you: turn it on in Options → Macros and drag them to your bar from the macro window (type /macro).]==],
   GUIDE_MACRO_GOLPE = [==[|cfff2c14ePFD Golpe|r
-Judgement and Holy Strike on one key. Judgement does not trigger the global cooldown, so both go out.]==],
+Casts {JUDGEMENT} and {HOLY_STRIKE} with one key. Press it as soon as it lights up.]==],
   GUIDE_MACRO_UNSEALED = [==[|cfff2c14ePFD Unsealed|r
-Switches between Command and Righteousness. Every fight starts on Command.]==],
+Switches between {COMMAND} and {RIGHTEOUSNESS}. Every fight starts on {COMMAND}.]==],
   GUIDE_MACRO_SELLO = [==[|cfff2c14ePFD Sello|r
-Command; holding Shift, Righteousness.]==],
-  GUIDE_MACRO_UTILITY = [==[|cfff2c14eThe utility ones|r
-Heals, protection, freedom, blessings, auras, resurrection... They go to the ally under your mouse (or to you) without changing your target.]==],
+{COMMAND}; holding Shift, {RIGHTEOUSNESS}.]==],
+  GUIDE_MACRO_UTILITY = [==[|cfff2c14eThe helper ones|r
+Heals, protections, blessings, auras, resurrection... They go to the teammate under your mouse (or to you) without losing your enemy target.]==],
   GUIDE_MACROS_JOKE = [==[You have 18 character macro slots. Choose wisely, like a paladin. Well, better than a paladin.]==],
-  GUIDE_NUMBERS_TITLE = [==[Your numbers]==],
-  GUIDE_NUMBERS_EMPTY = [==[No fights saved on this character yet. Go hit something and come back.]==],
-  GUIDE_NUMBERS_FIGHTS = [==[Fights saved: %s]==],
-  GUIDE_NUMBERS_COMMAND = [==[Seal of Command: %s procs per minute (guides say 7)]==],
-  GUIDE_NUMBERS_TWIST = [==[Fights with seal switching: %s]==],
-  GUIDE_NUMBERS_NOTE = [==[They come from your saved fights: the more, the more reliable.]==],
+  GUIDE_FIGHTS_TITLE = [==[Your fights]==],
+  GUIDE_FIGHTS_EMPTY = [==[No fights saved on this character yet. Go hit something and come back.]==],
+  GUIDE_FIGHTS_COUNT = [==[Fights saved: %s]==],
+  GUIDE_FIGHTS_JUDGE = [==[You use {JUDGEMENT} %s out of every 10 times you could.]==],
+  GUIDE_FIGHTS_STRIKE = [==[You use {HOLY_STRIKE} %s out of every 10 times you could.]==],
+  GUIDE_FIGHTS_TIP = [==[To improve: press PFD Golpe every time it lights up. Do not wait for anything.]==],
+  GUIDE_FIGHTS_GOOD = [==[Great job! You hardly miss any.]==],
+  GUIDE_FIGHTS_TWIST = [==[Fights where you switched seals with Unsealed Wrath: %s]==],
   GUIDE_GLOSSARY_TITLE = [==[Glossary]==],
-  GUIDE_GLOSSARY_TEXT = [==[|cfff2c14ePull|r: the moment the fight starts.
+  GUIDE_GLOSSARY_TEXT = [==[|cfff2c14ePull|r: starting the fight.
 
-|cfff2c14eBuff / debuff|r: a good effect on you / a bad one on the enemy.
+|cfff2c14eBuff|r: a good effect on you. |cfff2c14eDebuff|r: a bad effect on the enemy.
 
-|cfff2c14eProc|r: an effect that triggers by chance when you hit, like Command.
+|cfff2c14eProc|r: something that triggers by luck when you hit.
 
-|cfff2c14eCD (cooldown)|r: how long a spell takes to be ready again.
+|cfff2c14eCooldown (CD)|r: how long a spell takes to be ready again.
 
-|cfff2c14eGCD (global cooldown)|r: the 1.5 s pause after almost any spell.
-
-|cfff2c14eStack|r: several copies of the same effect, like the Unsealed Wrath ones.
+|cfff2c14eGlobal cooldown (GCD)|r: the 1.5 s pause after almost any spell.
 
 |cfff2c14eAggro|r: who the enemy wants to hit. Spoiler: whoever annoys it most.
 
-|cfff2c14eBubble Hearth|r: Divine Shield, then your hearthstone. Paladin cultural heritage.]==],
+|cfff2c14eBubble Hearth|r: casting {DIVINE_SHIELD} and using your hearthstone. Paladin cultural heritage.]==],
   GUIDE_FAQ_TITLE = [==[FAQ]==],
-  GUIDE_FAQ_Q_COMBAT = [==[Why does the advisor disappear in combat?]==],
-  GUIDE_FAQ_A_COMBAT = [==[The advice is for before the pull, and in combat the game hides almost everything from addons. You can keep it visible under Advisor → When to show it.]==],
+  GUIDE_FAQ_Q_COMBAT = [==[Why does the little window disappear when I fight?]==],
+  GUIDE_FAQ_A_COMBAT = [==[Its advice is for before you start. To always see it: Options → Advisor → When to show it.]==],
   GUIDE_FAQ_Q_AUTO = [==[Does this play for me?]==],
-  GUIDE_FAQ_A_AUTO = [==[No. No button casts anything on its own, and Blizzard does not allow real-time rotation advice. This is for learning.]==],
+  GUIDE_FAQ_A_AUTO = [==[No. No button casts anything on its own, and the game does not let an addon tell you what to press mid-fight. You learn here, then you do it yourself.]==],
   GUIDE_FAQ_Q_SOURCE = [==[Can I trust the advice?]==],
-  GUIDE_FAQ_A_SOURCE = [==[Look at the little colored square in the tooltip: blue, it comes from the spell's mechanics; amber, from guides not measured yet; green, measured with your fights.]==],
-  GUIDE_FAQ_Q_BUG = [==[I found a bug.]==],
-  GUIDE_FAQ_A_BUG = [==[Advanced → Error report: copy it and send it. Thank you, really.]==],
+  GUIDE_FAQ_A_SOURCE = [==[Look at the little colored square when you hover: blue, it comes from how the spell works; amber, from what guides say; green, from your own fights.]==],
+  GUIDE_FAQ_Q_BUG = [==[Something does not work.]==],
+  GUIDE_FAQ_A_BUG = [==[Options → Advanced → Error report. Copy it and send it to whoever maintains the addon. Thank you, really.]==],
   GUIDE_FAQ_JOKE = [==[|cfff2c14eCan I wear two seals at once?|r
 No. Many tried before you.]==],
 })

@@ -255,21 +255,30 @@ describe("PaladinForDummies.toc", function()
 
     assert.is_table(seen.options.PaladinForDummies_Profiles)
 
-    -- La guía: capítulos en árbol, chistes solo con humor y tus números.
+    -- La guía: capítulos en árbol, Tu plan según lo que sabes, nombres del
+    -- cliente, chistes solo con humor y tus peleas.
     local guide = seen.options.PaladinForDummies_Guide
     assert.are.equal("tree", guide.childGroups)
-    assert.are.equal("header", guide.args.start.args.b1.type)
-    assert.truthy(guide.args.start.args.b2.name():find("Before the pull", 1, true))
-    assert.are.equal(135000, guide.args.start.args.b2.image) -- icono del hechizo
-    local joke = guide.args.start.args.b8
+    local plan = guide.args.plan.args
+    assert.truthy(plan.planIntro.name():find("level", 1, true))
+    assert.truthy(plan.plan1.name():find("Before the fight", 1, true))
+    assert.are.equal("large", plan.plan1.fontSize())
+    assert.is_false(plan.plan2.hidden())
+    assert.is_true(plan.plan16.hidden())
+    local help = guide.args.help.args
+    assert.truthy(help.b1.name():find("|cfff2c14eJudgement|r", 1, true)) -- nombre del cliente
+    assert.are.equal(135000, (help.b1.image()))                         -- icono del hechizo
+    local joke = help.b7
     assert.is_false(joke.hidden()) -- chiste con el tono por defecto
     ns.Locales.setTone("plain")
     assert.is_true(joke.hidden())
     ns.Locales.setTone("fun")
-    assert.truthy(guide.args.numbers.args.b1.name():find("No fights saved", 1, true))
+    local fights = guide.args.fights.args.b1
+    assert.truthy(fights.name():find("No fights saved", 1, true))
     char.fights[1] = { duration = 60, openingSeal = "command", sealSeconds = { command = 60 },
       counts = { judgement = 7, holyStrike = 5, commandProc = 4, sealCast = 1 }, context = {} }
-    assert.truthy(guide.args.numbers.args.b1.name():find("Fights saved: |cfff2c14e1|r", 1, true))
+    assert.truthy(fights.name():find("Fights saved: |cfff2c14e1|r", 1, true))
+    assert.truthy(fights.name():find("|cfff2c14e9|r out of every 10", 1, true)) -- 7 de 8 posibles
 
     -- Abrir el panel: /pfd sin nada y el menú del minimapa
     env.SlashCmdList.PALADINFORDUMMIES("")

@@ -27,6 +27,7 @@ local DEFAULTS = {
 }
 local MAX_ERRORS = 50
 
+local guidePlan, guideName -- la guía (más abajo)
 local db              -- objeto AceDB
 local profile, char   -- db.profile y db.char
 local enabled = false -- solo con paladines
@@ -370,6 +371,46 @@ local function debug()
 end
 
 ---------------------------------------------------------------------------
+-- La guía: qué hechizos conoces y cómo se llaman en tu cliente
+---------------------------------------------------------------------------
+
+local function knowsAny(ids, known)
+  for _, id in ipairs(ids or {}) do if known[id] then return true end end
+  return false
+end
+
+-- Tu plan (core/Guide.lua) con los hechizos que conoces ahora.
+guidePlan = function()
+  local player = last.situation and last.situation.player or {}
+  local known = player.knownSpells or {}
+  local info = {
+    level = player.level,
+    known = {
+      righteousness = knowsAny(Seals.righteousness.spellIds, known),
+      crusader = knowsAny(Seals.crusader.spellIds, known),
+      command = knowsAny(Seals.command.spellIds, known),
+      holyStrike = knowsAny(ns.Data.SpellGroups.holyStrike.spellIds, known),
+    },
+  }
+  local plan = ns.Core.Guide.plan(info)
+  plan.level, plan.known = info.level, info.known
+  return plan
+end
+
+-- Nombre de un hechizo de la guía en el idioma del cliente (por spellID).
+guideName = function(token)
+  if token == "DAMAGE_SEAL" then token = guidePlan().damageSeal end
+  local spellId = ns.Data.GuideSpells[token]
+  if spellId and C_Spell and C_Spell.GetSpellName then
+    local ok, name = pcall(C_Spell.GetSpellName, spellId)
+    if ok and type(name) == "string" and not (issecretvalue and issecretvalue(name)) then return name end
+  end
+  local fallback = L["SPELL_" .. token]
+  if fallback ~= "SPELL_" .. token then return fallback end
+  return nil
+end
+
+---------------------------------------------------------------------------
 -- Opciones (ui/Options.lua)
 ---------------------------------------------------------------------------
 
@@ -440,17 +481,30 @@ local optionHandlers = {
     profile.language = value
     p(L.OPT_LANGUAGE_DESC)
   end,
-  -- "Tus números" de la guía, con las peleas guardadas de este personaje.
-  guideNumbers = function()
+  -- La guía (data/Guide.lua, core/Guide.lua): nombres de hechizo del cliente,
+  -- Tu plan según lo que conoces y Tus peleas.
+  guideFill = function(text) return ns.Core.Guide.fill(text, guideName) end,
+  guidePlan = function() return guidePlan() end,
+  guideFights = function()
     local fights = char.fights or {}
-    if #fights == 0 then return L.GUIDE_NUMBERS_EMPTY end
-    local s = ns.Core.FightStats.summarize(fights, ns.Core.FightStyle.classify)
+    local fill = function(text) return ns.Core.Guide.fill(text, guideName) end
+    local usage = ns.Core.Guide.usage(fights)
+    if usage.fights == 0 then return L.GUIDE_FIGHTS_EMPTY end
     local gold = ns.UI.Style.color
-    local lines = { L.GUIDE_NUMBERS_FIGHTS:format(gold("gold", s.fights)) }
-    if s.command then lines[#lines + 1] = L.GUIDE_NUMBERS_COMMAND:format(gold("gold", s.command.perMinute)) end
+    local lines = { L.GUIDE_FIGHTS_COUNT:format(gold("gold", usage.fights)) }
+    local function per10(u) return math.floor(u.used / u.possible * 10 + 0.5) end
+    local judge = per10(usage.judgement)
+    lines[#lines + 1] = fill(L.GUIDE_FIGHTS_JUDGE):format(gold("gold", judge))
+    local strike = guidePlan().known.holyStrike and per10(usage.holyStrike)
+    if strike then lines[#lines + 1] = fill(L.GUIDE_FIGHTS_STRIKE):format(gold("gold", strike)) end
+    if judge >= 8 and (not strike or strike >= 8) then
+      lines[#lines + 1] = L.GUIDE_FIGHTS_GOOD
+    else
+      lines[#lines + 1] = L.GUIDE_FIGHTS_TIP
+    end
+    local s = ns.Core.FightStats.summarize(fights, ns.Core.FightStyle.classify)
     local twist = s.byStyle and s.byStyle.twist
-    if twist then lines[#lines + 1] = L.GUIDE_NUMBERS_TWIST:format(gold("gold", twist.fights)) end
-    lines[#lines + 1] = "\n" .. L.GUIDE_NUMBERS_NOTE
+    if twist then lines[#lines + 1] = L.GUIDE_FIGHTS_TWIST:format(gold("gold", twist.fights)) end
     return table.concat(lines, "\n\n")
   end,
   getTone = function() return profile.tone end,

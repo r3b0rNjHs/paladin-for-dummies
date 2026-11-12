@@ -19,6 +19,23 @@ describe("Guide", function()
     end
   end)
 
+  it("has text for every step Tu plan can show, at any level", function()
+    local Guide = Addon.load({ "core/Guide.lua" }).Core.Guide
+    local cases = {
+      { righteousness = true },
+      { righteousness = true, crusader = true },
+      { righteousness = true, crusader = true, holyStrike = true },
+      { righteousness = true, crusader = true, holyStrike = true, command = true },
+    }
+    for _, known in ipairs(cases) do
+      for _, step in ipairs(Guide.plan({ level = 10, known = known }).steps) do
+        for _, lang in ipairs({ "enUS", "esES" }) do
+          assert.is_string(ns.Locales.tables[lang]["GUIDE_PLAN_" .. step.key], step.key .. " " .. lang)
+        end
+      end
+    end
+  end)
+
   it("keeps blocks short enough to read comfortably", function()
     for _, chapter in ipairs(ns.Data.Guide) do
       for _, block in ipairs(chapter.blocks) do
@@ -32,12 +49,33 @@ describe("Guide", function()
     end
   end)
 
-  it("starts with the basics and has the player's own numbers", function()
-    assert.are.equal("START", ns.Data.Guide[1].id)
+  it("starts with what to do (Tu plan) and has the player's own fights", function()
+    assert.are.equal("PLAN", ns.Data.Guide[1].id)
+    assert.is_true(ns.Data.Guide[1].blocks[1].plan)
     local found = false
     for _, chapter in ipairs(ns.Data.Guide) do
-      for _, block in ipairs(chapter.blocks) do if block.numbers then found = true end end
+      for _, block in ipairs(chapter.blocks) do if block.fights then found = true end end
     end
     assert.is_true(found)
+  end)
+
+  it("uses spell tokens that exist, with a fallback name for spells without a spellID", function()
+    local Guide = Addon.load({ "core/Guide.lua" }).Core.Guide
+    for _, chapter in ipairs(ns.Data.Guide) do
+      for _, block in ipairs(chapter.blocks) do
+        if type(block.icon) == "string" and not block.icon:find("\\") then
+          assert.is_not_nil(ns.Data.GuideSpells[block.icon] ~= nil or ns.Locales.tables.enUS["SPELL_" .. block.icon], block.icon)
+        end
+        if block.text then
+          for _, lang in ipairs({ "enUS", "esES" }) do
+            Guide.fill(ns.Locales.tables[lang]["GUIDE_" .. block.text], function(token)
+              local known = ns.Data.GuideSpells[token] or ns.Locales.tables[lang]["SPELL_" .. token]
+              assert.is_truthy(known, ("marca {%s} sin hechizo ni nombre (%s, %s)"):format(token, block.text, lang))
+              return "x"
+            end)
+          end
+        end
+      end
+    end
   end)
 end)

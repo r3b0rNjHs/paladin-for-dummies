@@ -109,147 +109,151 @@ ns.Locales.register("esES", {
 
   OPT_GUIDE_HINT = "¿Nuevo con el paladín? Abre la |cfff2c14eGuía|r, justo debajo en la lista: sellos, Sentencia, Unsealed Wrath, qué hacer en cada situación y tus propios números.",
   OPT_GUIDE = [==[Guía]==],
-  GUIDE_START_TITLE = [==[Empieza aquí]==],
-  GUIDE_START_H_WHAT = [==[Qué hace por ti]==],
-  GUIDE_START_BEFORE = [==[|cfff2c14eAntes del pull|r
-Te dice con qué sello pelear y qué sello juzgar. Lo ves en la ventanita de dos iconos, "Sello" y "Sentencia".]==],
-  GUIDE_START_DURING = [==[|cfff2c14eEn combate|r
-Si tienes el talento Unsealed Wrath, te avisa de cuándo cambiar de sello: |cfff2c14e¡CAMBIA!|r y |cfff2c14e¡VUELVE!|r.]==],
-  GUIDE_START_AFTER = [==[|cfff2c14eDespués de la pelea|r
-Guarda cada pelea para que veas cómo lo haces. Tus números están en esta misma guía.]==],
-  GUIDE_START_H_ICONS = [==[Cómo leer los iconos]==],
-  GUIDE_START_COLORS = [==[|cfff2c14eAnillo de oro|r: lo que te recomiendo.
+  SPELL_WISDOM = [==[Sello de sabiduría]==],
+  SPELL_JUSTICE = [==[Sello de justicia]==],
+  SPELL_FURY = [==[Sello de furia]==],
+  GUIDE_PLAN_TITLE = [==[Tu plan]==],
+  GUIDE_PLAN_INTRO = [==[Esto es lo que te toca hacer con lo que sabes ahora (nivel %s). Se actualiza solo cuando aprendes hechizos nuevos.]==],
+  GUIDE_PLAN_H_BEFORE = [==[Antes de pelear]==],
+  GUIDE_PLAN_SEAL_ONLY = [==[Ponte {RIGHTEOUSNESS}. Es tu sello: hace que cada golpe pegue más.]==],
+  GUIDE_PLAN_PREPULL_1 = [==[|cfff2c14e1.|r Ponte {CRUSADER}.]==],
+  GUIDE_PLAN_PREPULL_2 = [==[|cfff2c14e2.|r Selecciona al enemigo y lánzale {JUDGEMENT}. Durante 40 s recibirá más daño Sagrado.]==],
+  GUIDE_PLAN_PREPULL_3 = [==[|cfff2c14e3.|r Ponte {DAMAGE_SEAL} y a por él. Es tu sello para la pelea.]==],
+  GUIDE_PLAN_H_DURING = [==[Durante la pelea]==],
+  GUIDE_PLAN_JUDGE = [==[Lanza {JUDGEMENT} cada vez que esté listo (cada 8 s). No te quita el sello: úsalo sin miedo.]==],
+  GUIDE_PLAN_STRIKE = [==[Lo mismo con {HOLY_STRIKE} (cada 10 s). Truco: la macro PFD Golpe lanza los dos con una sola tecla.]==],
+  GUIDE_PLAN_UNSEALED = [==[¿Tienes el talento Unsealed Wrath? Mira el indicador: con ¡CAMBIA! ponte {RIGHTEOUSNESS} y da un golpe; con ¡VUELVE!, otra vez {COMMAND}. Lo explica el capítulo Unsealed Wrath.]==],
+  GUIDE_PLAN_REFRESH = [==[El sello dura 30 s. Si se te acaba, vuelve a ponerte {DAMAGE_SEAL}: sin sello pegas mucho menos.]==],
+  GUIDE_PLAN_H_NEXT = [==[Lo próximo]==],
+  GUIDE_PLAN_NEXT_CRUSADER = [==[A nivel 6 aprenderás {CRUSADER}. Tu plan ganará un paso antes de cada pelea.]==],
+  GUIDE_PLAN_NEXT_STRIKE = [==[Pronto aprenderás {HOLY_STRIKE}: un golpe extra que podrás usar cada 10 s.]==],
+  GUIDE_PLAN_NEXT_COMMAND = [==[Si vas por la rama de Retribución, a nivel 20 el talento {COMMAND} será tu sello para pegar.]==],
+  GUIDE_HELP_TITLE = [==[Cómo te ayuda el addon]==],
+  GUIDE_HELP_BEFORE = [==[|cfff2c14eAntes de pelear|r
+Una ventanita con dos iconos: el sello con el que pelear y el que conviene lanzar con {JUDGEMENT} antes de empezar. Pasa el ratón por encima para ver los pasos.]==],
+  GUIDE_HELP_DURING = [==[|cfff2c14eDurante la pelea|r
+Si tienes Unsealed Wrath, un icono te dice cuándo cambiar de sello: ¡CAMBIA! y ¡VUELVE!.]==],
+  GUIDE_HELP_AFTER = [==[|cfff2c14eDespués|r
+Guarda tus peleas. En el capítulo Tus peleas ves qué tal lo haces.]==],
+  GUIDE_HELP_H_ICONS = [==[Qué significan los colores]==],
+  GUIDE_HELP_COLORS = [==[|cfff2c14eAnillo dorado|r: lo que te recomiendo.
 |cffe5484dBorde rojo y "!"|r: te falta algo.
-|cfff5a524Ámbar|r: caduca pronto o no es lo previsto.
-
-Pasa el ratón por un icono para ver el porqué.]==],
-  GUIDE_START_SOURCES = [==[En cada tooltip, un cuadradito dice de dónde sale el consejo:
-|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:156:195:240|t de la mecánica del hechizo
-|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:245:165:36|t de las guías de la comunidad (aún sin medir)
-|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:70:167:88|t medido con tus propias peleas]==],
-  GUIDE_START_JOKE = [==[Nadie nace sabiendo qué sello poner. Bueno, quizá Uther. Tú tranquilo.]==],
+|cfff5a524Ámbar|r: está a punto de acabarse.]==],
+  GUIDE_HELP_SOURCES = [==[En la ventanita que sale al pasar el ratón, un cuadradito dice de dónde sale el consejo:
+|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:156:195:240|t de cómo funciona el hechizo
+|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:245:165:36|t de lo que recomiendan las guías
+|TInterface\Buttons\WHITE8X8:10:10:0:0:8:8:0:8:0:8:70:167:88|t de tus propias peleas]==],
+  GUIDE_HELP_JOKE = [==[Nadie nace sabiendo qué sello poner. Bueno, quizá Uther. Tú tranquilo.]==],
   GUIDE_BASICS_TITLE = [==[Sellos y Sentencia]==],
-  GUIDE_BASICS_H_SEAL = [==[El sello]==],
-  GUIDE_BASICS_SEAL = [==[Un buff que te pones tú. Dura |cfff2c14e30 s|r y añade algo a cada golpe: daño Sagrado, curarte, maná...
+  GUIDE_BASICS_H_SEAL = [==[¿Qué es un sello?]==],
+  GUIDE_BASICS_SEAL = [==[Un hechizo que te pones a ti mismo. Dura 30 s y mejora tus golpes: más daño, curarte, recuperar maná...
 
-Solo llevas |cfff2c14euno a la vez|r: al ponerte otro, el anterior desaparece.]==],
-  GUIDE_BASICS_H_JUDGEMENT = [==[La Sentencia (Judgement)]==],
-  GUIDE_BASICS_JUDGEMENT = [==[Un solo hechizo que |cfff2c14elibera el sello que llevas|r sobre el enemigo. Lo que hace depende del sello: un golpe de daño, un efecto de 40 s...
+Solo puedes llevar uno a la vez. Si te pones otro, el anterior se quita.]==],
+  GUIDE_BASICS_H_JUDGEMENT = [==[¿Y la Sentencia?]==],
+  GUIDE_BASICS_JUDGEMENT = [==[{JUDGEMENT} es un hechizo que lanzas al enemigo. Lo que le hace depende del sello que lleves en ese momento: un golpe de daño, un efecto que dura 40 s...
 
-En Forever |cfff2c14eno consume el sello|r: lo sigues llevando. Enfriamiento medido: 8 s.]==],
-  GUIDE_BASICS_H_RULES = [==[Tres reglas de oro]==],
-  GUIDE_BASICS_RULE_ONE = [==[|cfff2c14e1. Una Sentencia por paladín.|r
-Si juzgas otro sello, la anterior se sustituye.]==],
-  GUIDE_BASICS_RULE_PREPULL = [==[|cfff2c14e2. Juzga antes de pelear.|r
-Ponte Crusader, lánzale Judgement al enemigo (recibirá más daño Sagrado 40 s) y cambia a tu sello de daño.]==],
-  GUIDE_BASICS_RULE_STRIKE = [==[|cfff2c14e3. Holy Strike va con Judgement.|r
-Enfriamiento medido: 10 s. La macro PFD Golpe lanza los dos con una tecla.]==],
+No te quita el sello: lo sigues llevando.]==],
+  GUIDE_BASICS_H_RULES = [==[Tres cosas que conviene saber]==],
+  GUIDE_BASICS_RULE_ONE = [==[|cfff2c14eSolo cuenta tu última Sentencia.|r
+Si lanzas {JUDGEMENT} con otro sello, la anterior desaparece del enemigo.]==],
+  GUIDE_BASICS_RULE_PREPULL = [==[|cfff2c14eEl truco de siempre:|r ponte {CRUSADER}, lánzale {JUDGEMENT} al enemigo y luego cámbiate al sello con el que vas a pelear.]==],
+  GUIDE_BASICS_RULE_STRIKE = [==[|cfff2c14eÚsalos en cuanto estén listos.|r
+{JUDGEMENT} cada 8 s y {HOLY_STRIKE} cada 10 s. Si los dejas esperando, pierdes daño.]==],
   GUIDE_BASICS_JOKE = [==[Sí, juzgar a un múrloc está permitido. Él empezó.]==],
   GUIDE_SEALS_TITLE = [==[Los sellos, uno a uno]==],
-  GUIDE_SEALS_H_DAMAGE = [==[Para pegar]==],
-  GUIDE_SEAL_RIGHTEOUSNESS = [==[|cfff2c14eSeal of Righteousness|r · nivel 1
-Llevándolo: daño Sagrado extra en cada golpe (más con armas lentas).
-Su Sentencia: un golpe de daño Sagrado.
-Cuándo: tu sello de daño hasta tener Command, y la mitad del cambio con Unsealed Wrath.]==],
-  GUIDE_SEAL_COMMAND = [==[|cfff2c14eSeal of Command|r · nivel 20 · talento de Retribución
-Llevándolo: a veces un golpe Sagrado extra del 74 % del daño del arma. Medido: unas 3,7 veces por minuto (las guías prometen 7).
-Su Sentencia: daño Sagrado, el doble si el enemigo está aturdido.
-Cuándo: el sello de daño de Retribución, mejor con arma lenta.]==],
-  GUIDE_SEALS_H_PREPULL = [==[Para antes del pull]==],
-  GUIDE_SEAL_CRUSADER = [==[|cfff2c14eSeal of the Crusader|r · nivel 6
-Llevándolo: más poder de ataque y ataques un 40 % más rápidos, pero más flojos.
-Su Sentencia: 40 s en los que el objetivo recibe más daño Sagrado; tus golpes la refrescan.
-Cuándo: para juzgarlo antes del pull.]==],
+  GUIDE_SEALS_H_DAMAGE = [==[Para hacer daño]==],
+  GUIDE_SEAL_RIGHTEOUSNESS = [==[{RIGHTEOUSNESS} · desde nivel 1
+Cada golpe hace daño Sagrado extra. Con armas lentas, más aún.
+Cuándo: es tu sello para pegar hasta que tengas {COMMAND}.]==],
+  GUIDE_SEAL_COMMAND = [==[{COMMAND} · nivel 20, talento de Retribución
+De vez en cuando, un golpe extra muy fuerte (unas 3 o 4 veces por minuto).
+Cuándo: tu sello para pegar si vas de Retribución. Mejor con un arma lenta.]==],
+  GUIDE_SEALS_H_PREPULL = [==[Para antes de empezar]==],
+  GUIDE_SEAL_CRUSADER = [==[{CRUSADER} · nivel 6
+Atacas más rápido, pero cada golpe pega menos.
+Su Sentencia: durante 40 s el enemigo recibe más daño Sagrado.
+Cuándo: lánzale {JUDGEMENT} con él puesto antes de pelear y cámbiate.]==],
   GUIDE_SEALS_H_SUSTAIN = [==[Para aguantar]==],
-  GUIDE_SEAL_LIGHT = [==[|cfff2c14eSeal of Light|r · nivel 30
-Llevándolo: probabilidad de curarte al golpear.
-Su Sentencia: 40 s en los que quien golpee al objetivo puede curarse.
-Cuándo: si el grupo recibe mucho daño, o en solitario si vas justo de vida.]==],
-  GUIDE_SEAL_WISDOM = [==[|cfff2c14eSeal of Wisdom|r · nivel 38 · sin comprobar en el juego
-Llevándolo: probabilidad de recuperar maná al golpear.
-Su Sentencia: quien golpee al objetivo recupera maná.
-Cuándo: en peleas largas o si vas justo de maná.]==],
+  GUIDE_SEAL_LIGHT = [==[{LIGHT} · nivel 30
+A veces te curas al golpear.
+Cuándo: si vas justo de vida.]==],
+  GUIDE_SEAL_WISDOM = [==[{WISDOM} · nivel 38
+A veces recuperas maná al golpear.
+Cuándo: si te quedas sin maná en peleas largas.]==],
   GUIDE_SEALS_H_SPECIAL = [==[Para casos concretos]==],
-  GUIDE_SEAL_JUSTICE = [==[|cfff2c14eSeal of Justice|r · nivel 22 · sin comprobar en el juego
-Llevándolo: probabilidad de aturdir 2 s.
-Su Sentencia: el objetivo no puede huir a toda velocidad.
-Cuándo: contra humanoides que huyen con poca vida.]==],
-  GUIDE_SEAL_FURY = [==[|cfff2c14eSeal of Fury|r · nivel 10 · nuevo en Forever · sin comprobar
-Llevándolo: daño Sagrado fijo por golpe y un escudo del 50 % de ese daño.
-Su Sentencia: daño extra y provoca a los enemigos a 10 m durante 3 s.
-Cuándo: si tanqueas.]==],
+  GUIDE_SEAL_JUSTICE = [==[{JUSTICE} · nivel 22
+A veces aturde al enemigo 2 s, y su Sentencia le impide huir corriendo.
+Cuándo: contra humanoides que huyen cuando les queda poca vida.]==],
+  GUIDE_SEAL_FURY = [==[{FURY} · nivel 10, nuevo (por confirmar)
+Daño Sagrado en cada golpe y un pequeño escudo. Su Sentencia hace que los enemigos cercanos te ataquen.
+Cuándo: si eres el tanque del grupo.]==],
   GUIDE_SEALS_JOKE = [==[Siete sellos y una sola mano para pulsarlos. Para eso estamos.]==],
   GUIDE_UNSEALED_TITLE = [==[Unsealed Wrath]==],
-  GUIDE_UNSEALED_H_WHAT = [==[Qué es]==],
-  GUIDE_UNSEALED_WHAT = [==[Un talento de Retribución (requiere Repentance). Cada golpe guarda |cfff2c14euna copia|r del sello que llevas durante 15 s, hasta 3.
+  GUIDE_UNSEALED_WHAT = [==[Un talento de Retribución. Con él, cada golpe guarda una copia de tu sello (hasta 3). Cuando golpeas con otro sello distinto, todas esas copias se sueltan a la vez en ese golpe.
 
-Al golpear con |cfff2c14eotro|r sello, se gastan todas de golpe y ese golpe suma sus efectos.]==],
-  GUIDE_UNSEALED_H_HOW = [==[Cómo se juega, en tres pasos]==],
-  GUIDE_UNSEALED_STEP_1 = [==[|cfff2c14e1. Acumula.|r Pelea con Command hasta tener 3 copias. El indicador dice |cfff2c14e¡CAMBIA!|r y te enseña el icono de Righteousness: es adonde vas.]==],
-  GUIDE_UNSEALED_STEP_2 = [==[|cfff2c14e2. Cambia y golpea.|r Ponte Righteousness y da un golpe: las copias de Command se gastan.]==],
-  GUIDE_UNSEALED_STEP_3 = [==[|cfff2c14e3. Vuelve.|r Con 1 copia de Righteousness el indicador dice |cfff2c14e¡VUELVE!|r: otra vez Command, y a empezar.]==],
-  GUIDE_UNSEALED_SHORTCUT = [==[Atajo: la macro |cfff2c14ePFD Unsealed|r alterna los dos sellos con una sola tecla.]==],
-  GUIDE_UNSEALED_H_MEASURED = [==[Lo medido hasta ahora]==],
-  GUIDE_UNSEALED_MEASURED = [==[Un ciclo bien hecho: unos 11 s con Command (3 golpes con un arma de 3,4 s) y unos 4 s con Righteousness.
-
-Cuánto daño suma se está midiendo con el medidor de daño. Las copias también se gastan con otros sellos: cambiar a Wisdom para recuperar maná está por probar.]==],
+En resumen: cambiar de sello en el momento justo hace mucho más daño.]==],
+  GUIDE_UNSEALED_H_HOW = [==[Cómo se hace, en tres pasos]==],
+  GUIDE_UNSEALED_STEP_1 = [==[|cfff2c14e1. Acumula.|r Pelea con {COMMAND}. Cuando el indicador diga |cfff2c14e¡CAMBIA!|r, ya tienes 3 copias.]==],
+  GUIDE_UNSEALED_STEP_2 = [==[|cfff2c14e2. Cambia y golpea.|r Ponte {RIGHTEOUSNESS} y da un golpe. Ahí se sueltan las copias.]==],
+  GUIDE_UNSEALED_STEP_3 = [==[|cfff2c14e3. Vuelve.|r Cuando diga |cfff2c14e¡VUELVE!|r, ponte otra vez {COMMAND} y repite.]==],
+  GUIDE_UNSEALED_SHORTCUT = [==[Atajo: la macro PFD Unsealed hace el cambio con una sola tecla. Púlsala cuando veas ¡CAMBIA! y cuando veas ¡VUELVE!.]==],
   GUIDE_UNSEALED_JOKE = [==[Es como hacer malabares, pero con sellos sagrados y un múrloc mirando.]==],
-  GUIDE_SITUATIONS_TITLE = [==[Qué hacer en cada situación]==],
-  GUIDE_SIT_SOLO = [==[|cfff2c14eSubiendo de nivel, en solitario|r
-Juzga Crusader antes del pull y pelea con Command (o Righteousness si aún no lo tienes). En peleas largas, si vas justo de maná o de vida: Wisdom o Light.]==],
-  GUIDE_SIT_DUNGEON = [==[|cfff2c14eMazmorra, como Retribución|r
-Crusader antes del pull, Command y cambio de sellos con Unsealed Wrath. Pulsa PFD Golpe cada vez que Judgement o Holy Strike estén listos.]==],
-  GUIDE_SIT_BOSS = [==[|cfff2c14eJefes, con otro paladín|r
-Poneos de acuerdo antes: uno mantiene la Sentencia de Wisdom (si el grupo gasta mucho maná) o la de Light (si recibe mucho daño). Consenso de guías.]==],
-  GUIDE_SIT_FLEE = [==[|cfff2c14eHumanoides que huyen|r
-Justice: los aturde y su Sentencia les impide huir a toda velocidad. O Hammer of Justice en el momento justo.]==],
+  GUIDE_SITUATIONS_TITLE = [==[Qué hacer en cada caso]==],
+  GUIDE_SIT_SOLO = [==[|cfff2c14eSubiendo de nivel, tú solo|r
+Sigue Tu plan. Si siempre te quedas sin maná, prueba a pelear con {WISDOM}; si sin vida, con {LIGHT}.]==],
+  GUIDE_SIT_DUNGEON = [==[|cfff2c14eEn una mazmorra|r
+Tu plan de siempre. Lanza {JUDGEMENT} y {HOLY_STRIKE} en cuanto estén listos y, si tienes Unsealed Wrath, haz caso al indicador.]==],
+  GUIDE_SIT_GROUP = [==[|cfff2c14eCon otro paladín en el grupo|r
+Hablad antes de empezar: si el grupo gasta mucho maná, que uno juzgue con {WISDOM}; si recibe mucho daño, con {LIGHT}.]==],
+  GUIDE_SIT_FLEE = [==[|cfff2c14eEnemigos que huyen|r
+Algunos humanoides salen corriendo con poca vida y traen a sus amigos. {HAMMER} los aturde; {JUSTICE} también ayuda.]==],
   GUIDE_SIT_UNDEAD = [==[|cfff2c14eNo-muertos y demonios|r
-Exorcism les hace mucho daño (en Classic solo funcionaba con ellos; por confirmar en Forever). Macro PFD Exorcismo.]==],
-  GUIDE_SIT_TANK = [==[|cfff2c14eSi tanqueas|r
-Seal of Fury: su Sentencia provoca 3 s a los enemigos cercanos. La ayuda completa para tanques y sanadores llegará más adelante.]==],
+{EXORCISM} les hace muchísimo daño. Úsalo siempre que esté listo.]==],
+  GUIDE_SIT_DANGER = [==[|cfff2c14eSi estás a punto de morir|r
+{DIVINE_SHIELD} te hace inmune unos segundos. Aprovecha para curarte o para salir de ahí.]==],
   GUIDE_SIT_JOKE = [==[Situación especial: el grupo ha muerto y tú sigues vivo. Bubble Hearth. Es broma. (¿O no?)]==],
   GUIDE_MACROS_TITLE = [==[Las macros]==],
-  GUIDE_MACROS_INTRO = [==[El addon puede crearte macros de personaje (Opciones → Macros) con los nombres de hechizo de tu cliente. Se actualizan solas al aprender rangos nuevos. Ninguna lanza nada por sí sola: tú pulsas.]==],
+  GUIDE_MACROS_INTRO = [==[Una macro es un botón que hace varias cosas a la vez. El addon puede crearlas por ti: actívalo en Opciones → Macros y arrástralas a tu barra desde la ventana de macros (escribe /macro).]==],
   GUIDE_MACRO_GOLPE = [==[|cfff2c14ePFD Golpe|r
-Judgement y Holy Strike en una tecla. Judgement no gasta el tiempo global, así que salen los dos.]==],
+Lanza {JUDGEMENT} y {HOLY_STRIKE} con una sola tecla. Púlsala en cuanto se ilumine.]==],
   GUIDE_MACRO_UNSEALED = [==[|cfff2c14ePFD Unsealed|r
-Alterna Command y Righteousness. Cada pelea empieza en Command.]==],
+Cambia entre {COMMAND} y {RIGHTEOUSNESS}. Cada pelea empieza en {COMMAND}.]==],
   GUIDE_MACRO_SELLO = [==[|cfff2c14ePFD Sello|r
-Command; con Shift pulsado, Righteousness.]==],
-  GUIDE_MACRO_UTILITY = [==[|cfff2c14eLas de utilidad|r
-Curas, protección, libertad, bendiciones, auras, resurrección... Van al aliado que tengas bajo el ratón (o a ti) sin cambiar tu objetivo.]==],
+{COMMAND}; si mantienes Mayúsculas, {RIGHTEOUSNESS}.]==],
+  GUIDE_MACRO_UTILITY = [==[|cfff2c14eLas de ayuda|r
+Curas, protecciones, bendiciones, auras, resurrección... Van al compañero que tengas bajo el ratón (o a ti) sin perder de vista al enemigo.]==],
   GUIDE_MACROS_JOKE = [==[Tienes 18 huecos de macros de personaje. Elige con cabeza, como un paladín. Bueno, mejor que un paladín.]==],
-  GUIDE_NUMBERS_TITLE = [==[Tus números]==],
-  GUIDE_NUMBERS_EMPTY = [==[Todavía no hay peleas guardadas en este personaje. Ve a pegarle a algo y vuelve.]==],
-  GUIDE_NUMBERS_FIGHTS = [==[Peleas guardadas: %s]==],
-  GUIDE_NUMBERS_COMMAND = [==[Seal of Command: %s activaciones por minuto (las guías dicen 7)]==],
-  GUIDE_NUMBERS_TWIST = [==[Peleas con cambio de sellos: %s]==],
-  GUIDE_NUMBERS_NOTE = [==[Salen de tus peleas guardadas: cuantas más, más fiables.]==],
+  GUIDE_FIGHTS_TITLE = [==[Tus peleas]==],
+  GUIDE_FIGHTS_EMPTY = [==[Todavía no hay peleas guardadas en este personaje. Ve a pegarle a algo y vuelve.]==],
+  GUIDE_FIGHTS_COUNT = [==[Peleas guardadas: %s]==],
+  GUIDE_FIGHTS_JUDGE = [==[Usas {JUDGEMENT} %s de cada 10 veces que podrías.]==],
+  GUIDE_FIGHTS_STRIKE = [==[Usas {HOLY_STRIKE} %s de cada 10 veces que podrías.]==],
+  GUIDE_FIGHTS_TIP = [==[Para mejorar: pulsa PFD Golpe cada vez que se ilumine. Sin esperar a nada.]==],
+  GUIDE_FIGHTS_GOOD = [==[¡Muy bien! Casi no dejas pasar ninguna.]==],
+  GUIDE_FIGHTS_TWIST = [==[Peleas en las que cambiaste de sello con Unsealed Wrath: %s]==],
   GUIDE_GLOSSARY_TITLE = [==[Glosario]==],
-  GUIDE_GLOSSARY_TEXT = [==[|cfff2c14ePull|r: el momento de empezar la pelea.
+  GUIDE_GLOSSARY_TEXT = [==[|cfff2c14ePull|r: empezar la pelea ("tirar" del enemigo).
 
-|cfff2c14eBuff / debuff|r: efecto bueno sobre ti / malo sobre el enemigo.
+|cfff2c14eBuff|r: efecto bueno que llevas encima. |cfff2c14eDebuff|r: efecto malo sobre el enemigo.
 
-|cfff2c14eProc|r: efecto que salta por probabilidad al golpear, como Command.
+|cfff2c14eProc|r: algo que salta por suerte al golpear.
 
-|cfff2c14eCD (enfriamiento)|r: lo que tarda un hechizo en volver a estar listo.
+|cfff2c14eEnfriamiento (CD)|r: el tiempo que tarda un hechizo en volver a estar listo.
 
-|cfff2c14eGCD (tiempo global)|r: la pausa de 1,5 s tras casi cualquier hechizo.
-
-|cfff2c14eStack (acumulación)|r: varias copias del mismo efecto, como las de Unsealed Wrath.
+|cfff2c14eTiempo global (GCD)|r: la pausa de 1,5 s después de casi cualquier hechizo.
 
 |cfff2c14eAggro|r: a quién quiere pegar el enemigo. Spoiler: al que más le molesta.
 
-|cfff2c14eBubble Hearth|r: Divine Shield y luego la piedra de hogar. Patrimonio cultural del paladín.]==],
+|cfff2c14eBubble Hearth|r: ponerte {DIVINE_SHIELD} y usar la piedra de hogar. Patrimonio cultural del paladín.]==],
   GUIDE_FAQ_TITLE = [==[Preguntas frecuentes]==],
-  GUIDE_FAQ_Q_COMBAT = [==[¿Por qué el asesor desaparece en combate?]==],
-  GUIDE_FAQ_A_COMBAT = [==[El consejo es para antes del pull, y en combate el juego oculta casi todo a los addons. Puedes dejarlo siempre a la vista en Asesor → Cuándo se ve.]==],
+  GUIDE_FAQ_Q_COMBAT = [==[¿Por qué la ventanita desaparece al pelear?]==],
+  GUIDE_FAQ_A_COMBAT = [==[Su consejo es para antes de empezar. Si la quieres ver siempre: Opciones → Asesor → Cuándo se ve.]==],
   GUIDE_FAQ_Q_AUTO = [==[¿Esto juega por mí?]==],
-  GUIDE_FAQ_A_AUTO = [==[No. Ningún botón lanza nada solo, y Blizzard no permite consejos de rotación en tiempo real. Aquí se aprende.]==],
+  GUIDE_FAQ_A_AUTO = [==[No. Ningún botón lanza nada solo y el juego no permite que un addon te diga qué pulsar en mitad de la pelea. Aquí se aprende, y luego lo haces tú.]==],
   GUIDE_FAQ_Q_SOURCE = [==[¿Me puedo fiar de los consejos?]==],
-  GUIDE_FAQ_A_SOURCE = [==[Mira el cuadradito de color del tooltip: azul, sale de la mecánica del hechizo; ámbar, de guías aún sin medir; verde, medido con tus peleas.]==],
-  GUIDE_FAQ_Q_BUG = [==[He encontrado un error.]==],
-  GUIDE_FAQ_A_BUG = [==[Avanzado → Informe de errores: cópialo y mándalo. Gracias, de verdad.]==],
+  GUIDE_FAQ_A_SOURCE = [==[Mira el cuadradito de color al pasar el ratón: azul, sale de cómo funciona el hechizo; ámbar, de lo que dicen las guías; verde, de tus propias peleas.]==],
+  GUIDE_FAQ_Q_BUG = [==[Algo no funciona.]==],
+  GUIDE_FAQ_A_BUG = [==[Opciones → Avanzado → Informe de errores. Cópialo y mándaselo a quien mantiene el addon. Gracias, de verdad.]==],
   GUIDE_FAQ_JOKE = [==[|cfff2c14e¿Puedo llevar dos sellos a la vez?|r
 No. Lo intentaron muchos antes que tú.]==],
 })

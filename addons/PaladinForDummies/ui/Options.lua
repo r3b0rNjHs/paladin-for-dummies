@@ -5,6 +5,7 @@
 local ADDON_NAME, ns = ...
 ns.UI = ns.UI or {}
 local L = ns.L
+local Style = ns.UI.Style
 
 local Options = {}
 ns.UI.Options = Options
@@ -115,12 +116,61 @@ function Options.build(h)
   }
 end
 
--- La guía (data/Guide.lua): un capítulo por grupo, en árbol. Los chistes solo
--- se ven con el tono con humor; los números los calcula Main.lua (h.guideNumbers).
+-- La guía (data/Guide.lua): un capítulo por grupo, en árbol. Los nombres de
+-- hechizo los pone Main.lua (h.guideFill, en el idioma del cliente); los chistes
+-- solo se ven con el tono con humor; Tu plan y Tus peleas dependen del jugador.
 local function spellIcon(spellId)
   if not (spellId and C_Spell and C_Spell.GetSpellTexture) then return nil end
   local ok, icon = pcall(C_Spell.GetSpellTexture, spellId)
   return ok and icon or nil
+end
+
+-- icon: una marca de data/Guide.lua (GuideSpells) o la ruta de un icono.
+local function iconOf(icon)
+  if not icon then return nil end
+  local spellId = ns.Data.GuideSpells[icon]
+  if spellId then return spellIcon(spellId) end
+  if icon:find("\\") then return icon end
+  return nil
+end
+
+local ICON_SIZE = 40
+local PLAN_SLOTS = 16
+
+local function withIcon(entry, getIcon)
+  entry.image = function()
+    local icon = getIcon()
+    if icon then return icon, ICON_SIZE, ICON_SIZE end
+    return nil
+  end
+  return entry
+end
+
+-- Tu plan: una introducción y un hueco por paso; cada hueco lee el plan actual.
+local function planArgs(h, args, order)
+  args.planIntro = { type = "description", order = order, fontSize = "medium",
+    name = function() return L.GUIDE_PLAN_INTRO:format(h.guidePlan().level or "?") .. "\n" end }
+  for i = 1, PLAN_SLOTS do
+    local function current() return h.guidePlan().steps[i] end
+    args["plan" .. i] = withIcon({
+      type = "description", order = order + i,
+      hidden = function() return current() == nil end,
+      fontSize = function()
+        local step = current()
+        return (step and step.key:find("^H_")) and "large" or "medium"
+      end,
+      name = function()
+        local step = current()
+        if not step then return "" end
+        local text = h.guideFill(L["GUIDE_PLAN_" .. step.key])
+        if step.key:find("^H_") then return "\n" .. Style.color("gold", text) end
+        return text .. "\n"
+      end,
+    }, function()
+      local step = current()
+      return step and iconOf(step.icon)
+    end)
+  end
 end
 
 function Options.buildGuide(h)
@@ -128,26 +178,26 @@ function Options.buildGuide(h)
   for i, chapter in ipairs(ns.Data.Guide) do
     local args = {}
     for j, block in ipairs(chapter.blocks) do
-      local entry
-      if block.header then
-        entry = { type = "header", order = j, name = L["GUIDE_" .. block.header] }
+      if block.plan then
+        planArgs(h, args, j * 100)
+      elseif block.header then
+        args["b" .. j] = { type = "header", order = j * 100, name = L["GUIDE_" .. block.header] }
       else
-        entry = { type = "description", order = j, fontSize = "medium" }
-        if block.numbers then
-          entry.name = function() return h.guideNumbers() end
+        local entry = { type = "description", order = j * 100, fontSize = "medium" }
+        if block.fights then
+          entry.name = function() return h.guideFights() end
         else
           local key = "GUIDE_" .. block.text
           -- Una línea en blanco detrás para que los bloques respiren.
-          entry.name = function() return L[key] .. "\n" end
+          entry.name = function() return h.guideFill(L[key]) .. "\n" end
         end
-        local icon = block.icon or spellIcon(block.spell)
-        if icon then entry.image, entry.imageWidth, entry.imageHeight = icon, 40, 40 end
+        withIcon(entry, function() return iconOf(block.icon) end)
         if block.fun then
           entry.hidden = function() return ns.Locales.tone ~= "fun" end
           entry.fontSize = "small"
         end
+        args["b" .. j] = entry
       end
-      args["b" .. j] = entry
     end
     chapters[chapter.id:lower()] = {
       type = "group", order = i, name = L["GUIDE_" .. chapter.id .. "_TITLE"], args = args,
