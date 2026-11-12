@@ -1,99 +1,126 @@
--- Panel de opciones en Opciones → AddOns → Paladin for Dummies (Settings API de
--- Blizzard, 10.0+ con los cambios de 11.0.2). Todas las opciones son "proxy":
--- leen y escriben a través de las funciones que pasa Main.lua, que además
--- aplican el cambio al momento (mostrar, escala, etc.).
-local _, ns = ...
+-- Panel de opciones con AceConfig (Ace3), dentro del panel de Blizzard
+-- (Opciones → AddOns → Paladin for Dummies), con pestañas, un tooltip en cada
+-- opción y los perfiles de AceDB como subapartado. Los valores se leen y se
+-- aplican a través de las funciones que pasa Main.lua (h).
+local ADDON_NAME, ns = ...
 ns.UI = ns.UI or {}
+local L = ns.L
 
 local Options = {}
 ns.UI.Options = Options
 
-local PREFIX = "PaladinForDummies_"
+local APP = "PaladinForDummies"
 
-local function percent(value)
-  return ("%d%%"):format(math.floor(value * 100 + 0.5))
+local function description(order, text)
+  return { type = "description", order = order, name = text, fontSize = "medium" }
 end
 
-local function header(layout, text)
-  if layout and CreateSettingsListSectionHeaderInitializer then
-    layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(text))
-  end
+-- Opción de activar/desactivar unida a un get/set de h.
+local function toggle(order, name, desc, get, set, width)
+  return { type = "toggle", order = order, name = name, desc = desc, width = width,
+    get = function() return get() end, set = function(_, value) set(value) end }
 end
 
-local function button(layout, name, text, onClick, tooltip)
-  if layout and CreateSettingsButtonInitializer then
-    layout:AddInitializer(CreateSettingsButtonInitializer(name, text, onClick, tooltip, true))
-  end
+local function scale(order, get, set)
+  return { type = "range", order = order, name = L.OPT_SCALE, min = 0.5, max = 2, step = 0.05, isPercent = true,
+    get = function() return get() end, set = function(_, value) set(value) end }
 end
 
-local function checkbox(category, key, name, default, get, set, tooltip)
-  local setting = Settings.RegisterProxySetting(category, PREFIX .. key, "boolean", name, default, get, set)
-  Settings.CreateCheckbox(category, setting, tooltip)
-  return setting
+local function button(order, name, desc, func, confirmText)
+  return { type = "execute", order = order, name = name, desc = desc, func = func,
+    confirm = confirmText and true or nil, confirmText = confirmText }
 end
 
-local function slider(category, key, name, default, min, max, step, get, set, tooltip)
-  local setting = Settings.RegisterProxySetting(category, PREFIX .. key, "number", name, default, get, set)
-  local options = Settings.CreateSliderOptions(min, max, step)
-  if MinimalSliderWithSteppersMixin then
-    options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, percent)
-  end
-  Settings.CreateSlider(category, setting, options, tooltip)
-  return setting
-end
-
--- h: funciones de Main.lua. Devuelve la categoría, o nil y el motivo.
-function Options.register(h)
-  if not (Settings and Settings.RegisterVerticalLayoutCategory) then
-    return nil, "este cliente no tiene la Settings API"
-  end
-  local category, layout = Settings.RegisterVerticalLayoutCategory("Paladin for Dummies")
-  if not layout and SettingsPanel and SettingsPanel.GetLayout then layout = SettingsPanel:GetLayout(category) end
-
-  header(layout, "Asesor antes del pull")
-  checkbox(category, "advisorShown", "Mostrar el asesor", true, h.getAdvisorShown, h.setAdvisorShown,
-    "La ventana con el sello y la Sentencia recomendados.")
-  checkbox(category, "advisorLocked", "Bloquear su posición", false, h.getAdvisorLocked, h.setAdvisorLocked,
-    "Impide arrastrarla sin querer. Los tooltips siguen funcionando.")
-  slider(category, "advisorScale", "Tamaño del asesor", 1, 0.5, 2, 0.05, h.getAdvisorScale, h.setAdvisorScale)
-  button(layout, "Posición del asesor", "Restablecer", h.resetAdvisorPosition,
-    "Devuelve la ventana a su sitio inicial.")
-
-  header(layout, "Widget de Unsealed Wrath")
-  checkbox(category, "echoShown", "Mostrar el widget", false, h.getEchoShown, h.setEchoShown,
-    "Copias de Echo of Command y Echo of Righteousness, con aviso para cambiar de sello.")
-  slider(category, "echoScale", "Tamaño del widget", 1, 0.5, 2, 0.05, h.getEchoScale, h.setEchoScale)
-  button(layout, "Mover el widget", "Desbloquear / fijar", h.toggleEchoMove,
-    "Muestra un recuadro para arrastrarlo. Pulsa otra vez para fijarlo.")
-  button(layout, "Posición del widget", "Restablecer", h.resetEchoPosition,
-    "Devuelve el widget a su sitio inicial.")
-
-  header(layout, "Macros")
-  checkbox(category, "macrosAuto", "Crear y actualizar las macros", false, h.getMacrosAuto, h.setMacrosAuto,
-    "Macros de personaje con los nombres de tu cliente. Se actualizan solas fuera de combate.")
-  for _, name in ipairs(h.macroNames) do
-    checkbox(category, "macro_" .. name:gsub("%s", "_"), name, true,
+function Options.build(h)
+  local macroToggles = {
+    description = description(0, L.OPT_MACROS_DESC),
+    auto = toggle(1, L.OPT_MACROS_AUTO, L.OPT_MACROS_AUTO_DESC, h.getMacrosAuto, h.setMacrosAuto, "full"),
+    now = button(2, L.OPT_MACROS_NOW, nil, h.syncMacrosNow),
+    list = { type = "header", order = 10, name = L.OPT_MACROS_LIST },
+  }
+  for i, name in ipairs(h.macroNames) do
+    macroToggles["macro" .. i] = toggle(10 + i, name, L.OPT_MACRO_TOGGLE_DESC,
       function() return h.getMacroEnabled(name) end,
-      function(value) h.setMacroEnabled(name, value) end,
-      "Desmarcada, el addon no la crea ni la actualiza (si ya existe, no la borra: bórrala desde /macro).")
+      function(value) h.setMacroEnabled(name, value) end)
   end
-  button(layout, "Macros", "Crear o actualizar ahora", h.syncMacrosNow,
-    "Hay un máximo de 18 macros por personaje.")
 
-  header(layout, "Repaso tras el combate")
-  checkbox(category, "fightSummary", "Resumen en el chat tras cada pelea", true, h.getFightSummary, h.setFightSummary)
-  button(layout, "Estadísticas", "Mostrar en el chat", h.printStats,
-    "Lo mismo que /pfd stats.")
-  button(layout, "Peleas guardadas", "Borrar", h.resetStats,
-    "Borra todas las peleas guardadas. Pide confirmación.")
+  return {
+    type = "group",
+    name = "Paladin for Dummies",
+    childGroups = "tab",
+    args = {
+      intro = description(0, L.OPT_INTRO),
+      advisor = {
+        type = "group", order = 1, name = L.OPT_ADVISOR,
+        args = {
+          description = description(0, L.OPT_ADVISOR_DESC),
+          shown = toggle(1, L.OPT_SHOW, L.OPT_ADVISOR_SHOW_DESC, h.getAdvisorShown, h.setAdvisorShown),
+          locked = toggle(2, L.OPT_LOCK, L.OPT_LOCK_DESC, h.getAdvisorLocked, h.setAdvisorLocked),
+          scale = scale(3, h.getAdvisorScale, h.setAdvisorScale),
+          reset = button(4, L.OPT_RESET_POSITION, nil, h.resetAdvisorPosition),
+        },
+      },
+      echo = {
+        type = "group", order = 2, name = L.OPT_ECHO,
+        args = {
+          description = description(0, L.OPT_ECHO_DESC),
+          shown = toggle(1, L.OPT_SHOW, L.OPT_ECHO_SHOW_DESC, h.getEchoShown, h.setEchoShown),
+          scale = scale(2, h.getEchoScale, h.setEchoScale),
+          move = button(3, L.OPT_ECHO_MOVE, L.OPT_ECHO_MOVE_DESC, h.toggleEchoMove),
+          reset = button(4, L.OPT_RESET_POSITION, nil, h.resetEchoPosition),
+        },
+      },
+      macros = { type = "group", order = 3, name = L.OPT_MACROS, args = macroToggles },
+      review = {
+        type = "group", order = 4, name = L.OPT_REVIEW,
+        args = {
+          description = description(0, L.OPT_REVIEW_DESC),
+          chat = toggle(1, L.OPT_REVIEW_CHAT, nil, h.getChatSummary, h.setChatSummary, "full"),
+          stats = button(2, L.OPT_REVIEW_STATS, nil, h.printStats),
+          reset = button(3, L.OPT_REVIEW_RESET, nil, h.resetFights, L.OPT_REVIEW_RESET_CONFIRM),
+        },
+      },
+      advanced = {
+        type = "group", order = 5, name = L.OPT_ADVANCED,
+        args = {
+          language = {
+            type = "select", order = 1, name = L.OPT_LANGUAGE, desc = L.OPT_LANGUAGE_DESC,
+            values = { auto = L.OPT_LANGUAGE_AUTO, enUS = "English", esES = "Español" },
+            sorting = { "auto", "enUS", "esES" },
+            get = function() return h.getLanguage() end,
+            set = function(_, value) h.setLanguage(value) end,
+          },
+          report = button(2, L.OPT_REPORT, L.OPT_REPORT_DESC, h.showReport),
+          dev = toggle(3, L.OPT_DEV, L.OPT_DEV_DESC, h.getDevMode, h.setDevMode, "full"),
+          resetAll = button(4, L.OPT_RESET_ALL, nil, h.resetSettings, L.OPT_RESET_ALL_CONFIRM),
+        },
+      },
+    },
+  }
+end
 
-  Settings.RegisterAddOnCategory(category)
-  Options.category = category
-  return category
+-- Registra el panel y el subapartado de perfiles. Devuelve el ID de categoría.
+function Options.register(h, db)
+  local registry = LibStub("AceConfigRegistry-3.0")
+  local dialog = LibStub("AceConfigDialog-3.0")
+  registry:RegisterOptionsTable(APP, Options.build(h))
+  local _, id = dialog:AddToBlizOptions(APP, "Paladin for Dummies")
+  Options.categoryID = id
+
+  local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(db)
+  registry:RegisterOptionsTable(APP .. "_Profiles", profiles)
+  dialog:AddToBlizOptions(APP .. "_Profiles", L.OPT_PROFILES, "Paladin for Dummies")
+  return id
 end
 
 function Options.open()
-  if not (Options.category and Settings and Settings.OpenToCategory) then return false end
-  Settings.OpenToCategory(Options.category:GetID())
+  if not (Options.categoryID and Settings and Settings.OpenToCategory) then return false end
+  Settings.OpenToCategory(Options.categoryID)
   return true
+end
+
+-- Para que el panel muestre los valores al día si se cambian por comando.
+function Options.refresh()
+  local registry = LibStub and LibStub("AceConfigRegistry-3.0", true)
+  if registry then registry:NotifyChange(APP) end
 end

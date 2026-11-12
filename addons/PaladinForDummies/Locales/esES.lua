@@ -1,0 +1,66 @@
+-- Español. Las claves que falten se muestran en inglés.
+local _, ns = ...
+
+ns.Locales.register("esES", {
+  WELCOME_1 = "¡Bienvenido! La ventanita muestra el sello y la Sentencia que convienen contra tu objetivo antes del pull. Pasa el ratón por los iconos para ver por qué.",
+  WELCOME_2 = "Escribe |cffffd100/pfd|r para las opciones (o usa el menú de addons del minimapa).",
+  NOT_A_PALADIN = "Este addon es solo para paladines; en este personaje se queda inactivo.",
+  HELP_HEADER = "Comandos:",
+  HELP_OPTIONS = "|cffffd100/pfd|r: abrir las opciones",
+  HELP_STATS = "|cffffd100/pfd stats|r: estadísticas de tus peleas",
+  HELP_REPORT = "|cffffd100/pfd report|r: informe para copiar y adjuntar al avisar de un error",
+  HELP_DEV = "Modo desarrollador: debug | ui | echodebug | test A|B|off | spec ret|prot|holy|auto",
+  OPTIONS_UNAVAILABLE = "No se pudo abrir el panel de opciones. Escribe /pfd help para ver los comandos.",
+  DEV_ONLY = "Ese comando necesita el modo desarrollador (Opciones → Avanzado).",
+
+  OPT_INTRO = "Paladin for Dummies te ayuda a elegir sellos y Sentencias, muestra las copias de Unsealed Wrath y guarda estadísticas de tus peleas. Todo es opcional.",
+  OPT_SHOW = "Mostrar",
+  OPT_LOCK = "Bloquear posición",
+  OPT_LOCK_DESC = "Evita arrastrarla sin querer. Los tooltips siguen funcionando.",
+  OPT_SCALE = "Tamaño",
+  OPT_RESET_POSITION = "Restablecer posición",
+
+  OPT_ADVISOR = "Asesor",
+  OPT_ADVISOR_DESC = "Antes de cada pull, una ventanita muestra con qué sello pelear y qué sello juzgar. Se congela durante el combate.",
+  OPT_ADVISOR_SHOW_DESC = "La ventana con el sello y la Sentencia recomendados.",
+
+  OPT_ECHO = "Unsealed Wrath",
+  OPT_ECHO_DESC = "Con el talento Unsealed Wrath, tus golpes guardan copias de tu sello. Este indicador las muestra y se ilumina cuando toca cambiar de sello. Solo aparece mientras tienes copias.",
+  OPT_ECHO_SHOW_DESC = "Echo of Command y Echo of Righteousness, con el aviso de cambio.",
+  OPT_ECHO_MOVE = "Mover",
+  OPT_ECHO_MOVE_DESC = "Muestra un recuadro para arrastrarlo. Pulsa otra vez para fijarlo.",
+  ECHO_UNLOCKED = "Indicador desbloqueado: arrástralo y pulsa Mover otra vez para fijarlo.",
+  ECHO_LOCKED = "Indicador fijado en su sitio.",
+  ECHO_RESET = "Indicador de vuelta a su sitio inicial.",
+
+  OPT_MACROS = "Macros",
+  OPT_MACROS_DESC = "Macros de personaje escritas con los nombres de hechizo de tu cliente. La mayoría lanzan sobre el aliado bajo el ratón (o sobre ti) sin cambiar tu objetivo enemigo. Tú eliges cuáles crear: hay 18 huecos de macros de personaje.",
+  OPT_MACROS_AUTO = "Crear y mantener al día",
+  OPT_MACROS_AUTO_DESC = "Crea las macros marcadas y las actualiza fuera de combate cuando aprendes rangos nuevos.",
+  OPT_MACROS_NOW = "Crear o actualizar ahora",
+  OPT_MACROS_LIST = "Qué macros",
+  OPT_MACRO_TOGGLE_DESC = "Desmarcada, el addon ni la crea ni la actualiza. Nunca borra macros: quítala desde /macro si quieres.",
+
+  OPT_REVIEW = "Repaso del combate",
+  OPT_REVIEW_DESC = "Cada pelea se guarda en este personaje: sellos usados, Sentencias, Holy Strike y activaciones de Seal of Command.",
+  OPT_REVIEW_CHAT = "Resumen en el chat tras cada pelea",
+  OPT_REVIEW_STATS = "Mostrar estadísticas",
+  OPT_REVIEW_RESET = "Borrar peleas guardadas",
+  OPT_REVIEW_RESET_CONFIRM = "¿Borrar todas las peleas guardadas de este personaje?",
+  FIGHTS_DELETED = "Peleas guardadas borradas.",
+
+  OPT_ADVANCED = "Avanzado",
+  OPT_LANGUAGE = "Idioma",
+  OPT_LANGUAGE_DESC = "Se aplica tras /reload.",
+  OPT_LANGUAGE_AUTO = "Automático (idioma del juego)",
+  OPT_DEV = "Modo desarrollador",
+  OPT_DEV_DESC = "Activa comandos de diagnóstico y muestra los errores en el chat.",
+  OPT_REPORT = "Informe de errores",
+  OPT_REPORT_DESC = "Abre un texto para copiar con tu configuración y los últimos errores, para adjuntarlo al avisar de un fallo.",
+  OPT_RESET_ALL = "Restablecer ajustes",
+  OPT_RESET_ALL_CONFIRM = "¿Restablecer todos los ajustes de este perfil a sus valores por defecto?",
+  OPT_PROFILES = "Perfiles",
+
+  REPORT_TITLE = "Paladin for Dummies: informe de errores",
+  REPORT_HINT = "Pulsa Ctrl+A y Ctrl+C para copiarlo.",
+})

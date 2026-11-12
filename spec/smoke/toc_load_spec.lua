@@ -1,14 +1,17 @@
 -- Prueba de humo: carga el addon entero en el orden del .toc con un WoW simulado,
 -- dispara los eventos principales y los comandos. No prueba la interfaz de verdad
 -- (eso solo se puede en el juego); detecta errores de carga, nombres mal escritos
--- y archivos en mal orden.
+-- y archivos en mal orden. Usa LibStub, CallbackHandler y AceDB de verdad (son Lua
+-- puro); AceConfig, AceDBOptions y AceGUI, que dibujan ventanas, van simulados.
 describe("PaladinForDummies.toc", function()
   local ROOT = "addons/PaladinForDummies/"
+  local CHAR = "Tester - Realm"
 
   local function tocFiles()
     local files = {}
     for line in io.lines(ROOT .. "PaladinForDummies.toc") do
-      if line:match("%.lua%s*$") then files[#files + 1] = (line:gsub("%s+$", "")) end
+      line = line:gsub("%s+$", "")
+      if line:match("%.lua$") then files[#files + 1] = (line:gsub("\\", "/")) end
     end
     return files
   end
@@ -33,9 +36,10 @@ describe("PaladinForDummies.toc", function()
 
   local env_now = 1000
 
-  local function wowEnv()
-    local frames, printed, createdMacros = {}, {}, {}
-    local env = setmetatable({
+  local function wowEnv(class)
+    local frames, printed, createdMacros, errors, opened = {}, {}, {}, {}, {}
+    local env
+    env = setmetatable({
       print = function(...)
         local parts = {}
         for i = 1, select("#", ...) do parts[#parts + 1] = tostring((select(i, ...))) end
@@ -47,6 +51,20 @@ describe("PaladinForDummies.toc", function()
       SlashCmdList = {},
       InCombatLockdown = function() return false end,
       issecretvalue = function() return false end,
+      securecallfunction = function(fn, ...) return fn(...) end,
+      wipe = function(t) for k in pairs(t) do t[k] = nil end return t end,
+      date = os.date,
+      geterrorhandler = function() return function(message) errors[#errors + 1] = message end end,
+      -- Lo que AceDB lee al cargarse para saber de quién son los datos
+      UnitClass = function() return "Paladin", class or "PALADIN" end,
+      UnitRace = function() return "Human", "Human" end,
+      UnitFactionGroup = function() return "Alliance" end,
+      UnitNameUnmodified = function() return "Tester" end,
+      GetRealmName = function() return "Realm" end,
+      GetCurrentRegion = function() return 3 end,
+      GetCurrentRegionName = function() return "EU" end,
+      GetLocale = function() return "enUS" end,
+      -- Juego
       UnitLevel = function() return 40 end,
       UnitExists = function() return true end,
       UnitCanAttack = function() return true end,
@@ -54,6 +72,7 @@ describe("PaladinForDummies.toc", function()
       UnitClassification = function() return "normal" end,
       IsInInstance = function() return false, "none" end,
       IsInGroup = function() return false end,
+      Settings = { OpenToCategory = function(id) opened[#opened + 1] = id end },
       C_Spell = {
         GetSpellTexture = function() return 135000 end,
         GetSpellName = function(id)
@@ -72,7 +91,7 @@ describe("PaladinForDummies.toc", function()
       GetTime = function() return env_now end,
       time = function() return 1794416000 end,
       GetBuildInfo = function() return "1.60.1", "70888", "Nov  9 2026", 16001 end,
-      C_AddOns = { GetAddOnMetadata = function(_, field) return field == "Version" and "0.2.1" or nil end },
+      C_AddOns = { GetAddOnMetadata = function(_, field) return field == "Version" and "0.9.0" or nil end },
       UnitAttackSpeed = function() return 2.4000000953674 end,
       UnitDamage = function() return 110.35113525391, 160 end,
       GetSpellBonusDamage = function() return 35 end,
@@ -91,221 +110,248 @@ describe("PaladinForDummies.toc", function()
       },
     }, { __index = _G })
     env._G = env
-    return env, frames, printed
+    return env, { frames = frames, printed = printed, errors = errors, opened = opened }
   end
 
-  local function fire(frames, event, ...)
-    for _, f in ipairs(frames) do
+  local function run(env, path)
+    local chunk = assert(loadfile(path))
+    setfenv(chunk, env)
+    return chunk("PaladinForDummies", env.__ns)
+  end
+
+  -- Ace3 simulado: guarda la tabla de opciones y el texto de las ventanas.
+  local function fakeAce(env, seen)
+    local LibStub = env.LibStub
+    local registry = LibStub:NewLibrary("AceConfigRegistry-3.0", 1)
+    function registry:RegisterOptionsTable(app, options) seen.options[app] = options end
+    function registry:NotifyChange() end
+    local dialog = LibStub:NewLibrary("AceConfigDialog-3.0", 1)
+    function dialog:AddToBlizOptions(app) return mock(), app == "PaladinForDummies" and 42 or 43 end
+    local dbOptions = LibStub:NewLibrary("AceDBOptions-3.0", 1)
+    function dbOptions:GetOptionsTable() return { type = "group", args = {} } end
+    local gui = LibStub:NewLibrary("AceGUI-3.0", 1)
+    function gui:Create()
+      local widget = mock()
+      rawset(widget, "SetText", function(_, text) seen.windowText = text end)
+      return widget
+    end
+  end
+
+  local function loadAddon(env)
+    env.__ns = {}
+    local seen = { options = {} }
+    for _, lib in ipairs({ "LibStub/LibStub.lua", "CallbackHandler-1.0/CallbackHandler-1.0.lua", "AceDB-3.0/AceDB-3.0.lua" }) do
+      run(env, ROOT .. "Libs/" .. lib)
+    end
+    fakeAce(env, seen)
+    for _, file in ipairs(tocFiles()) do run(env, ROOT .. file) end
+    return env.__ns, seen
+  end
+
+  local function output(w) return table.concat(w.printed, "\n") end
+
+  it("stays inactive on other classes", function()
+    local env, w = wowEnv("WARRIOR")
+    local _, seen = loadAddon(env)
+    local before = #w.frames
+    for _, f in ipairs(w.frames) do if f.scripts.OnEvent then f.scripts.OnEvent(f, "ADDON_LOADED", "PaladinForDummies") end end
+
+    assert.are.equal(before, #w.frames) -- no crea ventanas
+    assert.is_nil(env.PaladinForDummiesDB)
+    assert.is_nil(seen.options.PaladinForDummies)
+    env.SlashCmdList.PALADINFORDUMMIES("")
+    assert.truthy(output(w):find("only for paladins", 1, true))
+  end)
+
+  local function fire(w, event, ...)
+    for _, f in ipairs(w.frames) do
       local handler = f.scripts.OnEvent
       if handler then handler(f, event, ...) end
     end
   end
 
-  -- Settings API simulada: guarda cada opción para poder leerla y cambiarla.
-  local function settingsMock(env)
-    local registered, buttons, opened = {}, {}, {}
-    env.Settings = {
-      RegisterVerticalLayoutCategory = function(name)
-        return { name = name, GetID = function() return 42 end }, mock()
-      end,
-      RegisterProxySetting = function(_, variable, _, _, default, get, set)
-        registered[variable] = { get = get, set = set, default = default }
-        return mock()
-      end,
-      CreateCheckbox = function() return mock() end,
-      CreateSlider = function() return mock() end,
-      CreateSliderOptions = function() return mock() end,
-      RegisterAddOnCategory = function() end,
-      OpenToCategory = function(id) opened[#opened + 1] = id end,
-    }
-    env.CreateSettingsListSectionHeaderInitializer = function() return mock() end
-    env.CreateSettingsButtonInitializer = function(name, text, onClick)
-      buttons[name .. " / " .. text] = onClick
-      return mock()
-    end
-    env.StaticPopupDialogs = {}
-    env.StaticPopup_Show = function(which) opened[#opened + 1] = which end
-    return registered, buttons, opened
+  local function start(env, w)
+    local ns, seen = loadAddon(env)
+    fire(w, "ADDON_LOADED", "PaladinForDummies")
+    fire(w, "PLAYER_ENTERING_WORLD")
+    local db = env.PaladinForDummiesDB
+    return ns, seen, db.profiles.Default, db.char[CHAR]
   end
 
-  it("registers the options panel and applies changes right away", function()
-    local env, frames = wowEnv()
-    local registered, buttons, opened = settingsMock(env)
-    local ns = {}
-    for _, file in ipairs(tocFiles()) do
-      local chunk = assert(loadfile(ROOT .. file))
-      setfenv(chunk, env)
-      chunk("PaladinForDummies", ns)
-    end
-    fire(frames, "ADDON_LOADED", "PaladinForDummies")
-    fire(frames, "PLAYER_ENTERING_WORLD")
+  it("greets new players once, quietly, with sensible defaults", function()
+    local env, w = wowEnv()
+    local _, _, profile, char = start(env, w)
 
-    local db = env.PaladinForDummiesDB
-    assert.is_nil(db.errors)
+    assert.truthy(output(w):find("Welcome!", 1, true))
+    assert.is_true(char.welcomed)
+    assert.is_false(profile.review.chatSummary) -- sin mensajes en el chat por defecto
+    assert.is_false(profile.macros.auto)        -- no toca tus macros si no se lo pides
+    assert.is_true(profile.echo.shown)          -- solo se ve si tienes copias de Unsealed Wrath
+    assert.are.same({}, w.errors)
 
-    -- Asesor
-    assert.is_true(registered.PaladinForDummies_advisorShown.get())
-    registered.PaladinForDummies_advisorShown.set(false)
-    assert.is_true(db.hidden)
-    registered.PaladinForDummies_advisorScale.set(1.5)
-    assert.are.equal(1.5, db.advisorScale)
-    registered.PaladinForDummies_advisorLocked.set(true)
-    assert.is_true(db.advisorLocked)
+    -- Segunda sesión con los mismos datos: sin bienvenida
+    local saved = env.PaladinForDummiesDB
+    local env2, w2 = wowEnv()
+    env2.PaladinForDummiesDB = saved
+    start(env2, w2)
+    assert.is_nil(output(w2):find("Welcome!", 1, true))
+  end)
 
-    -- Widget
-    registered.PaladinForDummies_echoShown.set(true)
-    assert.is_true(db.echo)
-    registered.PaladinForDummies_echoScale.set(0.8)
-    assert.are.equal(0.8, db.echoScale)
+  it("migrates the old flat saved variables without losing fights or settings", function()
+    local env, w = wowEnv()
+    local oldFight = { duration = 30, counts = { judgement = 1, holyStrike = 0, commandProc = 1, sealCast = 0 }, sealSeconds = { command = 30 } }
+    env.PaladinForDummiesDB = {
+      hidden = true, quiet = true, echo = true, macros = true,
+      echoPosition = { point = "CENTER", relativePoint = "CENTER", x = 1, y = 150 },
+      fights = { oldFight }, snapshot = {}, errors = { { message = "viejo" } },
+    }
+    local _, _, profile, char = start(env, w)
 
-    -- Macros: una por cada macro posible, y desactivarla la excluye
-    assert.is_table(registered["PaladinForDummies_macro_PFD_Golpe"])
-    assert.is_table(registered["PaladinForDummies_macro_PFD_Exorcismo"])
-    registered["PaladinForDummies_macro_PFD_Golpe"].set(false)
-    assert.is_true(db.macroDisabled["PFD Golpe"])
-    buttons["Macros / Crear o actualizar ahora"]()
+    assert.is_false(profile.advisor.shown)
+    assert.is_true(profile.macros.auto)
+    assert.are.equal(150, profile.echo.position.y)
+    assert.are.equal(1, #char.fights)
+    assert.are.equal(30, char.fights[1].duration)
+    assert.is_nil(output(w):find("Welcome!", 1, true))
+    assert.is_nil(env.PaladinForDummiesDB.hidden) -- el formato viejo desaparece
+  end)
+
+  it("builds the options panel and applies changes right away", function()
+    local env, w = wowEnv()
+    local _, seen, profile, char = start(env, w)
+    local o = seen.options.PaladinForDummies.args
+
+    o.advisor.args.shown.set(nil, false)
+    assert.is_false(profile.advisor.shown)
+    o.advisor.args.scale.set(nil, 1.5)
+    assert.are.equal(1.5, profile.advisor.scale)
+    o.advisor.args.locked.set(nil, true)
+    assert.is_true(profile.advisor.locked)
+
+    o.echo.args.scale.set(nil, 0.8)
+    assert.are.equal(0.8, profile.echo.scale)
+    o.echo.args.move.func()
+    assert.truthy(output(w):find("Display unlocked", 1, true))
+
+    -- Macros: una casilla por macro; desmarcada no se crea
+    assert.are.equal("PFD Golpe", o.macros.args.macro1.name)
+    o.macros.args.macro1.set(nil, false)
+    o.macros.args.now.func()
     assert.is_nil(env.createdMacros["PFD Golpe"])
+    assert.is_true(profile.macros.auto)
 
-    -- Repaso
-    registered.PaladinForDummies_fightSummary.set(false)
-    assert.is_true(db.quiet)
-    buttons["Peleas guardadas / Borrar"]()
-    assert.are.equal("PALADINFORDUMMIES_RESET_STATS", opened[#opened])
+    o.review.args.chat.set(nil, true)
+    assert.is_true(profile.review.chatSummary)
+    char.fights[1] = { duration = 1 }
+    assert.is_true(o.review.args.reset.confirm)
+    o.review.args.reset.func()
+    assert.are.equal(0, #char.fights)
+
+    o.advanced.args.language.set(nil, "esES")
+    assert.are.equal("esES", profile.language)
+    o.advanced.args.report.func()
+    assert.truthy(seen.windowText:find("Paladin for Dummies 0.9.0", 1, true))
+
+    assert.is_table(seen.options.PaladinForDummies_Profiles)
 
     -- Abrir el panel: /pfd sin nada y el menú del minimapa
     env.SlashCmdList.PALADINFORDUMMIES("")
     env.PaladinForDummies_OnAddonCompartmentClick()
-    assert.are.equal(42, opened[#opened])
-    assert.are.equal(42, opened[#opened - 1])
+    assert.are.same({ 42, 42 }, w.opened)
   end)
 
-  it("saves errors in SavedVariables, not only in the chat", function()
-    local env, frames = wowEnv()
-    env.UnitLevel = function() error("boom") end
-    env.C_SpellBook.GetNumSpellBookSkillLines = function() error("boom") end
-    local ns = {}
-    for _, file in ipairs(tocFiles()) do
-      local chunk = assert(loadfile(ROOT .. file))
-      setfenv(chunk, env)
-      chunk("PaladinForDummies", ns)
-    end
-    -- Un fallo dentro del motor: una regla que apunta a un sello inexistente.
-    table.insert(ns.Data.Rules, { id = "broken", priority = 99, when = {}, recommend = { seal = "nope" },
-      why = "x", confidence = "mechanic" })
+  it("records a fight, keeps diagnostic commands behind developer mode", function()
+    local env, w = wowEnv()
+    local ns, _, profile, char = start(env, w)
 
-    fire(frames, "ADDON_LOADED", "PaladinForDummies")
-    fire(frames, "PLAYER_ENTERING_WORLD")
+    env.SlashCmdList.PALADINFORDUMMIES("debug")
+    assert.truthy(output(w):find("developer mode", 1, true))
+    env.SlashCmdList.PALADINFORDUMMIES("help")
+    assert.truthy(output(w):find("/pfd report", 1, true))
 
-    local errors = env.PaladinForDummiesDB.errors
-    assert.is_true(#errors >= 1)
-    assert.are.equal("la recomendación", errors[1].context)
-    assert.truthy(errors[1].message:find("unknown seal: nope", 1, true))
-  end)
-
-  it("loads every file, reacts to events and runs /pfd debug without errors", function()
-    local env, frames, printed = wowEnv()
-    local ns = {}
-    for _, file in ipairs(tocFiles()) do
-      local chunk = assert(loadfile(ROOT .. file))
-      setfenv(chunk, env)
-      chunk("PaladinForDummies", ns)
-    end
-
-    fire(frames, "ADDON_LOADED", "PaladinForDummies")
-    fire(frames, "PLAYER_ENTERING_WORLD")
+    profile.devMode = true
+    profile.review.chatSummary = true
     env.SlashCmdList.PALADINFORDUMMIES("spec ret")
     env.SlashCmdList.PALADINFORDUMMIES("debug")
     env.SlashCmdList.PALADINFORDUMMIES("ui")
-    env.SlashCmdList.PALADINFORDUMMIES("reset")
+    env.SlashCmdList.PALADINFORDUMMIES("test a")
+
     -- Pasar el ratón por los iconos: ejecuta los tooltips.
     local hovered = 0
-    for _, f in ipairs(frames) do
+    for _, f in ipairs(w.frames) do
       if f.scripts.OnEnter then f.scripts.OnEnter(f); hovered = hovered + 1 end
     end
     assert.are.equal(2, hovered)
 
-    -- Widget experimental de Unsealed Wrath: se crea y su inicialización no falla.
-    env.SlashCmdList.PALADINFORDUMMIES("echo")
-    assert.is_true(env.PaladinForDummiesDB.echo)
-    assert.is_true(env.PaladinForDummiesDB.echoStatus.created)
-    env.SlashCmdList.PALADINFORDUMMIES("echo move")
-    env.SlashCmdList.PALADINFORDUMMIES("echo move")
-    env.SlashCmdList.PALADINFORDUMMIES("echo reset")
-    env.SlashCmdList.PALADINFORDUMMIES("echo debug")
-    assert.is_table(env.PaladinForDummiesDB.echoDebug)
+    -- Indicador de Unsealed Wrath: se crea por defecto y su inicialización no falla
+    assert.is_true(char.echoStatus.created)
+    env.SlashCmdList.PALADINFORDUMMIES("echodebug")
+    assert.is_table(char.echoDebug)
     local slotErrors = {}
     for _, echo in ipairs(ns.UI.EchoTracker.ECHOES) do
       ns.UI.EchoTracker.initializer(echo, function(key, err) slotErrors[#slotErrors + 1] = key .. ": " .. tostring(err) end)(mock())
     end
     assert.are.same({}, slotErrors)
-    -- Macros: se crea PFD Golpe; ya no hay macro de apertura.
-    env.SlashCmdList.PALADINFORDUMMIES("macros")
-    assert.is_nil(env.createdMacros["PFD Apertura"])
-    assert.are.equal("#showtooltip\n/cast Judgement\n/cast Holy Strike\n/startattack\n/run UIErrorsFrame:Clear()",
-      env.createdMacros["PFD Golpe"])
-    assert.is_true(env.PaladinForDummiesDB.macros)
 
     -- Una pelea de 20 s con Command: Sentencia, Holy Strike y dos activaciones.
-    env.SlashCmdList.PALADINFORDUMMIES("test a")
     env_now = 1000
-    fire(frames, "PLAYER_REGEN_DISABLED")
-    fire(frames, "PLAYER_TARGET_CHANGED")
-    env_now = 1002; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-1", 20271)
-    env_now = 1004; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-2", 2495)
-    env_now = 1006; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-3", 20424)
-    env_now = 1012; fire(frames, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-4", 20424)
+    fire(w, "PLAYER_REGEN_DISABLED")
+    fire(w, "PLAYER_TARGET_CHANGED")
+    env_now = 1002; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-1", 20271)
+    env_now = 1004; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-2", 2495)
+    env_now = 1006; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-3", 20424)
+    env_now = 1012; fire(w, "UNIT_SPELLCAST_SUCCEEDED", "player", "Cast-4", 20424)
     env_now = 1020
-    fire(frames, "PLAYER_REGEN_ENABLED")
+    fire(w, "PLAYER_REGEN_ENABLED")
     env.SlashCmdList.PALADINFORDUMMIES("stats")
-    env.SlashCmdList.PALADINFORDUMMIES("last")
     env.SlashCmdList.PALADINFORDUMMIES("test off")
-    env.SlashCmdList.PALADINFORDUMMIES("test")
 
-    local output = table.concat(printed, "\n")
-    assert.is_nil(output:find("Error"), output)
-    assert.truthy(output:find("Sello: command %(spellID 20918"), output)
-    assert.truthy(output:find("Sentencia: crusader %(spellID 20306"), output)
-    assert.truthy(output:find("mostrada"), output)
-    assert.is_table(env.PaladinForDummiesDB)
-    assert.are.equal("retribution", env.PaladinForDummiesDB.specOverride)
+    local out = output(w)
+    assert.truthy(out:find("Sello: command %(spellID 20918"), out)
+    assert.truthy(out:find("Sentencia: crusader %(spellID 20306"), out)
+    assert.truthy(out:find("Arma: velocidad 2.4, daño 110.35-160", 1, true), out)
+    assert.are.equal("retribution", char.specOverride)
+    assert.is_nil(char.test)
 
-    -- El repaso tras el combate
-    local fights = env.PaladinForDummiesDB.fights
-    assert.are.equal(1, #fights)
-    local f = fights[1]
+    local f = char.fights[1]
+    assert.are.equal(1, #char.fights)
     assert.are.equal(20, f.duration)
     assert.are.equal("command", f.openingSeal)
     assert.are.same({ command = 3 }, f.openingEchoes)
     assert.are.same({ judgement = 1, holyStrike = 1, commandProc = 2, sealCast = 0 }, f.counts)
     assert.are.same({ command = 20 }, f.sealSeconds)
-    assert.is_true(math.abs(f.context.weaponSpeed - 2.4) < 0.001)
-    assert.is_true(math.abs(f.context.weaponBaseSpeed - 2.4) < 0.001) -- empezó con Command, no con Crusader
-    assert.are.equal(6, f.context.target.creatureType)
-    assert.truthy(output:find("[prueba A] Solo Seal of Command | 20 s | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), output)
+    assert.is_true(math.abs(f.context.weaponBaseSpeed - 2.4) < 0.001)
+    assert.are.equal("A", f.context.test)
     assert.are.same({
       { t = 2, kind = "judgement" },
       { t = 4, kind = "holyStrike" },
       { t = 6, kind = "commandProc" },
       { t = 12, kind = "commandProc" },
     }, f.timeline)
-    assert.truthy(output:find("Solo Seal of Command | peleas: 1 | duración media: 20 s", 1, true), output)
-    assert.are.equal("A", f.context.test)
-    assert.truthy(output:find("Prueba A | peleas: 1 | duración media: 20 s", 1, true), output)
-    assert.truthy(output:find("Command: 2 activaciones en 20 s con el sello puesto = 6 por minuto", 1, true), output)
-    assert.truthy(output:find("No hay ninguna prueba activa", 1, true), output)
-    assert.is_nil(env.PaladinForDummiesDB.test)
-    assert.truthy(output:find("Peleas guardadas: 1.", 1, true), output)
-    assert.truthy(output:find("Widget desbloqueado", 1, true), output)
-    assert.truthy(output:find("Widget fijado en su sitio", 1, true), output)
-    assert.truthy(output:find("Total con Seal of Command: 2 activaciones en 20 s = 6 por minuto", 1, true), output)
-    assert.truthy(output:find("Arma: velocidad 2.4, daño 110.35-160", 1, true), output)
+    assert.truthy(out:find("[prueba A] Solo Seal of Command | 20 s | Sentencias: 1 | Holy Strike: 1 | activaciones de Command: 2", 1, true), out)
+    assert.truthy(out:find("Total con Seal of Command: 2 activaciones en 20 s = 6 por minuto", 1, true), out)
 
-    -- Todo lo de /pfd debug queda también en el archivo de SavedVariables
-    local snap = env.PaladinForDummiesDB.snapshot
-    assert.are.equal("0.2.1", snap.addonVersion)
-    assert.are.equal("70888", snap.client.build)
-    assert.are.equal("retribution", snap.situation.player.spec)
-    assert.are.equal("override", snap.diagnostics.specSource)
-    assert.are.equal("command", snap.recommendation.seal.seal)
+    -- El estado queda guardado en el personaje para el informe
+    assert.are.equal("0.9.0", char.snapshot.addonVersion)
+    assert.are.equal("override", char.snapshot.diagnostics.specSource)
+    assert.are.same({}, w.errors)
+  end)
+
+  it("sends errors to the error handler and the report, not to the chat", function()
+    local env, w = wowEnv()
+    local ns = loadAddon(env)
+    -- Un fallo dentro del motor: una regla que apunta a un sello inexistente.
+    table.insert(ns.Data.Rules, { id = "broken", priority = 99, when = {}, recommend = { seal = "nope" },
+      why = "x", confidence = "mechanic" })
+    fire(w, "ADDON_LOADED", "PaladinForDummies")
+    fire(w, "PLAYER_ENTERING_WORLD")
+    fire(w, "PLAYER_TARGET_CHANGED")
+
+    local char = env.PaladinForDummiesDB.char[CHAR]
+    assert.is_true(#char.errors >= 1)
+    assert.are.equal("la recomendación", char.errors[1].context)
+    assert.truthy(char.errors[1].message:find("unknown seal: nope", 1, true))
+    assert.are.equal(1, #w.errors) -- una sola vez por sesión, aunque se repita
+    assert.is_nil(output(w):find("unknown seal", 1, true))
   end)
 end)

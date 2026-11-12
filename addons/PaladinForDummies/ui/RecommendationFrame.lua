@@ -104,7 +104,7 @@ local function fill(slot, entry, iconSpellId)
   end
 end
 
--- db: tabla de SavedVariables donde se guarda la posición.
+-- db: tabla donde se guarda la posición (profile.advisor de AceDB).
 function RecommendationFrame.create(db)
   local frame = CreateFrame("Frame", "PaladinForDummiesFrame", UIParent, "BackdropTemplate")
   frame:SetSize(ICON_SIZE * 2 + 60, ICON_SIZE + 52)
@@ -210,6 +210,18 @@ function RecommendationFrame.create(db)
   -- Bloqueada: no se arrastra, pero los tooltips siguen funcionando.
   function frame:SetLocked(locked)
     self.locked = locked and true or nil
+  end
+
+  -- Cambia la tabla donde se guarda la posición (al cambiar de perfil).
+  function frame:UseStore(store)
+    db = store
+    self:ClearAllPoints()
+    local p = db.position
+    if p then
+      self:SetPoint(p.point, UIParent, p.relativePoint, p.x, p.y)
+    else
+      self:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
+    end
   end
 
   function frame:ResetPosition()

@@ -96,7 +96,7 @@ local function createAnchor(db, width, height)
   anchor:SetScript("OnDragStop", function(self)
     self:StopMovingOrSizing()
     local ok, point, _, relativePoint, x, y = pcall(self.GetPoint, self)
-    if ok and point then db.echoPosition = { point = point, relativePoint = relativePoint, x = x, y = y } end
+    if ok and point then db.position = { point = point, relativePoint = relativePoint, x = x, y = y } end
   end)
 
   if anchor.SetBackdrop then
@@ -113,7 +113,7 @@ local function createAnchor(db, width, height)
   anchor.hint:SetText("Arrastra para mover · /pfd echo move para fijar")
 
   function anchor:ApplyPosition()
-    local pos = db.echoPosition or DEFAULT_POSITION
+    local pos = db.position or DEFAULT_POSITION
     self:ClearAllPoints()
     self:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
   end
@@ -127,6 +127,12 @@ local function createAnchor(db, width, height)
       self:SetBackdropBorderColor(1, 1, 1, unlocked and 1 or 0)
     end
     self.hint:SetShown(unlocked)
+  end
+
+  -- Cambia la tabla donde se guarda la posición (al cambiar de perfil).
+  function anchor:UseStore(store)
+    db = store
+    self:ApplyPosition()
   end
 
   anchor:ApplyPosition()

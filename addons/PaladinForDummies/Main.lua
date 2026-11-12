@@ -1,34 +1,74 @@
--- Arranque: eventos, SavedVariables y comandos.
--- Regla 1 de CLAUDE.md: en combate no se calcula nada. Al entrar en combate la
--- recomendación se congela y solo se vuelve a calcular al salir. Durante la pelea
--- solo se anotan tus lanzamientos para el repaso (Recorder.lua).
+-- Arranque: base de datos (AceDB), eventos, opciones y comandos.
+--
+-- Solo se activa con paladines. Los ajustes van en un perfil de AceDB (por
+-- defecto compartido por todos tus personajes) y las peleas en el personaje.
+-- En combate la recomendación se congela; solo se anotan tus lanzamientos para
+-- el repaso (Recorder.lua). Los errores van a BugSack/BugGrabber, o a la ventana
+-- de errores del juego, y se guardan para el informe (/pfd report).
 local ADDON_NAME, ns = ...
+local L = ns.L
 
 local SituationReader = ns.Adapters.SituationReader
 local RuleEngine = ns.Core.RuleEngine
 local Seals, Rules = ns.Data.Seals, ns.Data.Rules
 
-local db
-local ui
-local echoes -- widget experimental de Unsealed Wrath (ui/EchoTracker.lua)
+local DEFAULTS = {
+  profile = {
+    language = "auto",
+    devMode = false,
+    advisor = { shown = true, locked = false, scale = 1 },
+    echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
+    macros = { auto = false, disabled = {} },
+    review = { chatSummary = false },
+  },
+  char = { fights = {}, errors = {}, welcomed = false },
+}
+local MAX_ERRORS = 50
+
+local db              -- objeto AceDB
+local profile, char   -- db.profile y db.char
+local enabled = false -- solo con paladines
+local ui              -- ventana del asesor (ui/RecommendationFrame.lua)
+local echoes          -- indicador de Unsealed Wrath (ui/EchoTracker.lua)
 local frozen = false
-local last = {} -- última situación calculada, para /pfd debug
+local last = {}       -- última situación calculada
+local reported = {}   -- errores ya enviados al gestor de errores en esta sesión
 
 local function p(...)
   print("|cfff5b041Paladin for Dummies|r:", ...)
 end
 
-local MAX_ERRORS = 50
+---------------------------------------------------------------------------
+-- Errores
+---------------------------------------------------------------------------
 
--- Los errores se muestran en el chat y se guardan en SavedVariables (db.errors),
--- para que lleguen en el archivo aunque se pierdan del chat.
+-- Se guardan en el personaje (para /pfd report) y se envían una vez por sesión
+-- al gestor de errores (BugSack si está instalado). En el chat, solo con el modo
+-- desarrollador.
 local function reportError(context, err)
-  p("Error en " .. context .. ":", err)
-  if not db then return end
-  db.errors = db.errors or {}
-  table.insert(db.errors, { time = time(), context = context, message = tostring(err) })
-  while #db.errors > MAX_ERRORS do table.remove(db.errors, 1) end
+  local message = tostring(err)
+  if char then
+    char.errors = char.errors or {}
+    table.insert(char.errors, { time = time(), context = context, message = message })
+    while #char.errors > MAX_ERRORS do table.remove(char.errors, 1) end
+  end
+  if profile and profile.devMode then p("Error (" .. context .. "):", message) end
+
+  local key = context .. "\001" .. message
+  if not reported[key] and geterrorhandler then
+    reported[key] = true
+    pcall(geterrorhandler(), ("Paladin for Dummies (%s): %s"):format(context, message))
+  end
 end
+
+local function safely(label, fn, ...)
+  local ok, err = pcall(fn, ...)
+  if not ok then reportError(label, err) end
+end
+
+---------------------------------------------------------------------------
+-- Información del juego
+---------------------------------------------------------------------------
 
 local function addonVersion()
   local get = C_AddOns and C_AddOns.GetAddOnMetadata
@@ -43,18 +83,21 @@ local function clientInfo()
   return { version = version, build = build, date = date, toc = toc }
 end
 
--- Lo mismo que muestra /pfd debug, guardado en SavedVariables (db.snapshot).
--- La Situation ya viene sin valores secret (regla 4).
-local function saveSnapshot()
-  db.snapshot = {
-    savedAt = time(),
-    addonVersion = addonVersion(),
-    client = clientInfo(),
-    situation = last.situation,
-    diagnostics = last.diagnostics,
-    recommendation = last.recommendation,
-  }
+local function spellNameOf(spellId)
+  if not (C_Spell and C_Spell.GetSpellName) then return nil end
+  local ok, name = pcall(C_Spell.GetSpellName, spellId)
+  if not ok or type(name) ~= "string" or (issecretvalue and issecretvalue(name)) then return nil end
+  return name
 end
+
+local function isPaladin()
+  local ok, _, classFile = pcall(UnitClass, "player")
+  return ok and classFile == "PALADIN"
+end
+
+---------------------------------------------------------------------------
+-- Macros
+---------------------------------------------------------------------------
 
 local MACRO_ACTION_TEXT = {
   created = "creada",
@@ -63,20 +106,15 @@ local MACRO_ACTION_TEXT = {
   full = "no hay hueco libre en tus macros de personaje",
 }
 
-local function spellNameOf(spellId)
-  if not (C_Spell and C_Spell.GetSpellName) then return nil end
-  local ok, name = pcall(C_Spell.GetSpellName, spellId)
-  if not ok or type(name) ~= "string" or (issecretvalue and issecretvalue(name)) then return nil end
-  return name
-end
-
--- Crea o actualiza las macros del addon (core/Macros.lua) a partir de la última
--- recomendación. Solo fuera de combate; verbose = contarlo en el chat.
+-- Crea o actualiza las macros marcadas (core/Macros.lua). Solo fuera de
+-- combate; si no, queda pendiente. No llama a las
+-- funciones de macros si el texto de las macros no ha cambiado desde la última
+-- vez. verbose = contarlo en el chat.
 local macrosPending = false
+local lastMacroSignature
 local function syncMacros(verbose)
-  if not (db and db.macros and last.situation) then return end
-  local macros, skipped = ns.Core.Macros.build({
-    recommendation = last.recommendation,
+  if not (profile and profile.macros.auto and last.situation) then return end
+  local built, skipped = ns.Core.Macros.build({
     seals = Seals,
     macroSpells = ns.Data.MacroSpells,
     knownSpells = last.situation.player.knownSpells,
@@ -84,24 +122,32 @@ local function syncMacros(verbose)
     holyStrikeSpellId = ns.Data.Spells.holyStrike,
     nameOf = spellNameOf,
   })
-  -- Las macros desactivadas en el panel de opciones no se crean ni se tocan.
-  local enabled = {}
-  for _, m in ipairs(macros) do
-    if not (db.macroDisabled and db.macroDisabled[m.name]) then enabled[#enabled + 1] = m end
+  local macros = {}
+  for _, m in ipairs(built) do
+    if not profile.macros.disabled[m.name] then macros[#macros + 1] = m end
   end
-  macros = enabled
+  local parts = {}
+  for _, m in ipairs(macros) do parts[#parts + 1] = m.name .. "\001" .. m.body end
+  local signature = table.concat(parts, "\002")
+  if not verbose and not macrosPending and signature == lastMacroSignature then return end
+
   local results, reason = ns.Adapters.MacroWriter.write(_G, macros)
-  -- Queda en el archivo de SavedVariables para poder revisarlo.
-  db.macroStatus = { time = time(), results = results, skipped = skipped, reason = reason }
+  char.macroStatus = { time = time(), results = results, skipped = skipped, reason = reason }
+
   if verbose then
-    for _, s in ipairs(skipped) do p(("Macro %s: no creada, %s."):format(s.name, s.reason)) end
+    for _, s in ipairs(skipped) do
+      if not profile.macros.disabled[s.name] then p(("Macro %s: no creada, %s."):format(s.name, s.reason)) end
+    end
   end
   if not results then
-    macrosPending = (reason == "combat")
-    if verbose then p("Estás en combate: las macros se crearán al salir.") end
+    macrosPending = true
+    if verbose then
+      p("Estás en combate: las macros se crearán al salir.")
+    end
     return
   end
   macrosPending = false
+  lastMacroSignature = signature
   for _, r in ipairs(results) do
     if r.action == "error" then
       reportError("la macro " .. r.name, r.error)
@@ -111,37 +157,47 @@ local function syncMacros(verbose)
   end
 end
 
+---------------------------------------------------------------------------
+-- Recomendación
+---------------------------------------------------------------------------
+
+local function saveSnapshot()
+  char.snapshot = {
+    savedAt = time(),
+    addonVersion = addonVersion(),
+    client = clientInfo(),
+    situation = last.situation,
+    diagnostics = last.diagnostics,
+    recommendation = last.recommendation,
+  }
+end
+
 local function refresh()
   if frozen or not ui then return end
-  local ok, err = pcall(function()
-    -- TrackedSpells viene de data/MacroSpells.lua; si falta (archivo nuevo sin
-    -- reiniciar el juego), al menos se leen los sellos.
-    local situation, diagnostics = SituationReader.read(_G, ns.Data.TrackedSpells or Seals, { specOverride = db.specOverride })
+  safely("la recomendación", function()
+    local situation, diagnostics = SituationReader.read(_G, ns.Data.TrackedSpells, { specOverride = char.specOverride })
     -- Rangos nuevos del grimorio: que el motor, las macros y el registro de
     -- peleas los reconozcan (cada rango tiene su propio spellID).
-    if ns.Data.LearnRanks then ns.Data.LearnRanks(diagnostics.discoveredRanks) end
+    ns.Data.LearnRanks(diagnostics.discoveredRanks)
     local recommendation = RuleEngine.recommend(situation, Rules, Seals)
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation }
     ui:ShowRecommendation(recommendation)
     saveSnapshot()
     syncMacros(false)
   end)
-  if not ok then reportError("la recomendación", err) end
 end
 
--- Crea el widget de copias de Unsealed Wrath y guarda en db.echoStatus si
--- funcionó, para verlo en el archivo de SavedVariables.
-local function createEchoes()
-  local container, err = ns.UI.EchoTracker.create(db, function(key, slotErr)
-    reportError("el widget de Echo (" .. key .. ")", slotErr)
-  end)
-  db.echoStatus = { time = time(), created = container ~= nil, error = err and tostring(err) or nil }
-  if not container then
-    reportError("el widget de Echo", err)
-    return nil
+-- Los eventos que piden recalcular llegan a menudo en ráfagas (SPELLS_CHANGED,
+-- GROUP_ROSTER_UPDATE...): se agrupan en un solo cálculo.
+local refreshQueued = false
+local function scheduleRefresh()
+  if refreshQueued then return end
+  refreshQueued = true
+  local function run()
+    refreshQueued = false
+    refresh()
   end
-  container:SetScale(db.echoScale or 1)
-  return container
+  if C_Timer and C_Timer.After then C_Timer.After(0.1, run) else run() end
 end
 
 local function setFrozen(value)
@@ -154,8 +210,102 @@ local function setFrozen(value)
 end
 
 ---------------------------------------------------------------------------
--- /pfd debug: lo que ve el addon, para comprobarlo en el juego
+-- Indicador de Unsealed Wrath
 ---------------------------------------------------------------------------
+
+local function createEchoes()
+  local container, err = ns.UI.EchoTracker.create(profile.echo, function(key, slotErr)
+    reportError("el indicador de Echo (" .. key .. ")", slotErr)
+  end)
+  char.echoStatus = { time = time(), created = container ~= nil, error = err and tostring(err) or nil }
+  if not container then
+    reportError("el indicador de Echo", err)
+    return nil
+  end
+  container:SetScale(profile.echo.scale)
+  return container
+end
+
+local function setEchoShown(value)
+  profile.echo.shown = value and true or false
+  if value then
+    echoes = echoes or createEchoes()
+    if echoes then echoes:Show() end
+  elseif echoes then
+    echoes:Hide()
+  end
+end
+
+local function toggleEchoMove()
+  setEchoShown(true)
+  if not echoes then return end
+  echoes:SetUnlocked(not echoes.unlocked)
+  p(echoes.unlocked and L.ECHO_UNLOCKED or L.ECHO_LOCKED)
+end
+
+---------------------------------------------------------------------------
+-- Perfil: aplicar los ajustes a las ventanas
+---------------------------------------------------------------------------
+
+local function applyProfile()
+  profile, char = db.profile, db.char
+  ui:UseStore(profile.advisor)
+  ui:SetShown(profile.advisor.shown)
+  ui:SetScale(profile.advisor.scale)
+  ui:SetLocked(profile.advisor.locked)
+  if echoes then
+    echoes:UseStore(profile.echo)
+    echoes:SetScale(profile.echo.scale)
+  end
+  setEchoShown(profile.echo.shown)
+  if ns.UI.Options.refresh then ns.UI.Options.refresh() end
+end
+
+---------------------------------------------------------------------------
+-- Estadísticas, informe y depuración
+---------------------------------------------------------------------------
+
+local function printStats()
+  for _, line in ipairs(ns.Recorder.statsLines(char)) do p(line) end
+end
+
+local function showReport()
+  local s = last.situation
+  local d = last.diagnostics or {}
+  local ranks = {}
+  for key, seal in pairs(Seals) do
+    local known = {}
+    for _, id in ipairs(seal.spellIds) do
+      if s and s.player.knownSpells[id] then known[#known + 1] = id end
+    end
+    if #known > 0 then ranks[key] = known end
+  end
+  local summary = ns.Core.FightStats.summarize(char.fights)
+  local fights = char.fights
+  local text = ns.Core.Report.build({
+    addonVersion = addonVersion(),
+    client = clientInfo(),
+    locale = GetLocale and GetLocale(),
+    language = ns.Locales.active,
+    level = s and s.player.level,
+    spec = s and s.player.spec,
+    specSource = d.specSource,
+    weaponSpeed = s and s.player.weapon and s.player.weapon.speed
+      and math.floor(s.player.weapon.speed * 100 + 0.5) / 100,
+    spellPower = s and s.player.spellPower,
+    ranks = ranks,
+    settings = {
+      advisor = profile.advisor.shown, echo = profile.echo.shown, macros = profile.macros.auto,
+      chatSummary = profile.review.chatSummary, devMode = profile.devMode,
+    },
+    fightCount = #fights,
+    commandPerMinute = summary.command and summary.command.perMinute,
+    lastFight = fights[#fights] and ns.Recorder.describe(fights[#fights]),
+    errors = char.errors,
+    date = function(t) return date and date("%Y-%m-%d %H:%M", t) or tostring(t) end,
+  })
+  ns.UI.ReportWindow.show(text)
+end
 
 local function sortedKeys(set)
   local out = {}
@@ -169,6 +319,7 @@ local function describeSlot(name, entry)
   return ("%s: %s (spellID %d, regla %s)"):format(name, entry.seal, entry.spellId, entry.ruleId)
 end
 
+-- /pfd debug (modo desarrollador): lo que ve el addon.
 local function debug()
   local s, d, r = last.situation, last.diagnostics, last.recommendation
   if not s then p("Todavía no hay ninguna situación calculada.") return end
@@ -202,121 +353,105 @@ local function debug()
 end
 
 ---------------------------------------------------------------------------
--- Ajustes: lo que usan el panel de opciones (ui/Options.lua) y los comandos
+-- Opciones (ui/Options.lua)
 ---------------------------------------------------------------------------
 
-local function setEchoShown(value)
-  if value then
-    echoes = echoes or createEchoes()
-    if echoes then
-      echoes:Show()
-      db.echo = true
-    end
-  else
-    if echoes then echoes:Hide() end
-    db.echo = nil
-  end
-end
-
-local function toggleEchoMove()
-  setEchoShown(true)
-  if not echoes then return end
-  echoes:SetUnlocked(not echoes.unlocked)
-  p(echoes.unlocked and "Widget desbloqueado: arrástralo y vuelve a pulsar para fijarlo."
-    or "Widget fijado en su sitio.")
-end
-
-local function resetEchoPosition()
-  db.echoPosition = nil
-  if echoes then echoes:ApplyPosition() end
-  p("Widget de vuelta a su sitio inicial.")
-end
-
-local function printStats()
-  for _, line in ipairs(ns.Recorder.statsLines(db)) do p(line) end
-end
-
-StaticPopupDialogs = StaticPopupDialogs or {}
-StaticPopupDialogs.PALADINFORDUMMIES_RESET_STATS = {
-  text = "Paladin for Dummies: ¿borrar todas las peleas guardadas?",
-  button1 = YES or "Sí",
-  button2 = NO or "No",
-  OnAccept = function()
-    db.fights = {}
-    p("Peleas guardadas borradas.")
-  end,
-  timeout = 0,
-  whileDead = true,
-  hideOnEscape = true,
-}
-
-local function syncMacrosNow()
-  db.macros = true
-  refresh()
-  syncMacros(true)
-end
-
 local optionHandlers = {
-  getAdvisorShown = function() return not db.hidden end,
+  getAdvisorShown = function() return profile.advisor.shown end,
   setAdvisorShown = function(value)
-    db.hidden = (not value) or nil
+    profile.advisor.shown = value
     ui:SetShown(value)
   end,
-  getAdvisorLocked = function() return db.advisorLocked == true end,
+  getAdvisorLocked = function() return profile.advisor.locked end,
   setAdvisorLocked = function(value)
-    db.advisorLocked = value or nil
+    profile.advisor.locked = value
     ui:SetLocked(value)
   end,
-  getAdvisorScale = function() return db.advisorScale or 1 end,
+  getAdvisorScale = function() return profile.advisor.scale end,
   setAdvisorScale = function(value)
-    db.advisorScale = value
+    profile.advisor.scale = value
     ui:SetScale(value)
   end,
   resetAdvisorPosition = function() ui:ResetPosition() end,
 
-  getEchoShown = function() return db.echo == true end,
+  getEchoShown = function() return profile.echo.shown end,
   setEchoShown = setEchoShown,
-  getEchoScale = function() return db.echoScale or 1 end,
+  getEchoScale = function() return profile.echo.scale end,
   setEchoScale = function(value)
-    db.echoScale = value
+    profile.echo.scale = value
     if echoes then echoes:SetScale(value) end
   end,
   toggleEchoMove = toggleEchoMove,
-  resetEchoPosition = resetEchoPosition,
+  resetEchoPosition = function()
+    profile.echo.position = nil
+    if echoes then echoes:ApplyPosition() end
+    p(L.ECHO_RESET)
+  end,
 
-  getMacrosAuto = function() return db.macros == true end,
+  getMacrosAuto = function() return profile.macros.auto end,
   setMacrosAuto = function(value)
-    db.macros = value or nil
+    profile.macros.auto = value
     if value then syncMacros(true) end
   end,
   macroNames = ns.Core.Macros.ALL_NAMES,
-  getMacroEnabled = function(name) return not (db.macroDisabled and db.macroDisabled[name]) end,
-  setMacroEnabled = function(name, value)
-    db.macroDisabled = db.macroDisabled or {}
-    db.macroDisabled[name] = (not value) or nil
+  getMacroEnabled = function(name) return not profile.macros.disabled[name] end,
+  setMacroEnabled = function(name, value) profile.macros.disabled[name] = (not value) or nil end,
+  syncMacrosNow = function()
+    profile.macros.auto = true
+    refresh()
+    syncMacros(true)
+    ns.UI.Options.refresh()
   end,
-  syncMacrosNow = syncMacrosNow,
 
-  getFightSummary = function() return not db.quiet end,
-  setFightSummary = function(value) db.quiet = (not value) or nil end,
+  getChatSummary = function() return profile.review.chatSummary end,
+  setChatSummary = function(value) profile.review.chatSummary = value end,
   printStats = printStats,
-  resetStats = function() StaticPopup_Show("PALADINFORDUMMIES_RESET_STATS") end,
+  resetFights = function()
+    wipe(char.fights)
+    p(L.FIGHTS_DELETED)
+  end,
+
+  getLanguage = function() return profile.language end,
+  setLanguage = function(value)
+    profile.language = value
+    p(L.OPT_LANGUAGE_DESC)
+  end,
+  getDevMode = function() return profile.devMode end,
+  setDevMode = function(value) profile.devMode = value end,
+  showReport = showReport,
+  resetSettings = function() db:ResetProfile() end,
 }
 
 local function openOptions()
-  if not ns.UI.Options.open() then
-    p("No se pudo abrir el panel de opciones. Comandos: /pfd help")
-  end
+  if not ns.UI.Options.open() then p(L.OPTIONS_UNAVAILABLE) end
 end
 
 -- Entrada del menú de addons del minimapa (AddonCompartmentFunc en el .toc).
 function PaladinForDummies_OnAddonCompartmentClick()
-  openOptions()
+  if enabled then openOptions() else p(L.NOT_A_PALADIN) end
 end
 
 ---------------------------------------------------------------------------
--- Eventos
+-- Arranque
 ---------------------------------------------------------------------------
+
+local function initDatabase()
+  local saved = PaladinForDummiesDB
+  local legacy = ns.Core.Migrations.isLegacy(saved) and saved or nil
+  if legacy then PaladinForDummiesDB = nil end
+
+  db = LibStub("AceDB-3.0"):New("PaladinForDummiesDB", DEFAULTS, true)
+  if legacy then
+    local migrated = ns.Core.Migrations.fromLegacy(legacy)
+    ns.Core.Migrations.apply(db.profile, migrated.profile)
+    ns.Core.Migrations.apply(db.char, migrated.char)
+  end
+  profile, char = db.profile, db.char
+
+  db.RegisterCallback(ns, "OnProfileChanged", applyProfile)
+  db.RegisterCallback(ns, "OnProfileCopied", applyProfile)
+  db.RegisterCallback(ns, "OnProfileReset", applyProfile)
+end
 
 local REFRESH_EVENTS = {
   "PLAYER_ENTERING_WORLD",
@@ -332,53 +467,65 @@ local REFRESH_EVENTS = {
 
 local events = CreateFrame("Frame")
 
-local function safely(label, fn, ...)
-  local ok, err = pcall(fn, ...)
-  if not ok then reportError(label, err) end
+local function enable()
+  initDatabase()
+  ns.Locales.use(ns.Locales.resolve(profile.language, GetLocale and GetLocale() or "enUS"))
+
+  ui = ns.UI.RecommendationFrame.create(profile.advisor)
+  ui:SetShown(profile.advisor.shown)
+  ui:SetScale(profile.advisor.scale)
+  ui:SetLocked(profile.advisor.locked)
+  ui:SetTest(char.test)
+  if profile.echo.shown then echoes = createEchoes() end
+
+  safely("el panel de opciones", ns.UI.Options.register, optionHandlers, db)
+
+  events:RegisterEvent("PLAYER_REGEN_DISABLED")
+  events:RegisterEvent("PLAYER_REGEN_ENABLED")
+  events:RegisterEvent("ADDON_ACTION_BLOCKED")
+  events:RegisterEvent("ADDON_ACTION_FORBIDDEN")
+  events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+  for _, event in ipairs(REFRESH_EVENTS) do
+    -- Algunos eventos pueden no existir en Forever: registrar uno inexistente da error.
+    pcall(events.RegisterEvent, events, event)
+  end
+
+  enabled = true
+  setFrozen(InCombatLockdown() and true or false)
+
+  if not char.welcomed then
+    p(L.WELCOME_1)
+    p(L.WELCOME_2)
+    char.welcomed = true
+  end
 end
 
-events:SetScript("OnEvent", function(_, event, arg1, _, arg3)
+events:SetScript("OnEvent", function(_, event, arg1, arg2, arg3)
   if event == "ADDON_LOADED" then
     if arg1 ~= ADDON_NAME then return end
-    PaladinForDummiesDB = PaladinForDummiesDB or {}
-    db = PaladinForDummiesDB
-    ui = ns.UI.RecommendationFrame.create(db)
-    if db.hidden then ui:Hide() end
-    ui:SetScale(db.advisorScale or 1)
-    ui:SetLocked(db.advisorLocked)
-    ui:SetTest(db.test)
-    local okOptions, optionsErr = pcall(ns.UI.Options.register, optionHandlers)
-    if not okOptions then reportError("el panel de opciones", optionsErr) end
-    if db.echo then echoes = createEchoes() end
-    setFrozen(InCombatLockdown() and true or false)
+    events:UnregisterEvent("ADDON_LOADED")
+    -- Con otras clases el addon no hace nada (ni crea su base de datos).
+    if isPaladin() then safely("el arranque", enable) end
+  elseif event == "ADDON_ACTION_BLOCKED" or event == "ADDON_ACTION_FORBIDDEN" then
+    -- El juego bloqueó una función protegida: guardar cuál, para el informe.
+    if arg1 == ADDON_NAME then reportError("acción bloqueada (" .. event .. ")", tostring(arg2)) end
   elseif event == "PLAYER_REGEN_DISABLED" then
-    if not db then return end
     refresh() -- última lectura antes del pull: aún no estamos en combate
-    safely("el inicio de la pelea", ns.Recorder.start, last.situation, db.test)
+    safely("el inicio de la pelea", ns.Recorder.start, last.situation, char.test)
     setFrozen(true)
   elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
     safely("un lanzamiento", ns.Recorder.cast, arg3) -- arg3 = spellID
   elseif event == "PLAYER_REGEN_ENABLED" then
-    if not db then return end
     safely("el final de la pelea", function()
-      local record = ns.Recorder.finish(db)
-      if record and not db.quiet then p(ns.Recorder.describe(record)) end
+      local record = ns.Recorder.finish(char)
+      if record and profile.review.chatSummary then p(ns.Recorder.describe(record)) end
     end)
     setFrozen(false)
   else
-    refresh()
+    scheduleRefresh()
   end
 end)
-
 events:RegisterEvent("ADDON_LOADED")
-events:RegisterEvent("PLAYER_REGEN_DISABLED")
-events:RegisterEvent("PLAYER_REGEN_ENABLED")
-events:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
-for _, event in ipairs(REFRESH_EVENTS) do
-  -- Algunos eventos pueden no existir en Forever: registrar uno inexistente da error.
-  local ok = pcall(events.RegisterEvent, events, event)
-  if not ok then last.missingEvents = (last.missingEvents or "") .. event .. " " end
-end
 
 ---------------------------------------------------------------------------
 -- Comandos
@@ -390,98 +537,77 @@ local SPEC_ALIASES = {
   holy = "holy",
 }
 
-SLASH_PALADINFORDUMMIES1 = "/pfd"
-SlashCmdList.PALADINFORDUMMIES = function(msg)
-  local cmd, arg = (msg or ""):lower():match("^(%S*)%s*(%S*)")
-  if cmd == "debug" then
-    debug()
-  elseif cmd == "spec" then
+local function help()
+  p(L.HELP_HEADER)
+  p(L.HELP_OPTIONS)
+  p(L.HELP_STATS)
+  p(L.HELP_REPORT)
+  if profile.devMode then p(L.HELP_DEV) end
+end
+
+-- Comandos de diagnóstico: solo con el modo desarrollador.
+local DEV_COMMANDS = {
+  debug = debug,
+  ui = function()
+    for _, line in ipairs(ui:Describe()) do p(line) end
+  end,
+  echodebug = function()
+    if not echoes then p("El indicador no está creado.") return end
+    char.echoDebug = ns.UI.EchoTracker.describe()
+    for _, line in ipairs(char.echoDebug) do p(line) end
+  end,
+  last = function()
+    local fights = char.fights
+    if #fights == 0 then p("Todavía no hay peleas guardadas.") return end
+    p(ns.Recorder.describe(fights[#fights]))
+  end,
+  test = function(arg)
+    if arg == "" then
+      p(char.test and ("Prueba activa: " .. char.test) or "No hay ninguna prueba activa. Uso: /pfd test A | B | off")
+      return
+    end
+    if arg == "off" then
+      char.test = nil
+    elseif arg:match("^%w+$") and #arg <= 12 then
+      char.test = arg:upper()
+    else
+      p("Uso: /pfd test A | B | off (letras o números, máximo 12)")
+      return
+    end
+    p(char.test and ("Prueba " .. char.test .. " activada.") or "Prueba desactivada.")
+    ui:SetTest(char.test)
+  end,
+  spec = function(arg)
     if arg == "auto" then
-      db.specOverride = nil
-      p("Spec automática.")
+      char.specOverride = nil
     elseif SPEC_ALIASES[arg] then
-      db.specOverride = SPEC_ALIASES[arg]
-      p("Spec fijada a mano:", db.specOverride)
+      char.specOverride = SPEC_ALIASES[arg]
     else
       p("Uso: /pfd spec ret | prot | holy | auto")
       return
     end
+    p("Spec: " .. (char.specOverride or "automática"))
     refresh()
-  elseif cmd == "show" then
-    db.hidden = nil
-    ui:Show()
-  elseif cmd == "hide" then
-    db.hidden = true
-    ui:Hide()
-  elseif cmd == "ui" then
-    if not ui then p("La ventana no se ha creado.") return end
-    for _, line in ipairs(ui:Describe()) do p(line) end
-  elseif cmd == "test" then
-    if arg == "" then
-      p(db.test and ("Prueba activa: " .. db.test) or "No hay ninguna prueba activa. Uso: /pfd test A | B | C | off")
-      return
-    end
-    if arg == "off" then
-      db.test = nil
-      p("Prueba desactivada: las peleas siguientes no se etiquetan.")
-    elseif arg:match("^%w+$") and #arg <= 12 then
-      db.test = arg:upper()
-      p(("Prueba %s activada: las peleas siguientes se etiquetan como %s. /pfd test off para quitarla."):format(db.test, db.test))
-    else
-      p("Uso: /pfd test A | B | C | off (letras o números, máximo 12)")
-      return
-    end
-    ui:SetTest(db.test)
-  elseif cmd == "echo" and arg == "move" then
-    toggleEchoMove()
-  elseif cmd == "echo" and arg == "debug" then
-    if not echoes then p("Activa primero el widget con /pfd echo.") return end
-    for _, line in ipairs(ns.UI.EchoTracker.describe()) do p(line) end
-    db.echoDebug = ns.UI.EchoTracker.describe()
-  elseif cmd == "echo" and arg == "reset" then
-    resetEchoPosition()
-  elseif cmd == "echo" then
-    if not echoes then
-      echoes = createEchoes()
-      if echoes then
-        db.echo = true
-        p("Widget de Unsealed Wrath activado (experimental). Aparece cuando tienes Echo of Command o Echo of Righteousness. /pfd echo move para moverlo, /pfd echo para ocultarlo.")
-      end
-    elseif echoes:IsShown() then
-      echoes:Hide()
-      db.echo = nil
-      p("Widget de Unsealed Wrath oculto.")
-    else
-      echoes:Show()
-      db.echo = true
-      p("Widget de Unsealed Wrath visible.")
-    end
-  elseif cmd == "macros" then
-    if arg == "off" then
-      db.macros = nil
-      p("Las macros ya no se actualizan solas. Siguen en tu lista de macros; puedes borrarlas desde /macro.")
-      return
-    end
-    syncMacrosNow()
-    p("Ábrelas con /macro, pestaña de tu personaje, y arrástralas a tu barra. Se actualizan solas si aprendes rangos nuevos. /pfd macros off para dejar de actualizarlas.")
+  end,
+}
+
+SLASH_PALADINFORDUMMIES1 = "/pfd"
+SLASH_PALADINFORDUMMIES2 = "/paladinfordummies"
+SlashCmdList.PALADINFORDUMMIES = function(msg)
+  if not enabled then
+    p(L.NOT_A_PALADIN)
+    return
+  end
+  local cmd, arg = (msg or ""):lower():match("^(%S*)%s*(%S*)")
+  if cmd == "" or cmd == "options" or cmd == "opciones" or cmd == "config" then
+    openOptions()
   elseif cmd == "stats" then
     printStats()
-  elseif cmd == "last" then
-    local fights = db.fights or {}
-    if #fights == 0 then p("Todavía no hay peleas guardadas.") return end
-    p(ns.Recorder.describe(fights[#fights]))
-  elseif cmd == "quiet" then
-    db.quiet = not db.quiet or nil
-    p(db.quiet and "Resumen tras cada pelea: desactivado." or "Resumen tras cada pelea: activado.")
-  elseif cmd == "resetstats" then
-    db.fights = {}
-    p("Peleas guardadas borradas.")
-  elseif cmd == "reset" then
-    ui:ResetPosition()
-    p("Posición restablecida.")
-  elseif cmd == "" or cmd == "options" or cmd == "opciones" then
-    openOptions()
+  elseif cmd == "report" or cmd == "informe" then
+    showReport()
+  elseif DEV_COMMANDS[cmd] then
+    if profile.devMode then DEV_COMMANDS[cmd](arg) else p(L.DEV_ONLY) end
   else
-    p("Comandos: /pfd (opciones) | debug | ui | echo [move|reset|debug] | macros [off] | test A|B|C|off | stats | last | quiet | resetstats | spec ret|prot|holy|auto | show | hide | reset")
+    help()
   end
 end

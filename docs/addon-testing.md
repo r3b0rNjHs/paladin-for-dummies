@@ -25,6 +25,15 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.9.0: base pública
+**Archivos y librerías nuevos: cierra el juego y vuelve a abrirlo** tras el `git pull`.
+- Tus datos se migran solos (ajustes al perfil, peleas al personaje). No verás la bienvenida porque ya eras usuario.
+- `/pfd`: opciones (pestañas Asesor, Unsealed Wrath, Macros, Repaso, Avanzado) y el subapartado Perfiles. **Idioma**: en Avanzado; se aplica tras `/reload`.
+- `/pfd help`, `/pfd stats`, `/pfd report` (informe para copiar). Los comandos de diagnóstico (`debug`, `ui`, `echodebug`, `last`, `test`, `spec`) necesitan el **modo desarrollador** (Avanzado).
+- El resumen en el chat tras cada pelea está **apagado por defecto** (Repaso).
+- Los errores ya no salen en el chat: van al gestor de errores (BugSack si lo tienes) y al informe. **Las acciones bloqueadas por el juego se guardan con el nombre de la función.**
+- Con otra clase, el addon no hace nada.
+
 ## Pruebas de la v0.8.0: panel de opciones (fase 1)
 **Archivo nuevo (`ui/Options.lua`): cierra el juego y vuelve a abrirlo** tras el `git pull`.
 1. `/pfd` a secas abre el panel. También desde *Opciones → AddOns → Paladin for Dummies* y desde el menú de addons del minimapa.

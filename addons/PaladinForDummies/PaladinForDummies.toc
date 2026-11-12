@@ -1,8 +1,10 @@
 ## Interface: 16001
 ## Title: Paladin for Dummies
-## Notes: Qué sello y qué Sentencia usar según la situación (en desarrollo)
-## Author: Jorge Hernandez
-## Version: 0.8.0
+## Notes: Seal and Judgement advisor, Unsealed Wrath tracker, paladin macros and fight review.
+## Notes-esES: Asesor de sellos y Sentencias, indicador de Unsealed Wrath, macros de paladín y repaso de peleas.
+## Notes-esMX: Asesor de sellos y Sentencias, indicador de Unsealed Wrath, macros de paladín y repaso de peleas.
+## Author: r3b0rNjHs
+## Version: 0.9.0
 ## SavedVariables: PaladinForDummiesDB
 ## IconTexture: Interface\Icons\Ability_Warrior_InnerRage
 ## Category: Combat
@@ -10,21 +12,30 @@
 ## Category-esMX: Combate
 ## AddonCompartmentFunc: PaladinForDummies_OnAddonCompartmentClick
 
-core/Conditions.lua
-core/RuleEngine.lua
-core/Plan.lua
-core/Macros.lua
-core/Fight.lua
-core/FightStyle.lua
-core/FightStats.lua
-data/Seals.lua
-data/Rules.lua
-data/MacroSpells.lua
-adapters/SituationReader.lua
-adapters/FightReader.lua
-adapters/MacroWriter.lua
-ui/RecommendationFrame.lua
-ui/EchoTracker.lua
-ui/Options.lua
+embeds.xml
+
+Locales\Locales.lua
+Locales\enUS.lua
+Locales\esES.lua
+
+core\Conditions.lua
+core\RuleEngine.lua
+core\Plan.lua
+core\Macros.lua
+core\Fight.lua
+core\FightStyle.lua
+core\FightStats.lua
+core\Migrations.lua
+core\Report.lua
+data\Seals.lua
+data\Rules.lua
+data\MacroSpells.lua
+adapters\SituationReader.lua
+adapters\FightReader.lua
+adapters\MacroWriter.lua
+ui\RecommendationFrame.lua
+ui\EchoTracker.lua
+ui\ReportWindow.lua
+ui\Options.lua
 Recorder.lua
 Main.lua
