@@ -280,6 +280,8 @@ local function setEchoShown(value)
   elseif echoes then
     echoes:Hide()
   end
+  -- Hammer of Wrath va al ladito de Unsealed Wrath si ese indicador se ve.
+  if sustain then sustain:AttachHammer(profile.echo.shown and echoes or nil) end
 end
 
 local function toggleEchoMove()
@@ -820,6 +822,7 @@ local function enable()
   safely("el indicador de vida y maná", function()
     sustain = ns.UI.SustainAlert.create(profile.sustain, char.sustainStatus)
     sustain:SetScale(profile.sustain.scale)
+    sustain:AttachHammer(profile.echo.shown and echoes or nil)
   end)
   window = ns.UI.MainWindow.create(windowHandlers)
   -- Primeros pasos: la primera vez se abre sola, con la bienvenida.

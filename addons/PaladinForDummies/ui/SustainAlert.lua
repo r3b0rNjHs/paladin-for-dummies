@@ -106,6 +106,28 @@ function SustainAlert.create(db, status)
   end
   frame.slots = slots
 
+  -- Hammer of Wrath, al ladito del indicador de Unsealed Wrath (Jorge, 14 nov):
+  -- se pega a su ancla y se mueve y escala con él. Sin ese indicador, vuelve a
+  -- su sitio junto a Light y Wisdom.
+  local hammerHome = { "TOPLEFT", frame, "TOPLEFT", 2 * (SIZE + GAP), 0 }
+  function frame:AttachHammer(anchor)
+    local slot = slots.hammer
+    slot:SetParent(anchor or self)
+    slot:ClearAllPoints()
+    if anchor then
+      slot:SetPoint("LEFT", anchor, "RIGHT", 6, 0)
+    else
+      slot:SetPoint(hammerHome[1], hammerHome[2], hammerHome[3], hammerHome[4], hammerHome[5])
+    end
+    self.hammerAttached = anchor ~= nil
+  end
+
+  -- Al ocultar el indicador, nada se queda encendido (el martillo puede vivir
+  -- en el ancla de Unsealed Wrath, que no se oculta con este marco).
+  frame:SetScript("OnHide", function()
+    for _, slot in pairs(slots) do slot:SetAlpha(0) end
+  end)
+
   local curves = {}
   function frame:SetThresholds(health, mana)
     local err

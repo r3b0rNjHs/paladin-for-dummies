@@ -360,7 +360,7 @@ describe("PaladinForDummies.toc", function()
     env.issecretvalue = function(v) return v == HEALTH or v == MANA or v == TARGET end
     local targetDead = false
     env.UnitIsDead = function() return targetDead end
-    local _, _, _, char = start(env, w)
+    local _, seen, _, char = start(env, w)
 
     local sustain
     for _, f in ipairs(w.frames) do if rawget(f, "SetThresholds") then sustain = f end end
@@ -378,6 +378,11 @@ describe("PaladinForDummies.toc", function()
     assert.are.equal("ok", char.sustainStatus.health)
     assert.is_true(char.sustainStatus.healthSecret)
     assert.are.same({ 0, 1 }, points[1])
+
+    -- Hammer of Wrath, al ladito de Unsealed Wrath; si ese indicador se apaga, vuelve a su sitio.
+    assert.is_true(sustain.hammerAttached)
+    seen.options.PaladinForDummies.args.echo.args.shown.set(nil, false)
+    assert.is_false(sustain.hammerAttached)
   end)
 
   it("fills the Food chapter", function()
