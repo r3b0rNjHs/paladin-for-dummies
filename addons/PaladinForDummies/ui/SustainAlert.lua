@@ -119,18 +119,12 @@ function SustainAlert.create(db, status)
     slot:ClearAllPoints()
     if anchor then
       slot:SetSize(Echo.ICON_SIZE, Echo.ICON_SIZE)
-      -- Pegado al propio icono de Unsealed Wrath (lo coloca el contenedor de
-      -- auras del juego): centrado con él en vertical, a 12 px a su derecha.
-      -- La posición del icono la oculta el juego (sale secret en /pfd
-      -- echodebug): no se puede medir, así que el ajuste fino (db.hammerX,
-      -- db.hammerY) lo deja cuadrar a ojo.
-      local icon = anchor.iconFrame
+      -- Se ancla al recuadro de Unsealed Wrath, que es nuestro y cuya posición
+      -- se lee. NO al icono que coloca el contenedor de auras: su posición es
+      -- secret (visto en /pfd echodebug) y anclarse a él rompió el Mover en la
+      -- v0.18.3. El ajuste fino (db.hammerX, db.hammerY) lo cuadra a ojo.
       local dx, dy = db.hammerX or 0, db.hammerY or 0
-      if icon then
-        slot:SetPoint("LEFT", icon, "RIGHT", 12 + dx, dy)
-      else
-        slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE + dx, -Echo.ICON_TOP + dy)
-      end
+      slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE + dx, -Echo.ICON_TOP + dy)
     else
       slot:SetSize(SIZE, SIZE)
       slot:SetPoint(hammerHome[1], hammerHome[2], hammerHome[3], hammerHome[4], hammerHome[5])
@@ -223,9 +217,11 @@ function SustainAlert.create(db, status)
     self.unlocked = unlocked and true or false
     self:EnableMouse(self.unlocked)
     box:SetShown(self.unlocked)
+    -- Cada icono por separado y con pcall: si uno falla, el Mover sigue
+    -- funcionando con los demás.
     for _, slot in pairs(slots) do
-      slot:SetShown(slot.known or self.unlocked)
-      if self.unlocked then slot:SetAlpha(1) else slot:SetAlpha(0) end
+      pcall(slot.SetShown, slot, slot.known or self.unlocked)
+      pcall(slot.SetAlpha, slot, self.unlocked and 1 or 0)
     end
   end
 

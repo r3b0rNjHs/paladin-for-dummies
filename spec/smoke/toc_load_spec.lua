@@ -379,6 +379,13 @@ describe("PaladinForDummies.toc", function()
     assert.is_true(char.sustainStatus.healthSecret)
     assert.are.same({ 0, 1 }, points[1])
 
+    -- El Mover de Avisos en combate desbloquea y vuelve a fijar.
+    local move = seen.options.PaladinForDummies.args.sustain.args.move.func
+    move()
+    assert.is_true(sustain.unlocked)
+    move()
+    assert.is_false(sustain.unlocked)
+
     -- Hammer of Wrath, al ladito de Unsealed Wrath; si ese indicador se apaga, vuelve a su sitio.
     assert.is_true(sustain.hammerAttached)
     seen.options.PaladinForDummies.args.echo.args.shown.set(nil, false)
