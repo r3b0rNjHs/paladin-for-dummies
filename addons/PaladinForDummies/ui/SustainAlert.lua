@@ -1,6 +1,5 @@
--- Poca vida o poco maná: el icono de Light o de Wisdom con "¡CAMBIA!". Y el
--- enemigo al 20 % o menos: Hammer of Wrath con "¡MARTILLO!" (misma técnica, con
--- la vida del objetivo).
+-- Poca vida o poco maná: el icono de Light o de Wisdom con "¡CAMBIA!".
+-- (El aviso de Hammer of Wrath va en el indicador de Unsealed Wrath.)
 -- El addon no lee tu vida ni tu maná (son secret siempre, sondeo 1): le da al
 -- juego una curva (core/Sustain.lua) y el juego devuelve la transparencia del
 -- icono (UnitHealthPercent / UnitPowerPercent con curva, SetAlpha admite valores
@@ -57,7 +56,7 @@ end
 -- db = profile.sustain { shown, health, mana, position }; status = tabla de diagnóstico.
 function SustainAlert.create(db, status)
   local frame = CreateFrame("Frame", "PaladinForDummiesSustain", UIParent)
-  frame:SetSize(SIZE * 3 + GAP * 2, SIZE + 24)
+  frame:SetSize(SIZE * 2 + GAP, SIZE + 24)
   frame:SetFrameStrata("MEDIUM")
   frame:SetMovable(true)
   frame:SetClampedToScreen(true)
@@ -92,52 +91,21 @@ function SustainAlert.create(db, status)
   box:Hide()
 
   local slots = {}
-  for i, kind in ipairs({ "light", "wisdom", "hammer" }) do
+  for i, kind in ipairs({ "light", "wisdom" }) do
     local slot = Style.icon(frame, SIZE)
     slot:SetPoint("TOPLEFT", frame, "TOPLEFT", (i - 1) * (SIZE + GAP), 0)
     slot:SetState("recommended")
     slot:EnableMouse(false)
     slot.label = Style.text(slot, "GameFontNormal", "gold")
     slot.label:SetPoint("TOP", slot, "BOTTOM", 0, -3)
-    slot.label:SetText(kind == "hammer" and L.HAMMER_SWITCH or L.SUSTAIN_SWITCH)
+    slot.label:SetText(L.SUSTAIN_SWITCH)
     slot:SetAlpha(0)
     slot:Hide()
     slots[kind] = slot
   end
   frame.slots = slots
 
-  -- Hammer of Wrath, al ladito del indicador de Unsealed Wrath (Jorge, 14 nov):
-  -- se pega a su ancla y se mueve y escala con él. Sin ese indicador, vuelve a
-  -- su sitio junto a Light y Wisdom.
-  local hammerHome = { "TOPLEFT", frame, "TOPLEFT", 2 * (SIZE + GAP), 0 }
-  -- Pegado: misma altura y mismo tamaño que el icono de Unsealed Wrath (que
-  -- está arriba del ancla, con el texto del aviso debajo), a su derecha.
-  function frame:AttachHammer(anchor)
-    local slot = slots.hammer
-    local Echo = ns.UI.EchoTracker
-    slot:SetParent(anchor or self)
-    slot:ClearAllPoints()
-    if anchor then
-      slot:SetSize(Echo.ICON_SIZE, Echo.ICON_SIZE)
-      -- Se ancla al recuadro de Unsealed Wrath, que es nuestro y cuya posición
-      -- se lee. NO al icono que coloca el contenedor de auras: su posición es
-      -- secret (visto en /pfd echodebug) y anclarse a él rompió el Mover en la
-      -- v0.18.3. El ajuste fino (db.hammerX, db.hammerY) lo cuadra a ojo.
-      local dx, dy = db.hammerX or 0, db.hammerY or 0
-      slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE + dx, -Echo.ICON_TOP + dy)
-    else
-      slot:SetSize(SIZE, SIZE)
-      slot:SetPoint(hammerHome[1], hammerHome[2], hammerHome[3], hammerHome[4], hammerHome[5])
-    end
-    self.hammerAttached = anchor ~= nil
-    self.hammerAnchor = anchor
-  end
-
-  -- Vuelve a colocar el martillo (tras cambiar el ajuste fino).
-  function frame:ReattachHammer() self:AttachHammer(self.hammerAnchor) end
-
-  -- Al ocultar el indicador, nada se queda encendido (el martillo puede vivir
-  -- en el ancla de Unsealed Wrath, que no se oculta con este marco).
+  -- Al ocultar el indicador, nada se queda encendido.
   frame:SetScript("OnHide", function()
     for _, slot in pairs(slots) do slot:SetAlpha(0) end
   end)
@@ -149,8 +117,6 @@ function SustainAlert.create(db, status)
     status.healthCurve = curves.light ~= nil or err
     curves.wisdom, err = makeCurve(mana)
     status.manaCurve = curves.wisdom ~= nil or err
-    curves.hammer, err = makeCurve(Sustain.HAMMER_THRESHOLD)
-    status.hammerCurve = curves.hammer ~= nil or err
   end
   frame:SetThresholds(db.health, db.mana)
 
@@ -167,24 +133,11 @@ function SustainAlert.create(db, status)
 
   -- El juego evalúa la curva y el resultado va tal cual a SetAlpha: nunca se
   -- compara ni se guarda.
-  -- Un enemigo vivo y atacable seleccionado (datos legibles: sondeo 1).
-  local function attackableTarget()
-    local ok, exists = pcall(UnitExists, "target")
-    if not ok or exists ~= true then return false end
-    local okAttack, attackable = pcall(UnitCanAttack, "player", "target")
-    local okDead, dead = pcall(UnitIsDead, "target")
-    return okAttack and attackable == true and okDead and dead == false
-  end
-
   local function evaluate(kind)
     local slot, curve = slots[kind], curves[kind]
     if not (slot.known and curve) then return end
     local ok, alpha
-    if kind == "hammer" then
-      if not attackableTarget() then slot:SetAlpha(0) return end
-      if type(UnitHealthPercent) ~= "function" then status.hammer = "missing" return end
-      ok, alpha = pcall(UnitHealthPercent, "target", true, curve)
-    elseif kind == "light" then
+    if kind == "light" then
       if type(UnitHealthPercent) ~= "function" then status.health = "missing" return end
       ok, alpha = pcall(UnitHealthPercent, "player", true, curve)
     else
@@ -192,7 +145,7 @@ function SustainAlert.create(db, status)
       local manaType = Enum and Enum.PowerType and Enum.PowerType.Mana or 0
       ok, alpha = pcall(UnitPowerPercent, "player", manaType, false, curve)
     end
-    local key = ({ light = "health", wisdom = "mana", hammer = "hammer" })[kind]
+    local key = kind == "light" and "health" or "mana"
     if not ok then status[key] = "error: " .. tostring(alpha) return end
     if status[key] ~= "ok" then
       status[key] = "ok"
@@ -210,7 +163,6 @@ function SustainAlert.create(db, status)
     elapsed = 0
     evaluate("light")
     evaluate("wisdom")
-    evaluate("hammer")
   end)
 
   function frame:SetUnlocked(unlocked)

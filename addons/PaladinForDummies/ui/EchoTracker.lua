@@ -204,11 +204,15 @@ local function createAnchor(db, width, height)
     self.unlocked = unlocked and true or false
     self:EnableMouse(self.unlocked)
     self.box:SetShown(self.unlocked)
+    -- Al moverlo se ve también el martillo, para colocarlo todo junto.
+    if self.hammer then pcall(self.hammer.ShowForMoving, self.hammer, self.unlocked) end
   end
 
   -- Cambia la tabla donde se guarda la posición (al cambiar de perfil).
   function anchor:UseStore(store)
     db = store
+    self.store = store
+    if self.hammer then self.hammer:Place() end
     self:ApplyPosition()
   end
 
@@ -281,12 +285,97 @@ function EchoTracker.describe(anchor)
   return lines
 end
 
+-- El aviso de Hammer of Wrath, parte del indicador (Jorge, 14 nov): un icono a la
+-- derecha del de Unsealed Wrath con "¡MARTILLO!", que el juego enciende cuando el
+-- enemigo seleccionado está al 20 % o menos. La vida del enemigo es secret: se
+-- le pasa al juego una curva (core/Sustain.lua) con UnitHealthPercent y el
+-- resultado va tal cual a SetAlpha. Es nuestro (hijo del ancla): nunca se ancla
+-- a los huecos del contenedor de auras, cuya posición es secret.
+local HAMMER_GAP = 12      -- px entre el icono de Unsealed Wrath y el martillo
+local HAMMER_SECONDS = 0.2
+
+local function createHammer(anchor, db, status)
+  local Style, Sustain = ns.UI.Style, ns.Core.Sustain
+  local hammer = Style.icon(anchor, SIZE)
+  hammer:SetState("recommended")
+  hammer:EnableMouse(false)
+  hammer.label = Style.text(hammer, "GameFontNormalLarge", "gold")
+  hammer.label:SetPoint("TOP", hammer, "BOTTOM", 0, -4)
+  hammer.label:SetText(ns.L.HAMMER_SWITCH)
+  hammer:SetAlpha(0)
+
+  -- El icono de Unsealed Wrath está centrado en el ancla, PAD por debajo del
+  -- borde de arriba; el martillo, a su derecha, a la misma altura.
+  function hammer:Place()
+    self:ClearAllPoints()
+    local store = anchor.store or db
+    self:SetPoint("TOPLEFT", anchor, "TOPRIGHT", HAMMER_GAP - PAD + (store.hammerX or 0), -PAD + (store.hammerY or 0))
+  end
+  hammer:Place()
+
+  local curve
+  if C_CurveUtil and C_CurveUtil.CreateCurve then
+    local ok, created = pcall(C_CurveUtil.CreateCurve)
+    if ok and created then
+      curve = created
+      if Enum and Enum.LuaCurveType and Enum.LuaCurveType.Linear and curve.SetType then
+        pcall(curve.SetType, curve, Enum.LuaCurveType.Linear)
+      end
+      for _, point in ipairs(Sustain.points(Sustain.HAMMER_THRESHOLD)) do pcall(curve.AddPoint, curve, point[1], point[2]) end
+    end
+  end
+  status.hammerCurve = curve ~= nil
+
+  -- spellId del rango que conoces, o nil si no lo conoces o el aviso está apagado.
+  function hammer:SetSpell(spellId)
+    self.spellId = spellId
+    if spellId and C_Spell and C_Spell.GetSpellTexture then
+      local ok, icon = pcall(C_Spell.GetSpellTexture, spellId)
+      if ok and icon then self.icon:SetTexture(icon) end
+    end
+    if not spellId then self:SetAlpha(anchor.unlocked and 1 or 0) end
+  end
+
+  function hammer:ShowForMoving(moving)
+    self:SetAlpha(moving and 1 or 0)
+  end
+
+  local function attackableTarget()
+    local ok, exists = pcall(UnitExists, "target")
+    if not ok or exists ~= true then return false end
+    local okAttack, attackable = pcall(UnitCanAttack, "player", "target")
+    local okDead, dead = pcall(UnitIsDead, "target")
+    return okAttack and attackable == true and okDead and dead == false
+  end
+
+  local elapsed = 0
+  anchor:SetScript("OnUpdate", function(self, dt)
+    if self.unlocked or not hammer.spellId or not curve then return end
+    elapsed = elapsed + (type(dt) == "number" and dt or 0)
+    if elapsed < HAMMER_SECONDS then return end
+    elapsed = 0
+    if not attackableTarget() then hammer:SetAlpha(0) return end
+    if type(UnitHealthPercent) ~= "function" then status.hammer = "missing" return end
+    local ok, alpha = pcall(UnitHealthPercent, "target", true, curve)
+    if not ok then status.hammer = "error: " .. tostring(alpha) return end
+    if status.hammer ~= "ok" then
+      status.hammer = "ok"
+      status.hammerSecret = (issecretvalue and issecretvalue(alpha)) and true or false
+    end
+    local set, err = pcall(hammer.SetAlpha, hammer, alpha)
+    if not set then status.hammer = "SetAlpha: " .. tostring(err) end
+  end)
+
+  return hammer
+end
+
 -- Crea el widget: el ancla y el contenedor con un hueco por cada copia. Los dos
 -- huecos van en el mismo sitio: nunca hay copias de los dos sellos a la vez (el
 -- golpe con el otro sello gasta las que había), así que solo se ve uno.
 -- Devuelve el ancla (que mueve, muestra y oculta el conjunto), o nil y el error
 -- si el cliente no lo permite.
-function EchoTracker.create(db, onError)
+-- status: tabla de diagnóstico (sin secrets) para el martillo.
+function EchoTracker.create(db, onError, status)
   local ok, result = pcall(function()
     local width, height = SIZE + 2 * PAD, PAD + SIZE + TEXT_HEIGHT
     local anchor = createAnchor(db, width, height)
@@ -303,10 +392,14 @@ function EchoTracker.create(db, onError)
         initializeFrame = EchoTracker.initializer(echo, onError),
       })
       frame:SetPoint("TOP", container, "TOP", 0, -PAD)
-      -- El primer hueco: el icono que se ve (los dos van en el mismo sitio).
-      -- Otros iconos se colocan respecto a él, no respecto al ancla.
+      -- El primer hueco (solo para /pfd echodebug: su posición es secret, nada
+      -- se ancla a él).
       anchor.iconFrame = anchor.iconFrame or frame
     end
+
+    -- El martillo, aparte: si falla, el indicador y su Mover siguen funcionando.
+    local okHammer, hammer = pcall(createHammer, anchor, db, status or {})
+    if okHammer then anchor.hammer = hammer elseif onError then onError("hammer", hammer) end
     return anchor
   end)
   if not ok then return nil, result end

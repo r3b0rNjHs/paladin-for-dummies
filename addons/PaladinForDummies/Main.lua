@@ -19,10 +19,10 @@ local DEFAULTS = {
     tone = "fun", -- Locales: chistes en algunos mensajes (nunca en los avisos)
     devMode = false,
     advisor = { shown = true, scale = 1, food = true }, -- el aviso antes del pull (core/Prepull.lua)
-    echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
+    echo = { shown = true, scale = 1, hammer = true, hammerX = 0, hammerY = 0 }, -- con el aviso de Hammer of Wrath -- solo se ve mientras tienes copias de Unsealed Wrath
     macros = { auto = false, disabled = {} },
     review = { chatSummary = false },
-    sustain = { shown = true, health = 0.35, mana = 0.30, hammer = true, hammerX = 0, hammerY = 0, scale = 1 }, -- ui/SustainAlert.lua
+    sustain = { shown = true, health = 0.35, mana = 0.30, scale = 1 }, -- ui/SustainAlert.lua
     reduceMotion = false,
   },
   char = { fights = {}, errors = {}, welcomed = false, trainer = { active = false }, sustainStatus = {} },
@@ -191,9 +191,13 @@ end
 sustainKnown = function(known)
   local light = highestKnown(Seals.light.spellIds, known)
   local wisdom = highestKnown(Seals.wisdom.spellIds, known)
-  local hammer = profile.sustain.hammer and highestKnown(ns.Data.SpellGroups.hammerOfWrath.spellIds, known) or nil
-  return { light = light ~= nil, wisdom = wisdom ~= nil, hammer = hammer ~= nil,
-    lightSpellId = light, wisdomSpellId = wisdom, hammerSpellId = hammer }
+  return { light = light ~= nil, wisdom = wisdom ~= nil, lightSpellId = light, wisdomSpellId = wisdom }
+end
+
+-- El rango de Hammer of Wrath que conoces, si el aviso está activado.
+local function hammerSpell(known)
+  if not profile.echo.hammer then return nil end
+  return highestKnown(ns.Data.SpellGroups.hammerOfWrath.spellIds, known)
 end
 
 -- El aviso solo se ve con avisos, fuera de combate, con la opción "Mostrar".
@@ -225,6 +229,7 @@ local function refresh()
     last = { situation = situation, diagnostics = diagnostics, recommendation = recommendation, alerts = alerts }
     ui:ShowAlerts(alerts, recommendation)
     if sustain then sustain:SetKnown(sustainKnown(situation.player.knownSpells or {})) end
+    if echoes and echoes.hammer then echoes.hammer:SetSpell(hammerSpell(situation.player.knownSpells or {})) end
     updateAdvisorVisibility()
     if window then window:RefreshIfShown() end
     saveSnapshot()
@@ -260,9 +265,10 @@ end
 ---------------------------------------------------------------------------
 
 local function createEchoes()
+  char.hammerStatus = char.hammerStatus or {}
   local container, err = ns.UI.EchoTracker.create(profile.echo, function(key, slotErr)
     reportError("el indicador de Echo (" .. key .. ")", slotErr)
-  end)
+  end, char.hammerStatus)
   char.echoStatus = { time = time(), created = container ~= nil, error = err and tostring(err) or nil }
   if not container then
     reportError("el indicador de Echo", err)
@@ -280,8 +286,6 @@ local function setEchoShown(value)
   elseif echoes then
     echoes:Hide()
   end
-  -- Hammer of Wrath va al ladito de Unsealed Wrath si ese indicador se ve.
-  if sustain then sustain:AttachHammer(profile.echo.shown and echoes or nil) end
 end
 
 local function toggleEchoMove()
@@ -650,13 +654,13 @@ local optionHandlers = {
     profile.sustain.mana = value
     if sustain then sustain:SetThresholds(profile.sustain.health, profile.sustain.mana) end
   end,
-  getHammerOffset = function(axis) return profile.sustain[axis] or 0 end,
+  getHammerOffset = function(axis) return profile.echo[axis] or 0 end,
   setHammerOffset = function(axis, value)
-    profile.sustain[axis] = value
-    if sustain then sustain:ReattachHammer() end
+    profile.echo[axis] = value
+    if echoes and echoes.hammer then echoes.hammer:Place() end
   end,
-  getSustainHammer = function() return profile.sustain.hammer end,
-  setSustainHammer = function(value) profile.sustain.hammer = value and true or false; refresh() end,
+  getEchoHammer = function() return profile.echo.hammer end,
+  setEchoHammer = function(value) profile.echo.hammer = value and true or false; refresh() end,
   toggleSustainMove = function()
     if not sustain then return end
     sustain:SetUnlocked(not sustain.unlocked)
@@ -827,7 +831,6 @@ local function enable()
   safely("el indicador de vida y maná", function()
     sustain = ns.UI.SustainAlert.create(profile.sustain, char.sustainStatus)
     sustain:SetScale(profile.sustain.scale)
-    sustain:AttachHammer(profile.echo.shown and echoes or nil)
   end)
   window = ns.UI.MainWindow.create(windowHandlers)
   -- Primeros pasos: la primera vez se abre sola, con la bienvenida.

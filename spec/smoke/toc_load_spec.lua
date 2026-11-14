@@ -354,27 +354,21 @@ describe("PaladinForDummies.toc", function()
       return { SetType = function() end, AddPoint = function(_, x, y) points[#points + 1] = { x, y } end }
     end }
     local HEALTH, MANA = setmetatable({}, {}), setmetatable({}, {}) -- valores secret simulados
-    local TARGET = setmetatable({}, {})
-    env.UnitHealthPercent = function(unit) return unit == "target" and TARGET or HEALTH end
+    env.UnitHealthPercent = function() return HEALTH end
     env.UnitPowerPercent = function(_, _, _, curve) return MANA end
-    env.issecretvalue = function(v) return v == HEALTH or v == MANA or v == TARGET end
-    local targetDead = false
-    env.UnitIsDead = function() return targetDead end
+    env.issecretvalue = function(v) return v == HEALTH or v == MANA end
     local _, seen, _, char = start(env, w)
 
     local sustain
     for _, f in ipairs(w.frames) do if rawget(f, "SetThresholds") then sustain = f end end
-    sustain:SetKnown({ light = true, wisdom = true, hammer = true, lightSpellId = 20165, wisdomSpellId = 20166, hammerSpellId = 24275 })
+    sustain:SetKnown({ light = true, wisdom = true, lightSpellId = 20165, wisdomSpellId = 20166 })
     local got = {}
     for kind, slot in pairs(sustain.slots) do rawset(slot, "SetAlpha", function(_, a) got[kind] = a end) end
     sustain.scripts.OnUpdate(sustain, 1)
 
     assert.are.equal(HEALTH, got.light)  -- sin compararlo ni operar con él
     assert.are.equal(MANA, got.wisdom)
-    assert.are.equal(TARGET, got.hammer) -- Hammer of Wrath: la vida del enemigo, no la tuya
-    targetDead = true
-    sustain.scripts.OnUpdate(sustain, 1)
-    assert.are.equal(0, got.hammer)      -- sin un enemigo vivo, apagado
+    assert.is_nil(sustain.slots.hammer)  -- el martillo va en el indicador de Unsealed Wrath
     assert.are.equal("ok", char.sustainStatus.health)
     assert.is_true(char.sustainStatus.healthSecret)
     assert.are.same({ 0, 1 }, points[1])
@@ -385,11 +379,44 @@ describe("PaladinForDummies.toc", function()
     assert.is_true(sustain.unlocked)
     move()
     assert.is_false(sustain.unlocked)
+  end)
 
-    -- Hammer of Wrath, al ladito de Unsealed Wrath; si ese indicador se apaga, vuelve a su sitio.
-    assert.is_true(sustain.hammerAttached)
-    seen.options.PaladinForDummies.args.echo.args.shown.set(nil, false)
-    assert.is_false(sustain.hammerAttached)
+  it("Unsealed Wrath: Hammer of Wrath is part of it, and its Move works", function()
+    local env, w = wowEnv()
+    env.C_CurveUtil = { CreateCurve = function() return { SetType = function() end, AddPoint = function() end } end }
+    local TARGET = setmetatable({}, {})
+    env.UnitHealthPercent = function(unit) return unit == "target" and TARGET or nil end
+    env.issecretvalue = function(v) return v == TARGET end
+    local targetDead = false
+    env.UnitIsDead = function() return targetDead end
+    local _, seen, _, char = start(env, w)
+
+    local echoes
+    for _, f in ipairs(w.frames) do if rawget(f, "hammer") then echoes = f end end
+    assert.is_table(echoes)
+    local hammer = echoes.hammer
+    local alpha
+    rawset(hammer, "SetAlpha", function(_, a) alpha = a end)
+
+    hammer:SetSpell(24275)
+    echoes.scripts.OnUpdate(echoes, 1)
+    assert.are.equal(TARGET, alpha)       -- la vida del enemigo va tal cual al icono
+    assert.are.equal("ok", char.hammerStatus.hammer)
+    targetDead = true
+    echoes.scripts.OnUpdate(echoes, 1)
+    assert.are.equal(0, alpha)            -- sin un enemigo vivo, apagado
+
+    -- El Mover de Unsealed Wrath desbloquea (y enseña el martillo) y vuelve a fijar.
+    local move = seen.options.PaladinForDummies.args.echo.args.move.func
+    move()
+    assert.is_true(echoes.unlocked)
+    assert.are.equal(1, alpha)
+    move()
+    assert.is_false(echoes.unlocked)
+
+    -- Las opciones del martillo están en la pestaña de Unsealed Wrath.
+    assert.is_table(seen.options.PaladinForDummies.args.echo.args.hammer)
+    assert.is_nil(seen.options.PaladinForDummies.args.sustain.args.hammer)
   end)
 
   it("fills the Food chapter", function()

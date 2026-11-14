@@ -374,7 +374,7 @@ Las mejores recetas de Cocina 275 o más necesitan este horno de campamento. El 
   FOOD_SRC_TRAINER = [==[pregunta a tu instructor de Cocina]==],
   FOOD_SRC_UNKNOWN = [==[aún no se sabe dónde se consigue]==],
   OPT_SUSTAIN = [==[Avisos en combate]==],
-  OPT_SUSTAIN_DESC = [==[Avisos que enciende el propio juego, también en combate: Seal of Light con poca vida, Seal of Wisdom con poco maná ("¡CAMBIA!") y Hammer of Wrath cuando el enemigo está al 20 % ("¡MARTILLO!"). El addon no lee ninguna vida ni maná: le pasa al juego una regla y el juego enciende el icono.]==],
+  OPT_SUSTAIN_DESC = [==[Avisos que enciende el propio juego, también en combate: Seal of Light con poca vida y Seal of Wisdom con poco maná, con "¡CAMBIA!". El addon no lee tu vida ni tu maná: le pasa al juego una regla y el juego enciende el icono. (El aviso de Hammer of Wrath está en la pestaña Unsealed Wrath.)]==],
   OPT_SUSTAIN_SHOW_DESC = [==[Los iconos de Light y Wisdom (solo los sellos que conoces).]==],
   OPT_SUSTAIN_HEALTH = [==[Avisar con la vida por debajo de]==],
   OPT_SUSTAIN_MANA = [==[Avisar con el maná por debajo de]==],

@@ -382,7 +382,7 @@ The best recipes from Cooking 275 need this camp oven. The blueprint drops in du
   FOOD_SRC_TRAINER = [==[ask your Cooking trainer]==],
   FOOD_SRC_UNKNOWN = [==[source not known yet]==],
   OPT_SUSTAIN = [==[Combat alerts]==],
-  OPT_SUSTAIN_DESC = [==[Alerts lit up by the game itself, also in combat: Seal of Light with low health, Seal of Wisdom with low mana ("SWITCH!") and Hammer of Wrath when the enemy is at 20% ("HAMMER!"). The addon reads no health or mana: it hands the game a rule and the game lights up the icon.]==],
+  OPT_SUSTAIN_DESC = [==[Alerts lit up by the game itself, also in combat: Seal of Light with low health and Seal of Wisdom with low mana, with "SWITCH!". The addon does not read your health or mana: it hands the game a rule and the game lights up the icon. (The Hammer of Wrath alert is in the Unsealed Wrath tab.)]==],
   OPT_SUSTAIN_SHOW_DESC = [==[The Light and Wisdom icons (only the seals you know).]==],
   OPT_SUSTAIN_HEALTH = [==[Warn with health below]==],
   OPT_SUSTAIN_MANA = [==[Warn with mana below]==],

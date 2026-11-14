@@ -25,6 +25,11 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.19.0: el martillo, dentro de Unsealed Wrath
+- Opciones > Unsealed Wrath > **Mover**: se ve el recuadro de Unsealed Wrath **y el martillo a su derecha**. Arrastra, fija con clic derecho.
+- Si el martillo no queda en línea con el icono de Unsealed Wrath, usa los dos deslizadores de esa pestaña.
+- Desde nivel 44, con un enemigo al 20 %: "¡MARTILLO!".
+
 ## Pruebas de la v0.18.0: Hammer of Wrath
 - Desde nivel 44, con Hammer of Wrath aprendido: al bajar un enemigo al 20 % o menos aparece su icono con "¡MARTILLO!" (también en combate). Al cambiar de objetivo o al morir el enemigo, desaparece.
 - Antes de 44: Tu plan dice en "Lo próximo" que lo aprenderás.
