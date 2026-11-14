@@ -230,3 +230,31 @@ Fuentes: [Warcraft Tavern: deep dive del paladín](https://www.warcrafttavern.co
 - **Para subir de nivel:** todas las guías recomiendan **Retribución en solitario**; Shockadin para ir en pareja o curar mazmorras.
 - **Puntos débiles:** **el maná** (todas las guías), equipo distinto del de Retribución, menos daño en solitario.
 - **Doble especialización desde nivel 40** (Warcraft Tavern): se puede tener Retribución y Shockadin a la vez y cambiar sin pagar.
+
+## Equipo, estadísticas y talentos de Retribución (investigación del 14 nov 2026)
+Guías de la comunidad del 9 al 14 nov, muchas basadas en la beta o en simulaciones; nadie ha peleado aún contra un jefe de nivel 63 (las bandas abren el 9 dic). Hipótesis hasta medirlo.
+
+**Estadísticas (consenso):** daño del arma (2 manos lenta) > golpe hasta el 8 % > pericia hasta el 6,5 % > Fuerza y poder con hechizos > Intelecto > crítico > Agilidad.
+- Golpe y crítico unificados (cuerpo a cuerpo, hechizos, a distancia). Tope de golpe 8 % contra nivel 63 (5 % contra 60); Judgement usa el golpe cuerpo a cuerpo, Hammer of Wrath el de distancia. Pericia: 6,5 % quita las esquivas, 14 % las paradas.
+- Por qué el golpe primero (ConquestCapped): un golpe fallado o esquivado no activa sellos ni guarda copias de Unsealed Wrath.
+- Coeficientes de poder con hechizos (Method): Righteousness 10 %, Command 29 %, Judgement 42,9 %, Holy Strike 42,9 %, Hammer of Wrath 43 %, Exorcism 43 %, Consecration 34 %, Retribution Aura 6 %.
+- Champion of the Light convierte Intelecto en poder con hechizos. Conversiones: 1 Fuerza = 2 PA, 60 Int = 1 % crítico de hechizo, 20 Agi = 1 % crítico y 1 % esquiva.
+- Los paladines no tienen penalización por tipo de armadura: el cuero con golpe puede ser bueno.
+
+**Talentos a 60:** banda 12/8/31 (todo Ret con Unsealed Wrath; Holy: Divine Strength, Improved Seals, Holy Conduit, Divine Intellect; Prot: Precision 3/3); mazmorra 16/4/31 (Reverence y Purifying Power en vez de Precision). Orden al subir (Method, 14 nov): Benediction, Sanctified Judgement, Improved Judgement, Pursuit of Justice (antes del 21), Seal of Command, Conviction, Sacred Arbiter, Two-Handed Weapon Specialization, Vengeance, Champion of the Light, Unyielding Faith (1), Unsealed Wrath. **Discrepancia:** Method dice que Unsealed Wrath pide Unyielding Faith; otras guías, Repentance.
+
+**Velocidad del arma y Unsealed Wrath (ConquestCapped, sin verificar):**
+| Arma | Guardar copias con | Soltar con |
+|---|---|---|
+| 3,3 s o más | Command (3 golpes) | Righteousness |
+| 2,6 a 3,2 s | Righteousness (2 golpes) | Command |
+| 2,5 s o menos | Righteousness (3 golpes) | Fury |
+Cambiar en cada golpe pierde daño (tiempo global y unos 200 de maná). Cambiar de arma borra las copias. Holy Strike y Windfury no guardan ni sueltan copias. Nunca juzgar Fury en un jefe (provoca). **El arma de Jorge es de 3,0 s: según esta tabla le tocaría lo contrario de lo que hacen nuestras macros.** Se puede medir con el repaso de peleas (A/B).
+
+**Armas:** antes de 60, Bonebiter (34, Scarlet Monastery), Ravager (37), The Rockpounder (45, Uldaman: Archaedas), Taran Icebreaker (50, BRD), Flameslash Crescent (55, Blackmaw Hold). A 60 hay desacuerdo: Nightfall (Herrería; su efecto aumenta el daño de hechizos recibido), Stormcarver, Arcanite Reaper o Forest Defender's Axe.
+
+**Encantamientos y consumibles (ConquestCapped):** arma Crusader o Spellblasting; Fuerza en casi todo, Agilidad en capa y pies. Elixir of the Grizzly, Greater Arcane Elixir, un elixir de PA; Flask of Supreme Power (o Natural Precision); Brilliant Wizard Oil; Dragonbreath Chili.
+
+**Raza:** Enano (Artisan's Precision, +1 % golpe) en Alianza; Humano +1 % crítico; No-muerto en Horda.
+
+Fuentes: method.gg (BiS y estadísticas, 9 nov; subida, 14 nov), conquestcapped.com (guía de Ret, 13 nov), lfcarry.com (11 nov), timesaver.gg (equipo para subir, 13 nov), wowforeverbislist.com.
