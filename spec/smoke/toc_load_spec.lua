@@ -402,6 +402,13 @@ describe("PaladinForDummies.toc", function()
     echoes.scripts.OnUpdate(echoes, 1)
     assert.are.equal(TARGET, alpha)       -- la vida del enemigo va tal cual al icono
     assert.are.equal("ok", char.hammerStatus.hammer)
+    -- En enfriamiento, apagado; en el tiempo global, sigue encendido.
+    env.C_Spell.GetSpellCooldown = function() return { isActive = true, isOnGCD = false } end
+    echoes.scripts.OnUpdate(echoes, 1)
+    assert.are.equal(0, alpha)
+    env.C_Spell.GetSpellCooldown = function() return { isActive = true, isOnGCD = true } end
+    echoes.scripts.OnUpdate(echoes, 1)
+    assert.are.equal(TARGET, alpha)
     targetDead = true
     echoes.scripts.OnUpdate(echoes, 1)
     assert.are.equal(0, alpha)            -- sin un enemigo vivo, apagado

@@ -28,3 +28,15 @@ end
 -- Hammer of Wrath solo se puede lanzar contra enemigos al 20 % o menos (lo usa
 -- el indicador de Unsealed Wrath, ui/EchoTracker.lua).
 Sustain.HAMMER_THRESHOLD = 0.2
+
+-- ¿Está el hechizo listo? info = C_Spell.GetSpellCooldown(spellId). isActive e
+-- isOnGCD son NeverSecret (Warcraft Wiki): se pueden comparar en combate. El
+-- tiempo global no cuenta (el hechizo está listo en cuanto acaba). Sin datos
+-- útiles no se oculta el aviso: mejor verlo de más que no verlo.
+function Sustain.spellReady(info)
+  if type(info) ~= "table" then return true end
+  local active, onGCD = info.isActive, info.isOnGCD
+  local secret = issecretvalue and (issecretvalue(active) or issecretvalue(onGCD))
+  if secret or type(active) ~= "boolean" then return true end
+  return not active or onGCD == true
+end

@@ -389,6 +389,10 @@ local function createHammer(anchor, db, status)
     if elapsed < HAMMER_SECONDS then return end
     elapsed = 0
     if not attackableTarget() then hammer:SetAlpha(0) return end
+    -- En enfriamiento, no se ve (isActive e isOnGCD se pueden leer en combate).
+    local okCd, info = pcall(C_Spell.GetSpellCooldown, hammer.spellId)
+    status.hammerCooldown = okCd and "ok" or ("error: " .. tostring(info))
+    if not Sustain.spellReady(okCd and info or nil) then hammer:SetAlpha(0) return end
     if type(UnitHealthPercent) ~= "function" then status.hammer = "missing" return end
     local ok, alpha = pcall(UnitHealthPercent, "target", true, curve)
     if not ok then status.hammer = "error: " .. tostring(alpha) return end
