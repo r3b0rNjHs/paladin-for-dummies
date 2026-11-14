@@ -121,18 +121,26 @@ function SustainAlert.create(db, status)
       slot:SetSize(Echo.ICON_SIZE, Echo.ICON_SIZE)
       -- Pegado al propio icono de Unsealed Wrath (lo coloca el contenedor de
       -- auras del juego): centrado con él en vertical, a 12 px a su derecha.
+      -- La posición del icono la oculta el juego (sale secret en /pfd
+      -- echodebug): no se puede medir, así que el ajuste fino (db.hammerX,
+      -- db.hammerY) lo deja cuadrar a ojo.
       local icon = anchor.iconFrame
+      local dx, dy = db.hammerX or 0, db.hammerY or 0
       if icon then
-        slot:SetPoint("LEFT", icon, "RIGHT", 12, 0)
+        slot:SetPoint("LEFT", icon, "RIGHT", 12 + dx, dy)
       else
-        slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE, -Echo.ICON_TOP)
+        slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE + dx, -Echo.ICON_TOP + dy)
       end
     else
       slot:SetSize(SIZE, SIZE)
       slot:SetPoint(hammerHome[1], hammerHome[2], hammerHome[3], hammerHome[4], hammerHome[5])
     end
     self.hammerAttached = anchor ~= nil
+    self.hammerAnchor = anchor
   end
+
+  -- Vuelve a colocar el martillo (tras cambiar el ajuste fino).
+  function frame:ReattachHammer() self:AttachHammer(self.hammerAnchor) end
 
   -- Al ocultar el indicador, nada se queda encendido (el martillo puede vivir
   -- en el ancla de Unsealed Wrath, que no se oculta con este marco).

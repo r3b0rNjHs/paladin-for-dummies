@@ -390,4 +390,7 @@ Cuando veas {LIGHT} o {WISDOM} con ¡CAMBIA!, ponte ese sello en lugar del de da
   OPT_SUSTAIN_HAMMER_DESC = [==[Cuando el enemigo seleccionado baja al 20 % de vida, aparece Hammer of Wrath con "¡MARTILLO!". Lo enciende el juego: el addon no lee la vida del enemigo. Necesitas haberlo aprendido (nivel 44).]==],
   GUIDE_PLAN_HAMMER = [==[Cuando el enemigo baje del 20 % de vida, aparecerá {HAMMER_OF_WRATH} con ¡MARTILLO!: lánzalo para rematarlo (cada 6 s).]==],
   GUIDE_PLAN_NEXT_HAMMER = [==[A nivel 44 aprenderás {HAMMER_OF_WRATH}: un martillazo a distancia para rematar enemigos al 20 % de vida o menos. Te avisaré cuando se pueda usar.]==],
+  OPT_HAMMER_X = [==[Martillo: mover a izquierda o derecha]==],
+  OPT_HAMMER_Y = [==[Martillo: mover arriba o abajo]==],
+  OPT_HAMMER_OFFSET_DESC = [==[Ajuste fino para dejar el icono del martillo justo al lado del de Unsealed Wrath. El juego no deja medir dónde está ese icono, así que se cuadra a ojo: pulsa Mover para verlo mientras lo ajustas.]==],
 })

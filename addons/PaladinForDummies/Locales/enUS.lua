@@ -398,4 +398,7 @@ When you see {LIGHT} or {WISDOM} with SWITCH!, put that seal on instead of your 
   OPT_SUSTAIN_HAMMER_DESC = [==[When your target drops to 20% health, Hammer of Wrath appears with "HAMMER!". The game lights it up: the addon does not read the enemy's health. You need to have learned it (level 44).]==],
   GUIDE_PLAN_HAMMER = [==[When the enemy drops below 20% health, {HAMMER_OF_WRATH} appears with HAMMER!: cast it to finish them off (every 6 s).]==],
   GUIDE_PLAN_NEXT_HAMMER = [==[At level 44 you learn {HAMMER_OF_WRATH}: a ranged hammer blow to finish off enemies at 20% health or less. I will tell you when you can use it.]==],
+  OPT_HAMMER_X = [==[Hammer: move left or right]==],
+  OPT_HAMMER_Y = [==[Hammer: move up or down]==],
+  OPT_HAMMER_OFFSET_DESC = [==[Fine-tune so the hammer icon sits right next to the Unsealed Wrath icon. The game does not let addons measure where that icon is, so you line it up by eye: press Move to see it while you adjust.]==],
 })

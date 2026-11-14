@@ -22,7 +22,7 @@ local DEFAULTS = {
     echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
     macros = { auto = false, disabled = {} },
     review = { chatSummary = false },
-    sustain = { shown = true, health = 0.35, mana = 0.30, hammer = true, scale = 1 }, -- ui/SustainAlert.lua
+    sustain = { shown = true, health = 0.35, mana = 0.30, hammer = true, hammerX = 0, hammerY = 0, scale = 1 }, -- ui/SustainAlert.lua
     reduceMotion = false,
   },
   char = { fights = {}, errors = {}, welcomed = false, trainer = { active = false }, sustainStatus = {} },
@@ -649,6 +649,11 @@ local optionHandlers = {
   setSustainMana = function(value)
     profile.sustain.mana = value
     if sustain then sustain:SetThresholds(profile.sustain.health, profile.sustain.mana) end
+  end,
+  getHammerOffset = function(axis) return profile.sustain[axis] or 0 end,
+  setHammerOffset = function(axis, value)
+    profile.sustain[axis] = value
+    if sustain then sustain:ReattachHammer() end
   end,
   getSustainHammer = function() return profile.sustain.hammer end,
   setSustainHammer = function(value) profile.sustain.hammer = value and true or false; refresh() end,
