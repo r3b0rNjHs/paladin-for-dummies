@@ -213,3 +213,20 @@ Fuentes: [MaxDPS: comida por nivel](https://maxdps.com/forever/buff-food), [fore
 | Mightfish Steak | +40 poder de ataque | Cocina 275, Vivianna / Sheendra Tallgrass (Feralas), 2 o | Pescado |
 | Prowler Steak | +25 Fuerza y +10 Aguante (nivel 55) | Cocina 250, fuente desconocida | Carne de tigre ×2, Holy Salts |
 | Grand Lobster Banquet / Specklefin Feast | Festín de 45 min para el grupo: +20 poder de ataque y más | Cocina 280, fuente desconocida | Para mazmorras |
+
+## Hammer of Wrath y Shockadin (investigación del 14 nov 2026)
+
+### Hammer of Wrath ([Warcraft Wiki](https://warcraft.wiki.gg/wiki/Hammer_of_Wrath))
+- Se aprende a **nivel 44**. Solo se puede lanzar contra enemigos con **20 % de vida o menos**. 30 m, 1 s de lanzamiento, 6 s de enfriamiento, 295 de maná, 286-314 de daño Sagrado en Forever (algo menos que en Classic). Tres rangos; IDs 24275 y 24239 (sin asignar a rango).
+- **Para el addon:** la vida del objetivo es secret, pero se puede **mostrar** con el mismo método que el indicador de vida y maná: `UnitHealthPercent("target", true, curva)` y el resultado a `SetAlpha` del icono de Hammer of Wrath (visible con el objetivo al 20 % o menos). Sin comprobar en Forever.
+
+### Shockadin (híbrido Sagrado y Retribución)
+Fuentes: [Warcraft Tavern: deep dive del paladín](https://www.warcrafttavern.com/forever/news/seal-twisting-shockadins-paladin-deep-dive-for-wow-forever/) (beta: aún habla de Twist of Light, que en el juego final es Unsealed Wrath), [theforeverguides](https://theforeverguides.com/classes/paladin/shockadin/) (14 nov), [Kami-Labs](https://kami-labs.fr/en/wow-forever/build-paladin-shockadin-wow-forever/) (simulación del 9 nov), [Conquest Capped: subir de nivel](https://conquestcapped.com/guides/wow-forever/wow-forever-paladin-leveling/) (8 nov), [Mobalytics](https://mobalytics.gg/wow-forever/profile/whiter/classes/shockadin-paladin-leveling-guide-level-1-60-hybrid-and-dps-talents), [Kovarel](https://kovarel.com/wow-forever/tools/talent-calculator/paladin/shockadin).
+
+- **Qué cambió en Forever para hacerlo posible (Blizzard):** Holy Shock baja al talento de 21 puntos y su enfriamiento pasa de 30 a 10 s; Divine Precision da hasta un 18 % de golpe con hechizos Sagrados (el equipo de curar de placas no tendrá golpe); Light's Vigil (31 puntos de Sagrado); Improved Seals afecta a todos los sellos; Champion of the Light convierte Intelecto en daño con hechizos; Holy Conduit abarata Consecration, Holy Wrath y Exorcism.
+- **Builds:** no hay acuerdo. 21 Sagrado / 30 Retribución (theforeverguides), 23/28 (Kami-Labs, Kovarel). Ninguna llega a Unsealed Wrath (31 de Retribución).
+- **Cómo se juega:** mucho más lanzar hechizos: Judgement, Holy Shock, Consecration, Exorcism, Hammer of Wrath, Holy Strike. Kami-Labs simula con **Seal of Righteousness** (el 20 % del daño es el sello y otro 15 % su Sentencia), no con Command. Equipo de **poder con hechizos e Intelecto** (placas o malla), no de Fuerza.
+- **Números:** solo una simulación (Kami-Labs, nivel 60, un objetivo, 2 min): 1042 de daño por segundo, sin comparar con Retribución. "Un híbrido jugable, no la mejor especialización de daño" (theforeverguides).
+- **Para subir de nivel:** todas las guías recomiendan **Retribución en solitario**; Shockadin para ir en pareja o curar mazmorras.
+- **Puntos débiles:** **el maná** (todas las guías), equipo distinto del de Retribución, menos daño en solitario.
+- **Doble especialización desde nivel 40** (Warcraft Tavern): se puede tener Retribución y Shockadin a la vez y cambiar sin pagar.
