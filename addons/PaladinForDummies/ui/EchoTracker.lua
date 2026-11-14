@@ -226,8 +226,39 @@ local function describeValue(fn)
   return tostring(v)
 end
 
-function EchoTracker.describe()
+-- Centro y tamaño de un marco, en texto (para ver dónde está de verdad).
+local function geometry(f)
+  if not f then return "no existe" end
+  local ok, x, y = pcall(f.GetCenter, f)
+  local okSize, w, h = pcall(f.GetSize, f)
+  local function num(v) return type(v) == "number" and not (issecretvalue and issecretvalue(v)) end
+  if not (ok and okSize and num(x) and num(y) and num(w) and num(h)) then return "sin datos" end
+  return ("centro %.0f, %.0f | tamaño %.0f x %.0f"):format(x, y, w, h)
+end
+
+local function offset(a, b)
+  local okA, ax, ay = pcall(a.GetCenter, a)
+  local okB, bx, by = pcall(b.GetCenter, b)
+  for _, v in ipairs({ ax, ay, bx, by }) do
+    if type(v) ~= "number" or (issecretvalue and issecretvalue(v)) then return "sin datos" end
+  end
+  if not (okA and okB) then return "sin datos" end
+  return ("%.0f, %.0f"):format(bx - ax, by - ay)
+end
+
+-- anchor: el ancla del indicador (para medir dónde queda el icono en el juego).
+function EchoTracker.describe(anchor)
   local lines = {}
+  if anchor then
+    lines[#lines + 1] = "ancla: " .. geometry(anchor)
+    lines[#lines + 1] = "contenedor: " .. geometry(anchor.container)
+    lines[#lines + 1] = "hueco del icono: " .. geometry(anchor.iconFrame)
+    if anchor.iconFrame then
+      lines[#lines + 1] = "icono respecto al centro del ancla: " .. offset(anchor, anchor.iconFrame)
+        -- Lo que pide el diseño: centrado en horizontal y arriba, con el texto debajo.
+        .. (" (debería ser 0, %d)"):format(math.floor((PAD + SIZE + TEXT_HEIGHT) / 2 - PAD - SIZE / 2 + 0.5))
+    end
+  end
   for _, echo in ipairs(EchoTracker.ECHOES) do
     local p = EchoTracker.progress[echo.key]
     local b = EchoTracker.buttons and EchoTracker.buttons[echo.key]
@@ -238,6 +269,7 @@ function EchoTracker.describe()
         tostring(p.icon == true), tostring(p.count == true), tostring(p.bar == true),
         p.error and (" | error: " .. p.error) or "")
       if b then
+        lines[#lines + 1] = "   botón: " .. geometry(b)
         lines[#lines + 1] = ("   botón visible %s | número '%s' visible %s | aviso visible %s"):format(
           describeValue(function() return b:IsVisible() end),
           describeValue(function() return b.pfdCount and b.pfdCount:GetText() end),
@@ -271,6 +303,9 @@ function EchoTracker.create(db, onError)
         initializeFrame = EchoTracker.initializer(echo, onError),
       })
       frame:SetPoint("TOP", container, "TOP", 0, -PAD)
+      -- El primer hueco: el icono que se ve (los dos van en el mismo sitio).
+      -- Otros iconos se colocan respecto a él, no respecto al ancla.
+      anchor.iconFrame = anchor.iconFrame or frame
     end
     return anchor
   end)

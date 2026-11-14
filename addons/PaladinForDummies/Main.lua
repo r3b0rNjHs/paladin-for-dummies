@@ -909,7 +909,7 @@ local DEV_COMMANDS = {
   end,
   echodebug = function()
     if not echoes then p("El indicador no está creado.") return end
-    char.echoDebug = ns.UI.EchoTracker.describe()
+    char.echoDebug = ns.UI.EchoTracker.describe(echoes)
     for _, line in ipairs(char.echoDebug) do p(line) end
   end,
   sustaindebug = function()

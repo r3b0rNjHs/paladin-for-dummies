@@ -119,9 +119,14 @@ function SustainAlert.create(db, status)
     slot:ClearAllPoints()
     if anchor then
       slot:SetSize(Echo.ICON_SIZE, Echo.ICON_SIZE)
-      -- El ancla deja un margen a cada lado del icono para el halo: se descuenta
-      -- para que quede a 16 px del icono.
-      slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE, -Echo.ICON_TOP)
+      -- Pegado al propio icono de Unsealed Wrath (lo coloca el contenedor de
+      -- auras del juego): centrado con él en vertical, a 12 px a su derecha.
+      local icon = anchor.iconFrame
+      if icon then
+        slot:SetPoint("LEFT", icon, "RIGHT", 12, 0)
+      else
+        slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE, -Echo.ICON_TOP)
+      end
     else
       slot:SetSize(SIZE, SIZE)
       slot:SetPoint(hammerHome[1], hammerHome[2], hammerHome[3], hammerHome[4], hammerHome[5])
