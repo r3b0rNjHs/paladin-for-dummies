@@ -257,6 +257,13 @@ function EchoTracker.describe(anchor)
     lines[#lines + 1] = "ancla: " .. geometry(anchor)
     lines[#lines + 1] = "contenedor: " .. geometry(anchor.container)
     lines[#lines + 1] = "hueco del icono: " .. geometry(anchor.iconFrame)
+    local hammer = anchor.hammer
+    if hammer then
+      lines[#lines + 1] = "martillo: " .. geometry(hammer)
+      lines[#lines + 1] = "martillo respecto al centro del ancla: " .. offset(anchor, hammer)
+      lines[#lines + 1] = "dibujo del martillo respecto a su marco: " .. offset(hammer, hammer.icon) .. " (debería ser 0, 0)"
+      lines[#lines + 1] = "texto del martillo respecto a su marco: " .. offset(hammer, hammer.label)
+    end
     if anchor.iconFrame then
       lines[#lines + 1] = "icono respecto al centro del ancla: " .. offset(anchor, anchor.iconFrame)
         -- Lo que pide el diseño: centrado en horizontal y arriba, con el texto debajo.
@@ -296,9 +303,20 @@ local HAMMER_SECONDS = 0.2
 
 local function createHammer(anchor, db, status)
   local Style, Sustain = ns.UI.Style, ns.Core.Sustain
-  local hammer = Style.icon(anchor, SIZE)
-  hammer:SetState("recommended")
+  -- Marco sencillo de tamaño fijo: borde negro, el dibujo dentro (recortado),
+  -- anillo dorado y el texto justo debajo. Todo cuelga del propio marco.
+  local hammer = CreateFrame("Frame", "PaladinForDummiesHammer", anchor)
+  hammer:SetSize(SIZE, SIZE)
   hammer:EnableMouse(false)
+  hammer.border = hammer:CreateTexture(nil, "BACKGROUND")
+  hammer.border:SetAllPoints(hammer)
+  hammer.border:SetColorTexture(0, 0, 0, 1)
+  hammer.icon = hammer:CreateTexture(nil, "ARTWORK")
+  hammer.icon:SetPoint("TOPLEFT", hammer, "TOPLEFT", 1, -1)
+  hammer.icon:SetPoint("BOTTOMRIGHT", hammer, "BOTTOMRIGHT", -1, 1)
+  hammer.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+  local ring = Style.ring(hammer, 2)
+  ring:SetColor("gold")
   hammer.label = Style.text(hammer, "GameFontNormalLarge", "gold")
   hammer.label:SetPoint("TOP", hammer, "BOTTOM", 0, -4)
   hammer.label:SetText(ns.L.HAMMER_SWITCH)
