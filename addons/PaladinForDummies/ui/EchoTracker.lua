@@ -28,6 +28,17 @@ local PAD = math.ceil(SIZE * (GLOW - 1) / 2) + 4
 EchoTracker.ICON_TOP = PAD
 EchoTracker.ICON_SIDE = PAD -- margen a cada lado del icono (para el halo)
 EchoTracker.ICON_SIZE = SIZE
+local HAMMER_GAP = 12 -- px entre el icono de Unsealed Wrath y el martillo
+-- Distribución del indicador (todo dentro del recuadro de mover):
+--   [PAD][icono de Unsealed Wrath][HAMMER_GAP][martillo][PAD]
+-- Los dos a la misma altura, PAD por debajo del borde de arriba.
+local WIDTH = PAD + SIZE + HAMMER_GAP + SIZE + PAD
+local HEIGHT = PAD + SIZE + TEXT_HEIGHT
+EchoTracker.HAMMER_LEFT = PAD + SIZE + HAMMER_GAP
+-- Hasta la v0.19.1 el recuadro solo tenía el icono (más estrecho) y la posición
+-- es la del centro: al ensancharlo se corrige una vez para que el icono no se mueva.
+local LAYOUT = 2
+local OLD_WIDTH = SIZE + 2 * PAD
 
 -- ready: con cuántas copias toca cambiar (Icy Veins: 3 de Command; volver con 1 de Righteousness).
 -- switchTo: el sello al que hay que ir (su icono es el que se ve; Jorge, 12 nov).
@@ -174,7 +185,8 @@ local function createAnchor(db, width, height)
   -- (antes se le ponía transparencia y el borde se quedaba detrás).
   local box = CreateFrame("Frame", nil, anchor, "BackdropTemplate")
   box:SetAllPoints(anchor)
-  box:SetFrameStrata("DIALOG")
+  -- Detrás de los iconos (antes, encima: tapaba medio martillo).
+  box:SetFrameStrata("BACKGROUND")
   if box.SetBackdrop then
     box:SetBackdrop({
       bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
@@ -194,6 +206,10 @@ local function createAnchor(db, width, height)
     if db.position and db.position.point ~= "CENTER" then
       db.position = EchoTracker.toCenter(db.position, LEGACY_WIDTH, LEGACY_HEIGHT)
     end
+    if db.position and db.layout ~= LAYOUT and type(db.position.x) == "number" then
+      db.position.x = db.position.x + (WIDTH - OLD_WIDTH) / 2
+    end
+    db.layout = LAYOUT
     local pos = db.position or DEFAULT_POSITION
     self:ClearAllPoints()
     self:SetPoint(pos.point, UIParent, pos.relativePoint, pos.x, pos.y)
@@ -267,7 +283,8 @@ function EchoTracker.describe(anchor)
     if anchor.iconFrame then
       lines[#lines + 1] = "icono respecto al centro del ancla: " .. offset(anchor, anchor.iconFrame)
         -- Lo que pide el diseño: centrado en horizontal y arriba, con el texto debajo.
-        .. (" (debería ser 0, %d)"):format(math.floor((PAD + SIZE + TEXT_HEIGHT) / 2 - PAD - SIZE / 2 + 0.5))
+        .. (" (debería ser %d, %d)"):format(math.floor(PAD + SIZE / 2 - WIDTH / 2 + 0.5),
+          math.floor(HEIGHT / 2 - PAD - SIZE / 2 + 0.5))
     end
   end
   for _, echo in ipairs(EchoTracker.ECHOES) do
@@ -298,7 +315,6 @@ end
 -- le pasa al juego una curva (core/Sustain.lua) con UnitHealthPercent y el
 -- resultado va tal cual a SetAlpha. Es nuestro (hijo del ancla): nunca se ancla
 -- a los huecos del contenedor de auras, cuya posición es secret.
-local HAMMER_GAP = 12      -- px entre el icono de Unsealed Wrath y el martillo
 local HAMMER_SECONDS = 0.2
 
 local function createHammer(anchor, db, status)
@@ -327,7 +343,7 @@ local function createHammer(anchor, db, status)
   function hammer:Place()
     self:ClearAllPoints()
     local store = anchor.store or db
-    self:SetPoint("TOPLEFT", anchor, "TOPRIGHT", HAMMER_GAP - PAD + (store.hammerX or 0), -PAD + (store.hammerY or 0))
+    self:SetPoint("TOPLEFT", anchor, "TOPLEFT", EchoTracker.HAMMER_LEFT + (store.hammerX or 0), -PAD + (store.hammerY or 0))
   end
   hammer:Place()
 
@@ -395,25 +411,29 @@ end
 -- status: tabla de diagnóstico (sin secrets) para el martillo.
 function EchoTracker.create(db, onError, status)
   local ok, result = pcall(function()
-    local width, height = SIZE + 2 * PAD, PAD + SIZE + TEXT_HEIGHT
-    local anchor = createAnchor(db, width, height)
+    local anchor = createAnchor(db, WIDTH, HEIGHT)
 
-    local container = CreateFrame("AuraContainer", "PaladinForDummiesEchoes", anchor, "CustomAuraContainerTemplate")
-    container:SetSize(width, height)
-    container:SetPoint("CENTER", anchor, "CENTER", 0, 0)
-    container:SetUnit("player")
-    anchor.container = container
-
-    for _, echo in ipairs(EchoTracker.ECHOES) do
+    -- Un contenedor por copia, cada uno del tamaño exacto del icono y en el
+    -- mismo sitio. Con los dos huecos en un solo contenedor, el juego los
+    -- apilaba: el segundo ("¡VUELVE!") salía un icono más abajo (captura del
+    -- 14 nov). Con un hueco por contenedor no hay nada que apilar.
+    anchor.containers = {}
+    for i, echo in ipairs(EchoTracker.ECHOES) do
+      local container = CreateFrame("AuraContainer", "PaladinForDummiesEchoes" .. (i == 1 and "" or i),
+        anchor, "CustomAuraContainerTemplate")
+      container:SetSize(SIZE, SIZE)
+      container:SetPoint("TOPLEFT", anchor, "TOPLEFT", PAD, -PAD)
+      container:SetUnit("player")
       local frame = container:AddAuraSlot(echo.key, "HELPFUL", {
         candidateFilters = { includeSpellIDs = { [echo.spellId] = true } },
         initializeFrame = EchoTracker.initializer(echo, onError),
       })
-      frame:SetPoint("TOP", container, "TOP", 0, -PAD)
-      -- El primer hueco (solo para /pfd echodebug: su posición es secret, nada
-      -- se ancla a él).
+      frame:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
+      anchor.containers[i] = container
+      -- Solo para /pfd echodebug: su posición es secret, nada se ancla a él.
       anchor.iconFrame = anchor.iconFrame or frame
     end
+    anchor.container = anchor.containers[1]
 
     -- El martillo, aparte: si falla, el indicador y su Mover siguen funcionando.
     local okHammer, hammer = pcall(createHammer, anchor, db, status or {})
