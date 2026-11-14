@@ -381,8 +381,8 @@ The best recipes from Cooking 275 need this camp oven. The blueprint drops in du
   FOOD_SRC_GIKKIX = [==[recipe from Gikkix (Tanaris), 2 g]==],
   FOOD_SRC_TRAINER = [==[ask your Cooking trainer]==],
   FOOD_SRC_UNKNOWN = [==[source not known yet]==],
-  OPT_SUSTAIN = [==[Health and mana]==],
-  OPT_SUSTAIN_DESC = [==[When your health is low, the Seal of Light icon appears with "SWITCH!", and with low mana, Seal of Wisdom. Also in combat. The addon does not read your health or mana: it hands the game a curve and the game lights up the icon.]==],
+  OPT_SUSTAIN = [==[Combat alerts]==],
+  OPT_SUSTAIN_DESC = [==[Alerts lit up by the game itself, also in combat: Seal of Light with low health, Seal of Wisdom with low mana ("SWITCH!") and Hammer of Wrath when the enemy is at 20% ("HAMMER!"). The addon reads no health or mana: it hands the game a rule and the game lights up the icon.]==],
   OPT_SUSTAIN_SHOW_DESC = [==[The Light and Wisdom icons (only the seals you know).]==],
   OPT_SUSTAIN_HEALTH = [==[Warn with health below]==],
   OPT_SUSTAIN_MANA = [==[Warn with mana below]==],
@@ -393,4 +393,9 @@ The best recipes from Cooking 275 need this camp oven. The blueprint drops in du
 {LIGHT} or {WISDOM} appears with SWITCH!: with that seal you heal or get mana back when you hit. Also in combat.]==],
   GUIDE_SIT_SUSTAIN = [==[|cfff2c14eIf you run low on health or mana|r
 When you see {LIGHT} or {WISDOM} with SWITCH!, put that seal on instead of your damage seal until you recover. With Unsealed Wrath, the {COMMAND} copies are also released when you switch to either of them.]==],
+  HAMMER_SWITCH = [==[HAMMER!]==],
+  OPT_SUSTAIN_HAMMER = [==[Warn about Hammer of Wrath (enemy at 20% or less)]==],
+  OPT_SUSTAIN_HAMMER_DESC = [==[When your target drops to 20% health, Hammer of Wrath appears with "HAMMER!". The game lights it up: the addon does not read the enemy's health. You need to have learned it (level 44).]==],
+  GUIDE_PLAN_HAMMER = [==[When the enemy drops below 20% health, {HAMMER_OF_WRATH} appears with HAMMER!: cast it to finish them off (every 6 s).]==],
+  GUIDE_PLAN_NEXT_HAMMER = [==[At level 44 you learn {HAMMER_OF_WRATH}: a ranged hammer blow to finish off enemies at 20% health or less. I will tell you when you can use it.]==],
 })

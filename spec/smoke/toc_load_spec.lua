@@ -354,20 +354,27 @@ describe("PaladinForDummies.toc", function()
       return { SetType = function() end, AddPoint = function(_, x, y) points[#points + 1] = { x, y } end }
     end }
     local HEALTH, MANA = setmetatable({}, {}), setmetatable({}, {}) -- valores secret simulados
-    env.UnitHealthPercent = function(_, _, curve) return HEALTH end
+    local TARGET = setmetatable({}, {})
+    env.UnitHealthPercent = function(unit) return unit == "target" and TARGET or HEALTH end
     env.UnitPowerPercent = function(_, _, _, curve) return MANA end
-    env.issecretvalue = function(v) return v == HEALTH or v == MANA end
+    env.issecretvalue = function(v) return v == HEALTH or v == MANA or v == TARGET end
+    local targetDead = false
+    env.UnitIsDead = function() return targetDead end
     local _, _, _, char = start(env, w)
 
     local sustain
     for _, f in ipairs(w.frames) do if rawget(f, "SetThresholds") then sustain = f end end
-    sustain:SetKnown({ light = true, wisdom = true, lightSpellId = 20165, wisdomSpellId = 20166 })
+    sustain:SetKnown({ light = true, wisdom = true, hammer = true, lightSpellId = 20165, wisdomSpellId = 20166, hammerSpellId = 24275 })
     local got = {}
     for kind, slot in pairs(sustain.slots) do rawset(slot, "SetAlpha", function(_, a) got[kind] = a end) end
     sustain.scripts.OnUpdate(sustain, 1)
 
     assert.are.equal(HEALTH, got.light)  -- sin compararlo ni operar con él
     assert.are.equal(MANA, got.wisdom)
+    assert.are.equal(TARGET, got.hammer) -- Hammer of Wrath: la vida del enemigo, no la tuya
+    targetDead = true
+    sustain.scripts.OnUpdate(sustain, 1)
+    assert.are.equal(0, got.hammer)      -- sin un enemigo vivo, apagado
     assert.are.equal("ok", char.sustainStatus.health)
     assert.is_true(char.sustainStatus.healthSecret)
     assert.are.same({ 0, 1 }, points[1])

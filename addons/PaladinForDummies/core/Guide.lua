@@ -22,7 +22,8 @@ end
 
 local function step(key, icon) return { key = key, icon = icon } end
 
--- info = { level, known = { righteousness, crusader, command, holyStrike } }.
+-- info = { level, known = { righteousness, crusader, command, holyStrike, hammer } }.
+local HAMMER_TALK_LEVEL = 30 -- antes no merece la pena anunciar Hammer of Wrath (nivel 44)
 -- Devuelve { damageSeal = "COMMAND"|"RIGHTEOUSNESS", steps = { { key, icon } } }.
 -- Las claves H_* son encabezados.
 function Guide.plan(info)
@@ -42,12 +43,16 @@ function Guide.plan(info)
   steps[#steps + 1] = step("JUDGE", "JUDGEMENT")
   if known.holyStrike then steps[#steps + 1] = step("STRIKE", "HOLY_STRIKE") end
   if known.command then steps[#steps + 1] = step("UNSEALED", "ECHO") end
+  if known.hammer then steps[#steps + 1] = step("HAMMER", "HAMMER_OF_WRATH") end
   steps[#steps + 1] = step("REFRESH", damageSeal)
 
   local next = {}
   if not known.crusader then next[#next + 1] = step("NEXT_CRUSADER", "CRUSADER") end
   if not known.holyStrike then next[#next + 1] = step("NEXT_STRIKE", "HOLY_STRIKE") end
   if known.crusader and not known.command then next[#next + 1] = step("NEXT_COMMAND", "COMMAND") end
+  if not known.hammer and (info.level or 0) >= HAMMER_TALK_LEVEL then
+    next[#next + 1] = step("NEXT_HAMMER", "HAMMER_OF_WRATH")
+  end
   if #next > 0 then
     steps[#steps + 1] = step("H_NEXT")
     for _, s in ipairs(next) do steps[#steps + 1] = s end

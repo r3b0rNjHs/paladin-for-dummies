@@ -116,6 +116,7 @@ function Options.build(h)
             get = function() return h.getSustainHealth() end, set = function(_, v) h.setSustainHealth(v) end },
           mana = { type = "range", order = 3, name = L.OPT_SUSTAIN_MANA, min = 0.1, max = 0.8, step = 0.05, isPercent = true,
             get = function() return h.getSustainMana() end, set = function(_, v) h.setSustainMana(v) end },
+          hammer = toggle(3.5, L.OPT_SUSTAIN_HAMMER, L.OPT_SUSTAIN_HAMMER_DESC, h.getSustainHammer, h.setSustainHammer, "full"),
           move = button(4, L.OPT_ECHO_MOVE, L.OPT_ALERT_MOVE_DESC, h.toggleSustainMove),
           reset = button(5, L.OPT_RESET_POSITION, nil, h.resetSustainPosition),
         },

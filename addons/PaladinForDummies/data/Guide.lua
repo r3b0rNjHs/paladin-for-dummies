@@ -47,6 +47,7 @@ ns.Data.GuideSpells = {
   DEVOTION = 465,
   RETRIBUTION_AURA = 7294,
   WELL_FED = 19705,
+  HAMMER_OF_WRATH = 24275,
 }
 
 local BOOK = "Interface\\Icons\\INV_Misc_Book_09"

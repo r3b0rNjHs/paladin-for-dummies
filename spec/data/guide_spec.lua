@@ -26,9 +26,10 @@ describe("Guide", function()
       { righteousness = true, crusader = true },
       { righteousness = true, crusader = true, holyStrike = true },
       { righteousness = true, crusader = true, holyStrike = true, command = true },
+      { righteousness = true, crusader = true, holyStrike = true, command = true, hammer = true },
     }
     for _, known in ipairs(cases) do
-      for _, step in ipairs(Guide.plan({ level = 10, known = known }).steps) do
+      for _, step in ipairs(Guide.plan({ level = 40, known = known }).steps) do
         for _, lang in ipairs({ "enUS", "esES" }) do
           assert.is_string(ns.Locales.tables[lang]["GUIDE_PLAN_" .. step.key], step.key .. " " .. lang)
         end

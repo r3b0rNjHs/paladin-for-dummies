@@ -17,10 +17,15 @@ function Sustain.points(threshold)
   return { { 0, 1 }, { t, 1 }, { t + STEP, 0 }, { 1, 0 } }
 end
 
--- Qué huecos mostrar: Light (vida) y Wisdom (maná), solo los sellos que conoces.
+-- Qué huecos mostrar: Light (tu vida), Wisdom (tu maná) y Hammer of Wrath (la
+-- vida del enemigo, al 20 % o menos), solo lo que conoces.
 function Sustain.slots(known)
   local slots = {}
   if known.light then slots[#slots + 1] = "light" end
   if known.wisdom then slots[#slots + 1] = "wisdom" end
+  if known.hammer then slots[#slots + 1] = "hammer" end
   return slots
 end
+
+-- Hammer of Wrath solo se puede lanzar contra enemigos al 20 % o menos.
+Sustain.HAMMER_THRESHOLD = 0.2

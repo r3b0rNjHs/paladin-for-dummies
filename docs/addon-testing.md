@@ -25,6 +25,11 @@ Todo queda en `D:\World of Warcraft\_forever_\WTF\Account\<TU_CUENTA>\SavedVaria
 
 El juego solo escribe el archivo al hacer **`/reload` o al salir**. Antes de mandarlo, haz `/reload`. Para comprobar algo concreto (un objetivo, una mazmorra), ponte en esa situación, haz `/reload` allí mismo y manda el archivo. Las capturas del chat siguen valiendo para un vistazo rápido.
 
+## Pruebas de la v0.18.0: Hammer of Wrath
+- Desde nivel 44, con Hammer of Wrath aprendido: al bajar un enemigo al 20 % o menos aparece su icono con "¡MARTILLO!" (también en combate). Al cambiar de objetivo o al morir el enemigo, desaparece.
+- Antes de 44: Tu plan dice en "Lo próximo" que lo aprenderás.
+- Se puede quitar en Opciones > Avisos en combate.
+
 ## Pruebas de la v0.17.0: poca vida o poco maná
 **Archivos nuevos: cierra el juego y vuelve a abrirlo.**
 - Opciones > **Vida y maná** > Mover: colócalo y fíjalo.

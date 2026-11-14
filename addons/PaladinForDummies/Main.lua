@@ -22,7 +22,7 @@ local DEFAULTS = {
     echo = { shown = true, scale = 1 }, -- solo se ve mientras tienes copias de Unsealed Wrath
     macros = { auto = false, disabled = {} },
     review = { chatSummary = false },
-    sustain = { shown = true, health = 0.35, mana = 0.30, scale = 1 }, -- ui/SustainAlert.lua
+    sustain = { shown = true, health = 0.35, mana = 0.30, hammer = true, scale = 1 }, -- ui/SustainAlert.lua
     reduceMotion = false,
   },
   char = { fights = {}, errors = {}, welcomed = false, trainer = { active = false }, sustainStatus = {} },
@@ -191,7 +191,9 @@ end
 sustainKnown = function(known)
   local light = highestKnown(Seals.light.spellIds, known)
   local wisdom = highestKnown(Seals.wisdom.spellIds, known)
-  return { light = light ~= nil, wisdom = wisdom ~= nil, lightSpellId = light, wisdomSpellId = wisdom }
+  local hammer = profile.sustain.hammer and highestKnown(ns.Data.SpellGroups.hammerOfWrath.spellIds, known) or nil
+  return { light = light ~= nil, wisdom = wisdom ~= nil, hammer = hammer ~= nil,
+    lightSpellId = light, wisdomSpellId = wisdom, hammerSpellId = hammer }
 end
 
 -- El aviso solo se ve con avisos, fuera de combate, con la opción "Mostrar".
@@ -463,6 +465,7 @@ guidePlan = function()
       crusader = knowsAny(Seals.crusader.spellIds, known),
       command = knowsAny(Seals.command.spellIds, known),
       holyStrike = knowsAny(ns.Data.SpellGroups.holyStrike.spellIds, known),
+      hammer = knowsAny(ns.Data.SpellGroups.hammerOfWrath.spellIds, known),
     },
   }
   local plan = ns.Core.Guide.plan(info)
@@ -645,6 +648,8 @@ local optionHandlers = {
     profile.sustain.mana = value
     if sustain then sustain:SetThresholds(profile.sustain.health, profile.sustain.mana) end
   end,
+  getSustainHammer = function() return profile.sustain.hammer end,
+  setSustainHammer = function(value) profile.sustain.hammer = value and true or false; refresh() end,
   toggleSustainMove = function()
     if not sustain then return end
     sustain:SetUnlocked(not sustain.unlocked)

@@ -373,8 +373,8 @@ Las mejores recetas de Cocina 275 o más necesitan este horno de campamento. El 
   FOOD_SRC_GIKKIX = [==[receta de Gikkix (Tanaris), 2 o]==],
   FOOD_SRC_TRAINER = [==[pregunta a tu instructor de Cocina]==],
   FOOD_SRC_UNKNOWN = [==[aún no se sabe dónde se consigue]==],
-  OPT_SUSTAIN = [==[Vida y maná]==],
-  OPT_SUSTAIN_DESC = [==[Cuando te queda poca vida aparece el icono de Seal of Light con "¡CAMBIA!", y con poco maná el de Seal of Wisdom. También en combate. El addon no lee tu vida ni tu maná: se lo pide al juego con una curva y es el juego quien enciende el icono.]==],
+  OPT_SUSTAIN = [==[Avisos en combate]==],
+  OPT_SUSTAIN_DESC = [==[Avisos que enciende el propio juego, también en combate: Seal of Light con poca vida, Seal of Wisdom con poco maná ("¡CAMBIA!") y Hammer of Wrath cuando el enemigo está al 20 % ("¡MARTILLO!"). El addon no lee ninguna vida ni maná: le pasa al juego una regla y el juego enciende el icono.]==],
   OPT_SUSTAIN_SHOW_DESC = [==[Los iconos de Light y Wisdom (solo los sellos que conoces).]==],
   OPT_SUSTAIN_HEALTH = [==[Avisar con la vida por debajo de]==],
   OPT_SUSTAIN_MANA = [==[Avisar con el maná por debajo de]==],
@@ -385,4 +385,9 @@ Las mejores recetas de Cocina 275 o más necesitan este horno de campamento. El 
 Aparece {LIGHT} o {WISDOM} con ¡CAMBIA!: con ese sello te curas o recuperas maná al golpear. También en combate.]==],
   GUIDE_SIT_SUSTAIN = [==[|cfff2c14eSi te quedas sin vida o sin maná|r
 Cuando veas {LIGHT} o {WISDOM} con ¡CAMBIA!, ponte ese sello en lugar del de daño hasta recuperarte. Con Unsealed Wrath, las copias de {COMMAND} también se sueltan al cambiar a cualquiera de los dos.]==],
+  HAMMER_SWITCH = [==[¡MARTILLO!]==],
+  OPT_SUSTAIN_HAMMER = [==[Avisar de Hammer of Wrath (enemigo al 20 % o menos)]==],
+  OPT_SUSTAIN_HAMMER_DESC = [==[Cuando el enemigo seleccionado baja al 20 % de vida, aparece Hammer of Wrath con "¡MARTILLO!". Lo enciende el juego: el addon no lee la vida del enemigo. Necesitas haberlo aprendido (nivel 44).]==],
+  GUIDE_PLAN_HAMMER = [==[Cuando el enemigo baje del 20 % de vida, aparecerá {HAMMER_OF_WRATH} con ¡MARTILLO!: lánzalo para rematarlo (cada 6 s).]==],
+  GUIDE_PLAN_NEXT_HAMMER = [==[A nivel 44 aprenderás {HAMMER_OF_WRATH}: un martillazo a distancia para rematar enemigos al 20 % de vida o menos. Te avisaré cuando se pueda usar.]==],
 })

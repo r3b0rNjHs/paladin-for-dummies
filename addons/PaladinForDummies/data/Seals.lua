@@ -29,6 +29,9 @@ ns.Data.Spells = {
 -- Otros grupos de rangos que hay que reconocer (se amplían con LearnRanks).
 ns.Data.SpellGroups = {
   holyStrike = { spellIds = { 679, 678, 1866, 680, 2495 } },
+  -- Hammer of Wrath (nivel 44): rangos de Classic según Wowhead/Warcraft Wiki,
+  -- sin verificar en Forever; LearnRanks descubre los que falten.
+  hammerOfWrath = { spellIds = { 24275, 24274, 24239 } },
 }
 
 local function set(ids)

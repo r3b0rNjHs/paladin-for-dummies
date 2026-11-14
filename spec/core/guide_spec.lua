@@ -38,8 +38,21 @@ describe("Guide", function()
 
     it("with Command: it becomes the damage seal and Unsealed Wrath appears", function()
       local plan = Guide.plan({ level = 41, known = { righteousness = true, crusader = true, holyStrike = true, command = true } })
-      assert.are.same({ "H_BEFORE", "PREPULL_1", "PREPULL_2", "PREPULL_3", "H_DURING", "JUDGE", "STRIKE", "UNSEALED", "REFRESH" }, keys(plan))
+      assert.are.same({ "H_BEFORE", "PREPULL_1", "PREPULL_2", "PREPULL_3", "H_DURING", "JUDGE", "STRIKE", "UNSEALED", "REFRESH",
+        "H_NEXT", "NEXT_HAMMER" }, keys(plan))
       assert.are.equal("COMMAND", plan.damageSeal)
+    end)
+
+    it("from level 44, Hammer of Wrath to finish them off (and it stops being 'coming up')", function()
+      local plan = Guide.plan({ level = 44,
+        known = { righteousness = true, crusader = true, holyStrike = true, command = true, hammer = true } })
+      assert.are.same({ "H_BEFORE", "PREPULL_1", "PREPULL_2", "PREPULL_3", "H_DURING", "JUDGE", "STRIKE", "UNSEALED", "HAMMER",
+        "REFRESH" }, keys(plan))
+    end)
+
+    it("does not talk about Hammer of Wrath too early", function()
+      local plan = Guide.plan({ level = 12, known = { righteousness = true, crusader = true, holyStrike = true } })
+      for _, step in ipairs(plan.steps) do assert.are_not.equal("NEXT_HAMMER", step.key) end
     end)
 
     it("each step carries the icon of the spell it talks about", function()
