@@ -110,13 +110,20 @@ function SustainAlert.create(db, status)
   -- se pega a su ancla y se mueve y escala con él. Sin ese indicador, vuelve a
   -- su sitio junto a Light y Wisdom.
   local hammerHome = { "TOPLEFT", frame, "TOPLEFT", 2 * (SIZE + GAP), 0 }
+  -- Pegado: misma altura y mismo tamaño que el icono de Unsealed Wrath (que
+  -- está arriba del ancla, con el texto del aviso debajo), a su derecha.
   function frame:AttachHammer(anchor)
     local slot = slots.hammer
+    local Echo = ns.UI.EchoTracker
     slot:SetParent(anchor or self)
     slot:ClearAllPoints()
     if anchor then
-      slot:SetPoint("LEFT", anchor, "RIGHT", 6, 0)
+      slot:SetSize(Echo.ICON_SIZE, Echo.ICON_SIZE)
+      -- El ancla deja un margen a cada lado del icono para el halo: se descuenta
+      -- para que quede a 16 px del icono.
+      slot:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 16 - Echo.ICON_SIDE, -Echo.ICON_TOP)
     else
+      slot:SetSize(SIZE, SIZE)
       slot:SetPoint(hammerHome[1], hammerHome[2], hammerHome[3], hammerHome[4], hammerHome[5])
     end
     self.hammerAttached = anchor ~= nil

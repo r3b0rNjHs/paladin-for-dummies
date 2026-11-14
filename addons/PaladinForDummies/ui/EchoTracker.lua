@@ -23,6 +23,12 @@ local TEXT_HEIGHT = 26 -- texto del aviso debajo del icono
 -- Margen para que el brillo quepa dentro del recuadro de mover.
 local PAD = math.ceil(SIZE * (GLOW - 1) / 2) + 4
 
+-- Dónde está el icono dentro del ancla (para poner otro icono al lado, a la
+-- misma altura y del mismo tamaño: Hammer of Wrath).
+EchoTracker.ICON_TOP = PAD
+EchoTracker.ICON_SIDE = PAD -- margen a cada lado del icono (para el halo)
+EchoTracker.ICON_SIZE = SIZE
+
 -- ready: con cuántas copias toca cambiar (Icy Veins: 3 de Command; volver con 1 de Righteousness).
 -- switchTo: el sello al que hay que ir (su icono es el que se ve; Jorge, 12 nov).
 EchoTracker.ECHOES = {
